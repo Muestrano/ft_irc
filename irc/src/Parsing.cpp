@@ -1,5 +1,5 @@
 #include "../include/Server.hpp"
-#include "../include/irc.hpp"
+#include "../include/include.hpp"
 
 /*
 

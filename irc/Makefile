@@ -14,7 +14,7 @@ DIR_INCLUDE = include/
 
 RM = rm -f
 
-SRCS := main.cpp channel.cpp client.cpp server.cpp
+SRCS := main.cpp Channel.cpp Client.cpp Server.cpp Parsing.cpp
 OBJS := $(addprefix $(DIR_OBJ), $(SRCS:.cpp=.o))
 
 INCLUDES = -I$(DIR_INCLUDE)

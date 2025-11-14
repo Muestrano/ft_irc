@@ -1,7 +1,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-#include "irc.hpp"
+#include "include.hpp"
 /*
  handle listening socket
 */

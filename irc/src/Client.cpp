@@ -1,5 +1,5 @@
 #include "../include/Client.hpp"
-#include "../include/irc.hpp"
+#include "../include/include.hpp"
 
 /*
 	handle client connection / received data (non blocking)

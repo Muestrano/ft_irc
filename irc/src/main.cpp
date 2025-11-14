@@ -1,4 +1,4 @@
-#include "../include/irc.hpp"
+#include "../include/include.hpp"
 
 /**
  * @brief Take two arg ./ircserv <port> <password>

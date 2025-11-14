@@ -1,5 +1,5 @@
 #include "../include/Channel.hpp"
-#include "../include/irc.hpp"
+#include "../include/include.hpp"
 
 /*
 Channel handling
