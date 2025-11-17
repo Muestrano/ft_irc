@@ -3,6 +3,9 @@
 
 /*
 
+	First: pars port, ref the to port of an irc server
+			Parse ipv4 with the great range
+
 Command:
 	authentication:
 		- PASS <password>

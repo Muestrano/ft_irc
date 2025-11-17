@@ -9,8 +9,12 @@
 class Server
 {
 	private:
-
+		int socketFd;
+		int port;
+		std::string password;
 	public:
+		void initServer(std::string port, std::string password);
+		void startServer();
 	
 };
 

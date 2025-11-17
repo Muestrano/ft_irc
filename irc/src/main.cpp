@@ -1,4 +1,6 @@
 #include "../include/include.hpp"
+#include "../include/Server.hpp"
+
 
 /**
  * @brief Take two arg ./ircserv <port> <password>
@@ -6,7 +8,9 @@
 int main(int ac, char **av)
 {
 	(void)ac;
-	(void)av;
+	// parse arg function
+	class Server server;
+	server.initServer(av[1], av[2]);
 	return 0;
 }
 
