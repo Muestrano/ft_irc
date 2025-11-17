@@ -12,6 +12,8 @@ class Server
 		int socketFd;
 		int port;
 		std::string password;
+
+		struct sockaddr_in serverAddr;
 	public:
 		void initServer(std::string port, std::string password);
 		void startServer();

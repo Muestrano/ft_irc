@@ -13,6 +13,8 @@ class Client
 		std::string nickName;
 		std::string userName;
 
+		int clientFd;
+
 	public:
 	
 };

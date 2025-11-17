@@ -5,13 +5,46 @@
 void Server::initServer(std::string port, std::string password)
 {
 	this->port = atoi(port.c_str());
-	this->password = password; // need to cast it
+	this->password = password; // need to cast it to have const password
 
 }
-
+/**
+ * @param serverAddre socketaddr_in struct contain the server adress
+ * @param AF_INET ipv4 protocol
+ * @param SOCK_STREAM TCP socket
+ * @param htons convert port to network byte ordre
+ * @param INADDR_ANY accept all ip conncetion
+*/
 void Server::startServer()
 {
-	this->socketFd = socket(AF_INET, SOCK_STREAM, 0);
+	this->socketFd = socket(AF_INET, SOCK_STREAM, 0); //
+	this->serverAddr.sin_family = AF_INET;
+	this->serverAddr.sin_port = htons(8080);
+	this->serverAddr.sin_addr.s_addr = INADDR_ANY;
+
+	bind(this->socketFd, (struct sockaddr*)&this->serverAddr, sizeof(this->serverAddr));
+	listen(this->socketFd, 1);
+
+	int clientSocket = accept(this->socketFd, NULL, NULL);
+
+	char buffer[1024] = {0};
+	recv(socketFd, buffer, sizeof(buffer), 0);
+	std::cout << "Message from client: " << buffer << std::endl;
+	close(socketFd);
+
+/*
+poll give info if the operand accept, recv, send can execute
+fcntl with O_NONBLOCK flag to handle A/I operation
+POLLIN
+POLLOUT
+POLLERR
+
+	LOOP:
+		-init pollfd struc with socket (client and listening)
+		- call poll()
+		- check all socket to see who's waiting for operation (send, recv...)
+		create tab or vector for pollfd ?
+*/
 	
 }
 /*

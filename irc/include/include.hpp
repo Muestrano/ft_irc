@@ -3,7 +3,10 @@
 
 #include <string>
 #include <cstdlib>
+#include <iostream>
+#include <unistd.h>
 #include <sys/socket.h>
+#include <netinet/in.h> //sockaddr_in
 
 
 
