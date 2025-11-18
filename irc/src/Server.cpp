@@ -7,6 +7,72 @@ void Server::initServer(std::string port, std::string password)
 	this->port = atoi(port.c_str());
 	this->password = password; // need to cast it to have const password
 
+
+
+}
+
+void Server::disconnectClient(size_t i)
+{
+	std::cout << "client disconnect: " << pollFd[i].fd << std::endl;
+	close(this->pollFd[i].fd);
+	this->pollFd.erase(pollFd.begin() + i);
+
+	// clean associate client object
+
+}
+
+/**
+ * @param ssize_t Use to count bytes
+*/
+void Server::handleClientData(size_t i)
+{
+	int clientFd = pollFd[i].fd;
+	char buffer[1024]; // Why 1024 ?? 
+
+	while (true)
+	{
+		ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
+
+		if (bytesRead > 0)
+		{
+			buffer[bytesRead] = '\0';
+			// add data to client buff
+			// parse the command (end by \r\n)
+			// addDataClient(clientFd, buffer, bytesRead);
+		}
+		else if (bytesRead == 0)
+		{
+			// disconnectClient(i);
+			// break;
+		}
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
+			break; // no data to read
+		else //error
+		{
+			disconnectClient(i);
+			break;
+		}
+	}
+}
+
+void Server::newConnection()
+{
+	struct sockaddr_in addr;
+	socklen_t addrlen = sizeof(addr);
+
+ 	int clientFd = accept(socketFd, (struct sockaddr*)&addr, &addrlen);
+	if (clientFd >= 0)
+	{
+		fcntl(clientFd, F_SETFL, O_NONBLOCK);
+		struct pollfd newPollFd; // to push it in the vector pollFd and we aren't limits by number of user
+		newPollFd.fd = clientFd;
+		newPollFd.events = POLLIN | POLLOUT; // wire reading and writing
+		newPollFd.revents = 0;
+
+		this->pollFd.push_back(newPollFd);
+
+		std::cout << "new client connected: " << clientFd << std::endl;
+	}
 }
 /**
  * @param serverAddre socketaddr_in struct contain the server adress
@@ -14,24 +80,63 @@ void Server::initServer(std::string port, std::string password)
  * @param SOCK_STREAM TCP socket
  * @param htons convert port to network byte ordre
  * @param INADDR_ANY accept all ip conncetion
+ * 
 */
+// poll evecnts: 
 void Server::startServer()
 {
+	// init serv
 	this->socketFd = socket(AF_INET, SOCK_STREAM, 0); //
+	if (this->socketFd < 0)
+		std::cerr << "Error: problem when creating socket" << std::endl;
+
+	fcntl(this->socketFd, F_SETFL, O_NONBLOCK);
+
 	this->serverAddr.sin_family = AF_INET;
-	this->serverAddr.sin_port = htons(8080);
+	this->serverAddr.sin_port = htons(this->port);
 	this->serverAddr.sin_addr.s_addr = INADDR_ANY;
 
 	bind(this->socketFd, (struct sockaddr*)&this->serverAddr, sizeof(this->serverAddr));
-	listen(this->socketFd, 1);
+	listen(this->socketFd, 10);
 
-	int clientSocket = accept(this->socketFd, NULL, NULL);
+	struct pollfd listenerPollFd;
+	listenerPollFd.fd = this->socketFd;
+	listenerPollFd.events = POLLIN; // waiting rading (new connection)
+	listenerPollFd.revents = 0;
 
-	char buffer[1024] = {0};
-	recv(socketFd, buffer, sizeof(buffer), 0);
-	std::cout << "Message from client: " << buffer << std::endl;
-	close(socketFd);
+	this->pollFd.push_back(listenerPollFd);
 
+	while (true)
+	{
+		int waitPoll = poll(pollFd.data(), pollFd.size(), -1);
+		// check all socket with POLLIN if there up with revents ==0
+		if (waitPoll > 0)
+		{
+			for (size_t i = 0; i < pollFd.size(); i++)
+			{
+				if (pollFd[i].revents == 0)
+					continue;
+				if (pollFd[i].revents & POLLIN)
+				{
+					if (pollFd[i].fd == socketFd) // new connection
+						newConnection();
+					else // data from an other client
+						handleClientData(i);
+				}
+				// chef if the socket is ready to send
+				// if (pollFd[i].revents & POLLOUT)
+				// 	// writeClient()
+				// // check if there is error with POLLHUP and POLLER
+				// if (pollFd[i].revents & (POLLHUP | POLLERR))
+				// {
+				// 	// disconnectClient(i)
+				// 	i--; // for disconnection
+				// }
+				}
+			// check all events new connection or data give for one client
+			}
+		}
+}
 /*
 poll give info if the operand accept, recv, send can execute
 fcntl with O_NONBLOCK flag to handle A/I operation
@@ -40,13 +145,12 @@ POLLOUT
 POLLERR
 
 	LOOP:
-		-init pollfd struc with socket (client and listening)
+		-init pollFd struc with socket (client and listening)
 		- call poll()
 		- check all socket to see who's waiting for operation (send, recv...)
-		create tab or vector for pollfd ?
+		create tab or vector for pollFd ?
 */
 	
-}
 /*
 socket : communication between two device in one network
 	one socket for listening communication in one port

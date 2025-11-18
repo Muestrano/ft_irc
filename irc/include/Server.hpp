@@ -2,6 +2,8 @@
 # define SERVER_HPP
 
 #include "include.hpp"
+
+#define CLIENT_MAX 10
 /*
  handle listening socket
 */
@@ -13,11 +15,19 @@ class Server
 		int port;
 		std::string password;
 
+
+		std::vector<struct pollfd> pollFd;
+
 		struct sockaddr_in serverAddr;
 	public:
 		void initServer(std::string port, std::string password);
 		void startServer();
+		void newConnection();
+		void handleClientData(size_t i);
+		void disconnectClient(size_t i);
 	
 };
+
+
 
 #endif
