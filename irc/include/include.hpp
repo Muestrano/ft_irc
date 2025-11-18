@@ -2,6 +2,8 @@
 # define IRC_HPP
 
 #include <string>
+#include <iostream>
+#include <stdlib.h>
 
 #include "Channel.hpp"
 #include "Client.hpp"
