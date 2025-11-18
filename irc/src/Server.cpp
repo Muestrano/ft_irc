@@ -1,6 +1,19 @@
 #include "../include/Server.hpp"
 #include "../include/include.hpp"
 
+
+void Server::initServer(std::string port, std::string password)
+{
+	this->port = atoi(port.c_str());
+	this->password = password; // need to cast it
+
+}
+
+void Server::startServer()
+{
+	this->socketFd = socket(AF_INET, SOCK_STREAM, 0);
+	
+}
 /*
 socket : communication between two device in one network
 	one socket for listening communication in one port
