@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <stdlib.h>
+#include <map>
 
 #include "Channel.hpp"
 #include "Client.hpp"
