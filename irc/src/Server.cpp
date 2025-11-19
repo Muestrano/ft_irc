@@ -50,11 +50,11 @@ void Server::handleClientData(int i)
 		}
 		if (errno == EAGAIN || errno == EWOULDBLOCK)
 			break; // no data to read
-		// else //error
-		// {
-		// 	disconnectClient(i);
-		// 	break;
-		// }
+		else //error
+		{
+			disconnectClient(i);
+			break;
+		}
 	}
 }
 /**
@@ -147,12 +147,7 @@ void Server::startServer()
 				// 	// disconnectClient(i)
 				// 	i--; // for disconnection
 				// }
-				else if (pollFd[i].revents & (POLLHUP | POLLERR))
-                {
-                    std::cout << "client disconnect: " 
-                              << pollFd[i].fd << std::endl;
-                    disconnectClient(i);
-                }
+			
 			}
 			// check all events new connection or data give for one client
 		}
