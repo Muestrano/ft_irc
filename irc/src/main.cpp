@@ -10,7 +10,6 @@ int main(int ac, char **av)
 	// parse arg function
 	if (ac > 2)
 	{
-		std::cout << "heee" << std::endl;
 		class Server server;
 		server.initServer(av[1], av[2]);
 		server.startServer();

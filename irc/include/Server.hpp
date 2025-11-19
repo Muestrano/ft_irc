@@ -23,8 +23,8 @@ class Server
 		void initServer(std::string port, std::string password);
 		void startServer();
 		void newConnection();
-		void handleClientData(size_t i);
-		void disconnectClient(size_t i);
+		void handleClientData(int i);
+		void disconnectClient(int i);
 	
 };
 

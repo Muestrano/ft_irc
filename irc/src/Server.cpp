@@ -10,21 +10,24 @@ void Server::initServer(std::string port, std::string password)
 
 
 }
-
-void Server::disconnectClient(size_t i)
+/**
+ * @brief disconnect client and erase the client socket
+*/
+void Server::disconnectClient(int i)
 {
 	std::cout << "client disconnect: " << pollFd[i].fd << std::endl;
 	close(this->pollFd[i].fd);
 	this->pollFd.erase(pollFd.begin() + i);
 
-	// clean associate client object
+	// clean associate client object and map client if there is
 
 }
 
 /**
+ * @brief handle receive message and parse the command
  * @param ssize_t Use to count bytes
 */
-void Server::handleClientData(size_t i)
+void Server::handleClientData(int i)
 {
 	int clientFd = pollFd[i].fd;
 	char buffer[1024]; // Why 1024 ?? 
@@ -42,19 +45,28 @@ void Server::handleClientData(size_t i)
 		}
 		else if (bytesRead == 0)
 		{
-			// disconnectClient(i);
-			// break;
-		}
-		if (errno == EAGAIN || errno == EWOULDBLOCK)
-			break; // no data to read
-		else //error
-		{
 			disconnectClient(i);
 			break;
 		}
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
+			break; // no data to read
+		// else //error
+		// {
+		// 	disconnectClient(i);
+		// 	break;
+		// }
 	}
 }
-
+/**
+ * @brief Create a client fd and initialize poll struct
+ * @param sockaddr_in socket adress ipv4 (in6 for ipv6)
+ * @param accept ectract connection to create a new fd
+ * @param fcntl open fd and configure it:
+ * 
+ * \li - F_SETFL: 
+ * 
+ * \li - O_NONBLOCK: 
+*/
 void Server::newConnection()
 {
 	struct sockaddr_in addr;
@@ -112,17 +124,20 @@ void Server::startServer()
 		// check all socket with POLLIN if there up with revents ==0
 		if (waitPoll > 0)
 		{
-			for (size_t i = 0; i < pollFd.size(); i++)
+			for (int i = pollFd.size() - 1; i >= 0 ; i--)
 			{
 				if (pollFd[i].revents == 0)
 					continue;
-				if (pollFd[i].revents & POLLIN)
+				// if (pollFd[i].revents & POLLIN)
+				if (pollFd[i].revents & POLLIN && pollFd[i].fd == socketFd)
 				{
-					if (pollFd[i].fd == socketFd) // new connection
-						newConnection();
-					else // data from an other client
-						handleClientData(i);
+					newConnection();
+					// if (pollFd[i].fd == socketFd) // new connection
+					// else // data from an other client
 				}
+				else if (pollFd[i].revents & POLLIN)
+					handleClientData(i);
+
 				// chef if the socket is ready to send
 				// if (pollFd[i].revents & POLLOUT)
 				// 	// writeClient()
@@ -132,10 +147,16 @@ void Server::startServer()
 				// 	// disconnectClient(i)
 				// 	i--; // for disconnection
 				// }
-				}
-			// check all events new connection or data give for one client
+				else if (pollFd[i].revents & (POLLHUP | POLLERR))
+                {
+                    std::cout << "client disconnect: " 
+                              << pollFd[i].fd << std::endl;
+                    disconnectClient(i);
+                }
 			}
+			// check all events new connection or data give for one client
 		}
+	}
 }
 /*
 poll give info if the operand accept, recv, send can execute
