@@ -7,8 +7,6 @@ Server::Server(int port, std::string pass)
 	this->socketFd = socket(AF_INET, SOCK_STREAM, 0);
 	this->port = port;
 	this->password = pass;
-
-	
 }
 Server::Server()
 {
@@ -93,7 +91,6 @@ void Server::disconnectClient(int i)
 void Server::handleClientData(int i)
 {
 	int clientFd = pollFd[i].fd;
-	// std::cout << "🔍 Traitement données client FD: " << clientFd << std::endl;
 	// Client* client = this->clients[clientFd];
 	char buffer[1024]; // Why 1024 ?? 
 
@@ -118,7 +115,6 @@ void Server::handleClientData(int i)
 			return;
 		else 
 		{
-		// Erreur réelle (pas EAGAIN)
 			disconnectClient(i);
 		}
 	}
@@ -141,10 +137,8 @@ void Server::newConnection()
 		newPollFd.revents = 0;
 
 		this->pollFd.push_back(newPollFd);
-
+		std::cout << "new client connected: " << clientFd << std::endl;
 	}
-	else
-		std::cout << "❌ ERREUR accept(): " << std::endl;
 }
 /**
  * @param serverAddre socketaddr_in struct contain the server adress
