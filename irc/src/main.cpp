@@ -52,6 +52,8 @@ int main(int ac, char **av)
 	// parse arg function
 	class Server server;
 	server.initServer(av[1], av[2]);
+	server.startServer();
+
 	return 0;
 }
 
