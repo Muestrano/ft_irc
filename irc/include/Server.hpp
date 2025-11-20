@@ -3,7 +3,6 @@
 
 #include "include.hpp"
 
-#define CLIENT_MAX 10
 /*
  handle listening socket
 */
@@ -21,6 +20,7 @@ class Server
 		struct sockaddr_in serverAddr;
 	public:
 		void initServer(std::string port, std::string password);
+		void initHexchat(int clientFd, const char* buffer);
 		void startServer();
 		void newConnection();
 		void handleClientData(int i);

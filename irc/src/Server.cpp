@@ -2,11 +2,40 @@
 #include "../include/include.hpp"
 
 
+/**
+ * @brief Create a client fd and initialize poll struct
+ * @param accept ectract connection to create a new fd
+ * @param fcntl open fd and configure it:
+ * 
+ * \li - F_SETFL: 
+ * 
+ * \li - O_NONBLOCK: 
+*/
 void Server::initServer(std::string port, std::string password)
 {
 	this->port = atoi(port.c_str());
 	this->password = password; // need to cast it to have const password
 
+	// init serv
+	this->socketFd = socket(AF_INET, SOCK_STREAM, 0); //
+	if (this->socketFd < 0)
+		std::cerr << "Error: problem when creating socket" << std::endl;
+
+	fcntl(this->socketFd, F_SETFL, O_NONBLOCK);
+
+	this->serverAddr.sin_family = AF_INET;
+	this->serverAddr.sin_port = htons(this->port);
+	this->serverAddr.sin_addr.s_addr = INADDR_ANY;
+
+	bind(this->socketFd, (struct sockaddr*)&this->serverAddr, sizeof(this->serverAddr));
+	listen(this->socketFd, 10);
+
+	struct pollfd listenerPollFd;
+	listenerPollFd.fd = this->socketFd;
+	listenerPollFd.events = POLLIN; // waiting rading (new connection)
+	listenerPollFd.revents = 0;
+
+	this->pollFd.push_back(listenerPollFd);
 
 
 }
@@ -21,6 +50,30 @@ void Server::disconnectClient(int i)
 
 	// clean associate client object and map client if there is
 
+}
+
+/**
+ * @brief HexChat client pass three successive command to the serv to autentifiate and configure user
+ * 
+ * \li - it's: PASS, NICK, USER
+*/
+void Server::initHexchat(int clientFd, const char* msg)
+{
+	std::string totalMsg = msg;
+	std::istringstream iss(totalMsg);
+	std::string command;
+	iss >> command;
+
+	if (command == "PASS")
+	{
+		this->password = command;
+	}
+
+	iss >> command;
+	if (command == "NICK")
+	{
+		this-> = 
+	}
 }
 
 /**
@@ -39,6 +92,8 @@ void Server::handleClientData(int i)
 		if (bytesRead > 0)
 		{
 			buffer[bytesRead] = '\0';
+			// std::cout << "data client " << clientFd << ": '" << buffer << "'" << std::endl;
+			initHexchat(clientFd, buffer);
 			// add data to client buff
 			// parse the command (end by \r\n)
 			// addDataClient(clientFd, buffer, bytesRead);
@@ -58,14 +113,7 @@ void Server::handleClientData(int i)
 	}
 }
 /**
- * @brief Create a client fd and initialize poll struct
- * @param sockaddr_in socket adress ipv4 (in6 for ipv6)
- * @param accept ectract connection to create a new fd
- * @param fcntl open fd and configure it:
- * 
- * \li - F_SETFL: 
- * 
- * \li - O_NONBLOCK: 
+ * @param sockaddr_in socket adress ipv4 (sockaddr_in6 for ipv6)
 */
 void Server::newConnection()
 {
@@ -97,26 +145,6 @@ void Server::newConnection()
 // poll evecnts: 
 void Server::startServer()
 {
-	// init serv
-	this->socketFd = socket(AF_INET, SOCK_STREAM, 0); //
-	if (this->socketFd < 0)
-		std::cerr << "Error: problem when creating socket" << std::endl;
-
-	fcntl(this->socketFd, F_SETFL, O_NONBLOCK);
-
-	this->serverAddr.sin_family = AF_INET;
-	this->serverAddr.sin_port = htons(this->port);
-	this->serverAddr.sin_addr.s_addr = INADDR_ANY;
-
-	bind(this->socketFd, (struct sockaddr*)&this->serverAddr, sizeof(this->serverAddr));
-	listen(this->socketFd, 10);
-
-	struct pollfd listenerPollFd;
-	listenerPollFd.fd = this->socketFd;
-	listenerPollFd.events = POLLIN; // waiting rading (new connection)
-	listenerPollFd.revents = 0;
-
-	this->pollFd.push_back(listenerPollFd);
 
 	while (true)
 	{

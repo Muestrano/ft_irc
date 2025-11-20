@@ -16,7 +16,12 @@ class Client
 		int clientFd;
 
 	public:
-	
+		Client();
+		Client(int fd);
+		~Client();
+
+		void setNickName(const std::string &nick);
+		void setUser(const std::string &user);
 };
 
 #endif
