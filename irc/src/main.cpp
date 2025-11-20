@@ -49,7 +49,6 @@ int main(int ac, char **av)
 		std::cerr << "You're seeing it big. Big things, big numbers. But calm down, don't reach over 65535." << std::endl;
 		return (-1);
 	}
-	(void)ac;
 	// parse arg function
 	class Server server;
 	server.initServer(av[1], av[2]);
