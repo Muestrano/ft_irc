@@ -57,24 +57,24 @@ void Server::disconnectClient(int i)
  * 
  * \li - it's: PASS, NICK, USER
 */
-void Server::initHexchat(int clientFd, const char* msg)
-{
-	std::string totalMsg = msg;
-	std::istringstream iss(totalMsg);
-	std::string command;
-	iss >> command;
+// void Server::initHexchat(int clientFd, const char* msg)
+// {
+// 	std::string totalMsg = msg;
+// 	std::istringstream iss(totalMsg);
+// 	std::string command;
+// 	iss >> command;
 
-	if (command == "PASS")
-	{
-		this->password = command;
-	}
+// 	if (command == "PASS")
+// 	{
+// 		this->password = command;
+// 	}
 
-	iss >> command;
-	if (command == "NICK")
-	{
-		this-> = 
-	}
-}
+// 	iss >> command;
+// 	if (command == "NICK")
+// 	{
+// 		this-> = 
+// 	}
+// }
 
 /**
  * @brief handle receive message and parse the command
@@ -93,7 +93,7 @@ void Server::handleClientData(int i)
 		{
 			buffer[bytesRead] = '\0';
 			// std::cout << "data client " << clientFd << ": '" << buffer << "'" << std::endl;
-			initHexchat(clientFd, buffer);
+			// initHexchat(clientFd, buffer);
 			// add data to client buff
 			// parse the command (end by \r\n)
 			// addDataClient(clientFd, buffer, bytesRead);

@@ -12,6 +12,8 @@ class Client
 	private:
 		std::string nickName;
 		std::string userName;
+		std::string hostName;
+		std::string buffer;
 
 		int clientFd;
 
@@ -19,9 +21,15 @@ class Client
 		Client();
 		Client(int fd);
 		~Client();
+		
+		std::string getNickName();
+		std::string getUser();
+		std::string getHostname();
 
-		void setNickName(const std::string &nick);
-		void setUser(const std::string &user);
+		void setNickName(const std::string& nick);
+		void setUser(const std::string& user);
+		void setHostname(const std::string& hostname);
+
 };
 
 #endif

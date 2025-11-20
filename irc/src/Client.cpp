@@ -26,3 +26,20 @@ void Client::setUser(const std::string &user)
 {
 	this->userName = user;
 }
+void Client::setHostname(const std::string& hostname)
+{
+	this->hostName = hostname;
+}
+
+std::string Client::getNickName()
+{
+	return (this->hostName);
+}
+std::string Client::getUser()
+{
+	return (this->userName)
+}
+std::string Client::getHostname()
+{
+	return (this->hostName);
+}
