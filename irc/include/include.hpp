@@ -12,9 +12,17 @@
 #include <poll.h>
 #include <cerrno>
 #include <sstream>
+#include <iostream>
+#include <stdlib.h>
+#include <map>
+
+#include "Channel.hpp"
+#include "Client.hpp"
+#include "Command.hpp"
+#include "Server.hpp"
 
 
-
+class Commands;
 
 
 #endif
