@@ -2,11 +2,17 @@
 # define IRC_HPP
 
 #include <string>
-#include <cstdlib>
-#include <sys/socket.h>
+#include <iostream>
+#include <stdlib.h>
+#include <map>
+
+#include "Channel.hpp"
+#include "Client.hpp"
+#include "Command.hpp"
+#include "Server.hpp"
 
 
-
+class Commands;
 
 
 #endif
