@@ -7,6 +7,8 @@
  handle listening socket
 */
 
+class Client;
+
 class Server
 {
 	private:
@@ -29,6 +31,7 @@ class Server
 		void newConnection();
 		void handleClientData(int i);
 		void disconnectClient(int i);
+		// std::map<int, Client*> clients;
 	
 };
 

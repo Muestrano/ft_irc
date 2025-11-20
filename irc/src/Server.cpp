@@ -7,6 +7,8 @@ Server::Server(int port, std::string pass)
 	this->socketFd = socket(AF_INET, SOCK_STREAM, 0);
 	this->port = port;
 	this->password = pass;
+
+	
 }
 Server::Server()
 {
@@ -91,32 +93,33 @@ void Server::disconnectClient(int i)
 void Server::handleClientData(int i)
 {
 	int clientFd = pollFd[i].fd;
+	// std::cout << "🔍 Traitement données client FD: " << clientFd << std::endl;
+	// Client* client = this->clients[clientFd];
 	char buffer[1024]; // Why 1024 ?? 
 
-	while (true)
-	{
-		ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
 
-		if (bytesRead > 0)
-		{
-			buffer[bytesRead] = '\0';
-			// std::cout << "data client " << clientFd << ": '" << buffer << "'" << std::endl;
-			// initHexchat(clientFd, buffer);
-			// add data to client buff
-			// parse the command (end by \r\n)
-			// addDataClient(clientFd, buffer, bytesRead);
-		}
-		else if (bytesRead == 0)
-		{
-			disconnectClient(i);
-			break;
-		}
+	ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
+	if (bytesRead > 0)
+	{
+		buffer[bytesRead] = '\0';
+		// std::cout << "data client " << clientFd << ": '" << buffer << "'" << std::endl;
+		// initHexchat(clientFd, buffer);
+		// add data to client buff
+		// parse the command (end by \r\n)
+		// addDataClient(clientFd, buffer, bytesRead);
+	}
+	else if (bytesRead == 0)
+	{
+		disconnectClient(i);
+	}
+	else //error
+	{ 
 		if (errno == EAGAIN || errno == EWOULDBLOCK)
-			break; // no data to read
-		else //error
+			return;
+		else 
 		{
+		// Erreur réelle (pas EAGAIN)
 			disconnectClient(i);
-			break;
 		}
 	}
 }
@@ -139,8 +142,9 @@ void Server::newConnection()
 
 		this->pollFd.push_back(newPollFd);
 
-		std::cout << "new client connected: " << clientFd << std::endl;
 	}
+	else
+		std::cout << "❌ ERREUR accept(): " << std::endl;
 }
 /**
  * @param serverAddre socketaddr_in struct contain the server adress
