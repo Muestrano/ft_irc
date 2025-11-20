@@ -37,7 +37,7 @@ std::string Client::getNickName()
 }
 std::string Client::getUser()
 {
-	return (this->userName)
+	return (this->userName);
 }
 std::string Client::getHostname()
 {

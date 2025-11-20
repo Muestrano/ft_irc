@@ -1,39 +1,39 @@
 #include "../include/Server.hpp"
 #include "../include/include.hpp"
 
-Command::Command()
-{
+// Command::Command()
+// {
 
-}
+// }
 
-Command::Command(const Command& c)
-{
-	if (this != &c)
-		*this = c;
-}
+// Command::Command(const Command& c)
+// {
+// 	if (this != &c)
+// 		*this = c;
+// }
 
-Command::~Command()
-{
-}
+// Command::~Command()
+// {
+// }
 
-Command& Command::operator=(const Command& c)
-{
-	if (this != &c)
-	{
-		this->CommandMap = c.CommandMap;
-	}
-	return (*this);
-}
+// Command& Command::operator=(const Command& c)
+// {
+// 	if (this != &c)
+// 	{
+// 		this->CommandMap = c.CommandMap;
+// 	}
+// 	return (*this);
+// }
 
-/**
- * @brief 
- * @param buffer the input from the client
- * @param client the client's fd
-*/
-void	Command::ft_redirect_buffer(std::string buffer, int client)
-{
+// /**
+//  * @brief 
+//  * @param buffer the input from the client
+//  * @param client the client's fd
+// */
+// void	Command::ft_redirect_buffer(std::string buffer, int client)
+// {
 
-}
+// }
 
 
 

@@ -2,6 +2,18 @@
 #include "../include/include.hpp"
 
 
+Server::Server(int port, std::string pass)
+{
+	this->socketFd = socket(AF_INET, SOCK_STREAM, 0);
+	this->port = port;
+	this->password = pass;
+}
+Server::Server()
+{
+
+}
+
+
 /**
  * @brief Create a client fd and initialize poll struct
  * @param accept ectract connection to create a new fd
@@ -11,13 +23,9 @@
  * 
  * \li - O_NONBLOCK: 
 */
-void Server::initServer(std::string port, std::string password)
+void Server::initServer()
 {
-	this->port = atoi(port.c_str());
-	this->password = password; // need to cast it to have const password
-
 	// init serv
-	this->socketFd = socket(AF_INET, SOCK_STREAM, 0); //
 	if (this->socketFd < 0)
 		std::cerr << "Error: problem when creating socket" << std::endl;
 

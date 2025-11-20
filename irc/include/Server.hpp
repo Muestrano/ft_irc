@@ -19,7 +19,11 @@ class Server
 
 		struct sockaddr_in serverAddr;
 	public:
-		void initServer(std::string port, std::string password);
+		Server(int port, std::string password);
+		Server();
+
+
+		void initServer();
 		void initHexchat(int clientFd, const char* buffer);
 		void startServer();
 		void newConnection();
