@@ -1,7 +1,10 @@
 #include "../include/Server.hpp"
 #include "../include/include.hpp"
 
-
+/**
+ * @param AF_INET ipv4 protocol
+ * @param SOCK_STREAM TCP socket
+*/
 Server::Server(int port, std::string pass)
 {
 	this->socketFd = socket(AF_INET, SOCK_STREAM, 0);
@@ -15,13 +18,28 @@ Server::Server()
 
 
 /**
- * @brief Create a client fd and initialize poll struct
- * @param accept ectract connection to create a new fd
+ * @brief Create a server fd and initialize poll/sockaddr struct
  * @param fcntl open fd and configure it:
  * 
- * \li - F_SETFL: 
+ * \li - F_SETFL: Set File Status Flags, overwrites actual flags
  * 
- * \li - O_NONBLOCK: 
+ * \li - O_NONBLOCK: flag non blocking to accept(), connect(), recv(), et send(). 
+ * 			if no data socket function return directly −1 and global variable errno is define to EAGAIN or EWOULDBLOCK.
+ * @param sockadrr => serverAddr component
+ * 
+ * \li - AF_INET type of adress, this specify the ipv4 adress (AF_INET6 for ipv6)
+ * 
+ * \li - htons(this->port): Host To Network Short, convert port to short int (16 bit) for the server to read it => cf big enddian / little endian
+ * 
+ * \li - INADDR_ANY: The serv accept all local network interface (wifi, internet, loopback)
+ * 
+ * @param bind() : Ip and port association to one socket
+ * 
+ * @param listen() : put socket in listening mode to handle input connexion
+ * 
+ * \li - the backlog is 10 because we don't handle lot of connection in this project.
+ * 			backlog is a queue if to handle connection peak
+ * @param pollstruct handle events and re-events: wait to read, write, error with appropriate flags
 */
 void Server::initServer()
 {
@@ -40,13 +58,14 @@ void Server::initServer()
 
 	struct pollfd listenerPollFd;
 	listenerPollFd.fd = this->socketFd;
-	listenerPollFd.events = POLLIN; // waiting rading (new connection)
+	listenerPollFd.events = POLLIN; // waiting reading (new connection)
 	listenerPollFd.revents = 0;
 
 	this->pollFd.push_back(listenerPollFd);
 
 
 }
+
 /**
  * @brief disconnect client and erase the client socket
 */
@@ -87,6 +106,7 @@ void Server::disconnectClient(int i)
 /**
  * @brief handle receive message and parse the command
  * @param ssize_t Use to count bytes
+ * @param buffer 1024 octets => conventional size to read TCP (three control protocol) data
 */
 void Server::handleClientData(int i)
 {
@@ -120,7 +140,8 @@ void Server::handleClientData(int i)
 	}
 }
 /**
- * @param sockaddr_in socket adress ipv4 (sockaddr_in6 for ipv6)
+ * @param sockaddr_in socket struct adress ipv4 (sockaddr_in6 for ipv6)
+ * @param accept extract connection to create a new fd with the three step handshake (SYN: Synchronize, SYN-ACK: Synchronize-Acknowledge, ACK: Acknowledge)
 */
 void Server::newConnection()
 {
@@ -141,14 +162,8 @@ void Server::newConnection()
 	}
 }
 /**
- * @param serverAddre socketaddr_in struct contain the server adress
- * @param AF_INET ipv4 protocol
- * @param SOCK_STREAM TCP socket
- * @param htons convert port to network byte ordre
- * @param INADDR_ANY accept all ip conncetion
  * 
 */
-// poll evecnts: 
 void Server::startServer()
 {
 
