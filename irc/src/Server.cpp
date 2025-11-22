@@ -62,6 +62,7 @@ void Server::initServer()
 	listenerPollFd.revents = 0;
 
 	this->pollFd.push_back(listenerPollFd);
+	Command::set_map();
 
 
 }
@@ -79,29 +80,9 @@ void Server::disconnectClient(int i)
 
 }
 
-/**
- * @brief HexChat client pass three successive command to the serv to autentifiate and configure user
- * 
- * \li - it's: PASS, NICK, USER
-*/
-// void Server::initHexchat(int clientFd, const char* msg)
-// {
-// 	std::string totalMsg = msg;
-// 	std::istringstream iss(totalMsg);
-// 	std::string command;
-// 	iss >> command;
 
-// 	if (command == "PASS")
-// 	{
-// 		this->password = command;
-// 	}
 
-// 	iss >> command;
-// 	if (command == "NICK")
-// 	{
-// 		this-> = 
-// 	}
-// }
+
 
 /**
  * @brief handle receive message and parse the command
@@ -111,8 +92,8 @@ void Server::disconnectClient(int i)
 void Server::handleClientData(int i)
 {
 	int clientFd = pollFd[i].fd;
-	// Client* client = this->clients[clientFd];
-	char buffer[1024]; // Why 1024 ?? 
+	Client* client(this->clients[clientFd]);
+	char buffer[1024];
 
 
 	ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
@@ -120,7 +101,8 @@ void Server::handleClientData(int i)
 	{
 		buffer[bytesRead] = '\0';
 		// std::cout << "data client " << clientFd << ": '" << buffer << "'" << std::endl;
-		// initHexchat(clientFd, buffer);
+		client->setBuffer(buffer);
+		Command::extractCompleteCommand(client, this);
 		// add data to client buff
 		// parse the command (end by \r\n)
 		// addDataClient(clientFd, buffer, bytesRead);

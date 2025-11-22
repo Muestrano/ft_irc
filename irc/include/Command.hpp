@@ -2,6 +2,12 @@
 # define COMMAND_HPP
 
 #include "include.hpp"
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// What do you whant pierre, cammand associate directly by Server class or non instanciable class funtion with 
+	// command static function to access in another cpp file ?
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 /*
 Forme canonique :
@@ -10,38 +16,46 @@ Forme canonique :
         ~T (); // Destructeur éventuellement virtuel
         T &operator=(const T&); // Operator d'affectation
 */
+// class Client;
+// class Server;
 
 class Command
 {
 	private :
-
-	typedef void (Command::*FtCommand)(std::string, int);
-	std::map<std::string, FtCommand> CommandMap;
-
-	public :
-
 	//Coplien form
 	Command();
 	Command(const Command&);
 	~Command();
 	Command& operator=(const Command&);
 
+	// typedef void (Command::*FtCommand)(std::string, int);
+	// std::map<std::string, FtCommand> CommandMap;
+	typedef void (*FtCommand)(Client* client, Server* server, std::string buffer);
+    static std::map<std::string, FtCommand> CommandMap;
+
+	public :
+
+
 	//Methods to handle commands
 	void	ft_redirect_buffer(std::string buffer, int client);
-	void	set_map(void);
+	static void	set_map(void);
+
+	static void extractCompleteCommand(Client* client, Server* server); //why static ??
+	static void prepareCommand(Client* client, Server* server, std::string line);
+	// static void executeCommand(Server* server, Client* client, const std::string& line);
 
 	// void	ft_pass_serv(std::string buffer, int client); ???????
-	void	ft_pass_chan(std::string buffer, int client);
-	void	ft_nick(std::string buffer, int client);
-	void	ft_user(std::string buffer, int client);
-	void	ft_join(std::string buffer, int client);
-	void	ft_mode(std::string buffer, int client);
-	void	ft_topic(std::string buffer, int client);
-	void	ft_invite(std::string buffer, int client);
-	void	ft_kick(std::string buffer, int client);
-	void	ft_privmsg(std::string buffer, int client);
-	void	ft_exit(std::string buffer, int client);
-	void	ft_quit(std::string buffer, int client);
+	void	ft_pass_chan(Client* client, Server* server, std::string buffer);
+	void	ft_nick(Client* client, Server* server, std::string buffer);
+	void	ft_user(Client* client, Server* server, std::string buffer);
+	void	ft_join(Client* client, Server* server, std::string buffer);
+	void	ft_mode(Client* client, Server* server, std::string buffer);
+	void	ft_topic(Client* client, Server* server, std::string buffer);
+	void	ft_invite(Client* client, Server* server, std::string buffer);
+	void	ft_kick(Client* client, Server* server, std::string buffer);
+	void	ft_privmsg(Client* client, Server* server, std::string buffer);
+	void	ft_exit(Client* client, Server* server, std::string buffer);
+	void	ft_quit(Client* client, Server* server, std::string buffer);
 
 
 	// /PASS <password>\

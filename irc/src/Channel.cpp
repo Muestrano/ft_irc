@@ -6,4 +6,4 @@ Channel handling
 	#canal
 	Join
 
-*/
+*/	

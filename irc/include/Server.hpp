@@ -2,12 +2,13 @@
 # define SERVER_HPP
 
 #include "include.hpp"
-
+#include "Command.hpp"
 /*
  handle listening socket
 */
 
 class Client;
+
 
 class Server
 {
@@ -18,6 +19,8 @@ class Server
 
 
 		std::vector<struct pollfd> pollFd;
+		std::map<int, Client*> clients;  // FD -> Client
+    	std::map<std::string, Channel*> channels;
 
 		struct sockaddr_in serverAddr;
 	public:
@@ -26,7 +29,8 @@ class Server
 
 
 		void initServer();
-		void initHexchat(int clientFd, const char* buffer);
+		void extractCompleteCommand(Client* client);
+		void prepareCommand(Client* client, std::string line);
 		void startServer();
 		void newConnection();
 		void handleClientData(int i);

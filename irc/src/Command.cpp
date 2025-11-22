@@ -33,16 +33,16 @@ Command& Command::operator=(const Command& c)
 void Command::set_map(void)
 {
 	CommandMap["PASS"] = &Command::ft_pass_chan;
-	// CommandMap["NICK"] = &Command::ft_nick;
-	// CommandMap["USER"] = &Command::ft_user;
-	// CommandMap["JOIN"] = &Command::ft_join;
-	// CommandMap["MODE"] = &Command::ft_mode;
-	// CommandMap["TOPIC"] = &Command::ft_topic;
-	// CommandMap["INVITE"] = &Command::ft_invite;
-	// CommandMap["KICK"] = &Command::ft_kick;
-	// CommandMap["PRIVMSG"] = &Command::ft_privmsg;
-	// CommandMap["PART"] = &Command::ft_exit;
-	// CommandMap["QUIT"] = &Command::ft_quit;
+	CommandMap["NICK"] = &Command::ft_nick;
+	CommandMap["USER"] = &Command::ft_user;
+	CommandMap["JOIN"] = &Command::ft_join;
+	CommandMap["MODE"] = &Command::ft_mode;
+	CommandMap["TOPIC"] = &Command::ft_topic;
+	CommandMap["INVITE"] = &Command::ft_invite;
+	CommandMap["KICK"] = &Command::ft_kick;
+	CommandMap["PRIVMSG"] = &Command::ft_privmsg;
+	CommandMap["PART"] = &Command::ft_exit;
+	CommandMap["QUIT"] = &Command::ft_quit;
 
 }
 // /!\ A mettre dans les constructeurs
@@ -61,8 +61,54 @@ void ft_join(std::string buffer, int client)
 {
 
 }
+/**
+ * @brief Extract all command to pass it in the handler command
+ * 
+*/
+void Command::extractCompleteCommand(Client* client, Server* server)
+{
+	std::string& buffer = client->getBuffer();
+	
+	size_t pos;
+	while ((pos = buffer.find("\r\n")) != std::string::npos) 
+	{
+		std::string line = buffer.substr(0, pos);
+		buffer.erase(0, pos + 2); // Supp \r\n for the next  command        
+		prepareCommand(client, server, line);
+	}
+}
+
+/**
+ * @brief extract the command and params to handle it
+*/
+// this function don't handle the different name of command
+void Command::prepareCommand(Client* client, Server* server, std::string line)
+{
+	std::istringstream ss(line);
+	std::string command;
+	ss >> command;
+
+	// upper conversion case-intensive command
+	std::transform(command.begin(), command.end(), command.begin(), ::toupper);
+
+	std::string param;
+	std::getline(ss, param);
+
+	param.erase(0, param.find_first_not_of(" ")); //erase space befor param
+
+	if (CommandMap.find(command) != CommandMap.end())
+	{
+		FtCommand f = CommandMap[command];
+		(f)(client, server, param); //need to test that with simple exemple with hexchat
+		// !!!!!!!!!!
+		//  Need to handle the nomenclature comment or not ????? JOIN, JOIIN, J_OIN ??
+		// !!!!!!!!!
+	}
+	else
+		sendError(Client* client, int codeError, const std::string& message) // to do
 
 
+}
 
 
 /*

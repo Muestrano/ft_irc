@@ -20,15 +20,17 @@ class Client
 	public:
 		Client();
 		Client(int fd);
-		~Client();
 		
-		std::string getNickName();
-		std::string getUser();
-		std::string getHostname();
+		std::string& getNickName() const;
+		std::string& getUser() const;
+		std::string& getHostname() const;
+		std::string& getBuffer() const;
 
 		void setNickName(const std::string& nick);
 		void setUser(const std::string& user);
 		void setHostname(const std::string& hostname);
+		void setBuffer(const std::string& buffer);
+
 
 };
 
