@@ -23,8 +23,6 @@ Command& Command::operator=(const Command& c)
 	return (*this);
 }
 
-
-
 /**
  * @brief Sets the CommandMap attribute
 */
@@ -71,9 +69,9 @@ void Command::set_map(void)
 
 }
 
-void ft_join(std::string buffer, int client)
-{
-}
+// void ft_join(std::string buffer, int client)
+// {
+// }
 
 // }
 /**
