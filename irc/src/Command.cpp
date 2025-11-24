@@ -46,14 +46,12 @@ void Command::set_map(void)
 	// CommandMap["QUIT"] = &Command::ft_quit;
 
 }
-// void Command::ft_pass_chan(Client* client, Server* server, const std::string& params)
 void	Command::ft_test(Client* client, Server* server, std::string buffer)
 {
 	(void)server;
     std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
     send(client->getFd(), response.c_str(), response.length(), 0);
 }
-// /!\ A mettre dans les constructeurs
 
 /**
  * @brief 
@@ -87,7 +85,7 @@ void Command::extractCompleteCommand(Client* client, Server* server)
 	buffer.erase(0, pos + 2);
 }
 
-// std::string Command::codeToString(int value)
+// std::string Command::codeToString(int value) // TODO, test again this format std::string (like lorenzo) for sendError(actualy stringstream)
 // {
 //     std::stringstream ss;
 //     ss << value;
@@ -97,15 +95,13 @@ void Command::extractCompleteCommand(Client* client, Server* server)
 void Command::sendError(Client* client, int codeError, const std::string& command)
 {
 	 std::string nickname = client->getNickName();
-    if (nickname.empty()) {
-        nickname = "*";  // Si le client n'a pas encore de nickname
-    }
+    if (nickname.empty())
+        nickname = "*";
     
     std::stringstream error;
     error << ":localhost " << codeError << " " << nickname;
     error << " " << command << " :Unknown command\r\n";
     
-    // AJOUTEZ CE LOG POUR DEBUG
 	std::string stringError = error.str();
     send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
@@ -122,8 +118,7 @@ void Command::prepareCommand(Client* client, Server* server, std::string line)
 	ss >> command;
 
 	std::cout << "line received: '" << line << "'" << std::endl;
-	// upper conversion command
-	std::transform(command.begin(), command.end(), command.begin(), ::toupper);
+	std::transform(command.begin(), command.end(), command.begin(), ::toupper); // upper conversion command
 
 	std::string param;
 	std::getline(ss, param);
@@ -132,11 +127,8 @@ void Command::prepareCommand(Client* client, Server* server, std::string line)
 
 	if (CommandMap.find(command) != CommandMap.end())
 	{
-		FtCommand funcMap = CommandMap[command];
-		(this->*funcMap)(client, server, param); //need to test that with simple exemple with hexchat
-		// !!!!!!!!!!
-		//  Need to handle the nomenclature comment or not ????? JOIN, JOIIN, J_OIN ??
-		// !!!!!!!!!
+		FtCommand funcMap = CommandMap[command]; // std::map<std::string, FtCommand> CommandMap;
+		(this->*funcMap)(client, server, param); 
 	}
 	else
 	{

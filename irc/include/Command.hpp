@@ -28,8 +28,6 @@ class Command
 {
 	private :
 
-	// typedef void (Command::*FtCommand)(std::string, int);
-	// std::map<std::string, FtCommand> CommandMap;
 	typedef void (Command::*FtCommand)(Client* client, Server* server, std::string buffer);
     std::map<std::string, FtCommand> CommandMap;
 
@@ -50,7 +48,6 @@ class Command
 	void sendError(Client* client, int codeError, const std::string& message);
 	std::string codeToString(int value);
 
-	// void executeCommand(Server* server, Client* client, const std::string& line);
 
 	// void	ft_pass_serv(std::string buffer, int client); ???????
 	void	ft_test(Client* client, Server* server, std::string buffer);

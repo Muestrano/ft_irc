@@ -3,18 +3,14 @@
 
 #include "include.hpp"
 
-/*
-	connected user (his socket, nick, username...)
-	
-*/
 class Client
 {
 	private:
 		std::string nickName;
 		std::string userName;
-		std::string realName; // IP client
+		std::string realName; 
 		std::string hostName; // IP client
-		std::string passWord; // IP client
+		std::string passWord;
 		std::string buffer;
 
 		int clientFd;

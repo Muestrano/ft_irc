@@ -112,7 +112,6 @@ void Server::handleClientData(int i)
 	Client* client(this->clients[clientFd]);
 	char buffer[1024];
 
-	// std::cout << "🔍 [RECV] Client " << pollFd[i].fd << std::endl;
 	ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
 	if (bytesRead > 0)
 	{
@@ -122,10 +121,7 @@ void Server::handleClientData(int i)
 		client->setBuffer(buffer);
 		Command commandObj;
 		commandObj.extractCompleteCommand(client, this);
-		// client->clearbuff()
-		// add data to client buff
-		// parse the command (end by \r\n)
-		// addDataClient(clientFd, buffer, bytesRead);
+		// client->clearbuff() // TODO need to see if it's necessary
 	}
 	else if (bytesRead == 0)
 	{
@@ -186,28 +182,17 @@ void Server::startServer()
 			{
 				if (pollFd[i].revents == 0)
 					continue;
-				// if (pollFd[i].revents & POLLIN)
-				if (/*pollFd[i].revents & POLLIN && */pollFd[i].fd == socketFd)
+				if (/*pollFd[i].revents & POLLIN && */pollFd[i].fd == socketFd) // TODO test with flaqs in comment
 				{
 					newConnection();
 					// if (pollFd[i].fd == socketFd) // new connection
 					// else // data from an other client
 				}
-				else/* if (pollFd[i].revents & POLLIN)*/
+				else/* if (pollFd[i].revents & POLLIN)*/ // TODO test with uncomment if condition
 					handleClientData(i);
-
-				// chef if the socket is ready to send
-				// if (pollFd[i].revents & POLLOUT)
-				// 	// writeClient()
-				// // check if there is error with POLLHUP and POLLER
-				// if (pollFd[i].revents & (POLLHUP | POLLERR))
-				// {
-				// 	// disconnectClient(i)
-				// 	i--; // for disconnection
-				// }
 			
 			}
-			// check all events new connection or data give for one client
+			// check all events new connection or data give for one client // TODO
 		}
 	}
 }

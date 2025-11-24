@@ -3,9 +3,6 @@
 
 #include "include.hpp"
 #include "Command.hpp"
-/*
- handle listening socket
-*/
 
 class Client;
 
@@ -20,7 +17,7 @@ class Server
 
 		std::vector<struct pollfd> pollFd;
 		std::map<int, Client*> clients;  // FD -> Client
-    	// std::map<std::string, Channel*> channels; to do
+    	// std::map<std::string, Channel*> channels; TODO
 
 		struct sockaddr_in serverAddr;
 	public:
@@ -35,9 +32,7 @@ class Server
 		void startServer();
 		void newConnection();
 		void handleClientData(int i);
-		void disconnectClient(int i);
-		// std::map<int, Client*> clients;
-	
+		void disconnectClient(int i);	
 };
 
 
