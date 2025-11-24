@@ -18,13 +18,14 @@ class Client
 		int clientFd;
 
 	public:
-		Client();
 		Client(int fd);
 		
-		std::string& getNickName() const;
-		std::string& getUser() const;
-		std::string& getHostname() const;
-		std::string& getBuffer() const;
+		std::string getNickName() const;
+		std::string getUser() const;
+		std::string getHostname() const;
+		std::string getBuffer() const;
+		int getFd() const;
+
 
 		void setNickName(const std::string& nick);
 		void setUser(const std::string& user);

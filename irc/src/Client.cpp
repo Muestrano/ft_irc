@@ -6,15 +6,7 @@
 	For handle non blocking we can put data into buffer
 */
 
-Client::Client()
-{
-
-}
 Client::Client(int fd) : clientFd(fd)
-{
-
-}
-Client::~Client()
 {
 
 }
@@ -22,7 +14,7 @@ Client::~Client()
 // setter
 void Client::setBuffer(const std::string& Buffer)
 {
-	this->buffer = buffer;
+	this->buffer = Buffer;
 }
 void Client::setNickName(const std::string &nick)
 {
@@ -37,20 +29,24 @@ void Client::setHostname(const std::string& hostname)
 	this->hostName = hostname;
 }
 // getter
-std::string Client::getNickName()
+std::string Client::getNickName() const
 {
 	return (this->hostName);
 }
-std::string Client::getUser()
+std::string Client::getUser() const
 {
 	return (this->userName);
 }
-std::string Client::getHostname()
+std::string Client::getHostname() const
 {
 	return (this->hostName);
 }
 
-std::string Client::getBuffer()
+std::string Client::getBuffer() const
 {
 	return (this->buffer);
+}
+int Client::getFd() const
+{
+	return (this->clientFd);
 }

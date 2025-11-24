@@ -1,30 +1,31 @@
 #include "../include/Server.hpp"
 #include "../include/include.hpp"
 
-Command::Command()
-{
+// Command::Command()
+// {
 
-}
+// }
 
-Command::Command(const Command& c)
-{
-	if (this != &c)
-		*this = c;
-}
+// Command::Command(const Command& c)
+// {
+// 	if (this != &c)
+// 		*this = c;
+// }
 
-Command::~Command()
-{
-}
+// Command::~Command()
+// {
+// }
 
-Command& Command::operator=(const Command& c)
-{
-	if (this != &c)
-	{
-		this->CommandMap = c.CommandMap;
-	}
-	return (*this);
-}
+// Command& Command::operator=(const Command& c)
+// {
+// 	if (this != &c)
+// 	{
+// 		this->CommandMap = c.CommandMap;
+// 	}
+// 	return (*this);
+// }
 
+std::map<std::string, Command::FtCommand> Command::CommandMap; // handle diferently if we use non static class
 
 
 /**
@@ -32,17 +33,17 @@ Command& Command::operator=(const Command& c)
 */
 void Command::set_map(void)
 {
-	CommandMap["PASS"] = &Command::ft_pass_chan;
-	CommandMap["NICK"] = &Command::ft_nick;
-	CommandMap["USER"] = &Command::ft_user;
-	CommandMap["JOIN"] = &Command::ft_join;
-	CommandMap["MODE"] = &Command::ft_mode;
-	CommandMap["TOPIC"] = &Command::ft_topic;
-	CommandMap["INVITE"] = &Command::ft_invite;
-	CommandMap["KICK"] = &Command::ft_kick;
-	CommandMap["PRIVMSG"] = &Command::ft_privmsg;
-	CommandMap["PART"] = &Command::ft_exit;
-	CommandMap["QUIT"] = &Command::ft_quit;
+	// CommandMap["PASS"] = &Command::ft_pass_chan;
+	// CommandMap["NICK"] = &Command::ft_nick;
+	// CommandMap["USER"] = &Command::ft_user;
+	// CommandMap["JOIN"] = &Command::ft_join;
+	// CommandMap["MODE"] = &Command::ft_mode;
+	// CommandMap["TOPIC"] = &Command::ft_topic;
+	// CommandMap["INVITE"] = &Command::ft_invite;
+	// CommandMap["KICK"] = &Command::ft_kick;
+	// CommandMap["PRIVMSG"] = &Command::ft_privmsg;
+	// CommandMap["PART"] = &Command::ft_exit;
+	// CommandMap["QUIT"] = &Command::ft_quit;
 
 }
 // /!\ A mettre dans les constructeurs
@@ -52,22 +53,22 @@ void Command::set_map(void)
  * @param buffer Input from the client
  * @param client Client's fd
 */
-void Command::ft_redirect_buffer(std::string buffer, int client)
-{
+// void Command::ft_redirect_buffer(std::string buffer, int client)
+// {
 
-}
+// }
 
-void ft_join(std::string buffer, int client)
-{
+// void ft_join(std::string buffer, int client)
+// {
 
-}
+// }
 /**
  * @brief Extract all command to pass it in the handler command
  * 
 */
 void Command::extractCompleteCommand(Client* client, Server* server)
 {
-	std::string& buffer = client->getBuffer();
+	std::string buffer = client->getBuffer();
 	
 	size_t pos;
 	while ((pos = buffer.find("\r\n")) != std::string::npos) 
@@ -77,6 +78,21 @@ void Command::extractCompleteCommand(Client* client, Server* server)
 		prepareCommand(client, server, line);
 	}
 }
+
+std::string Command::codeToString(int value)
+{
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
+}
+
+void Command::sendError(Client* client, int codeError, const std::string& command)
+{
+	 std::string error = ":localhost " + codeToString(codeError) + " " + 
+                       client->getNickName() + " " + command + "\r\n";
+    send(client->getFd(), error.c_str(), error.length(), 0);
+}
+
 
 /**
  * @brief extract the command and params to handle it
@@ -98,14 +114,14 @@ void Command::prepareCommand(Client* client, Server* server, std::string line)
 
 	if (CommandMap.find(command) != CommandMap.end())
 	{
-		FtCommand f = CommandMap[command];
-		(f)(client, server, param); //need to test that with simple exemple with hexchat
+		FtCommand funcMap = CommandMap[command];
+		funcMap(client, server, param); //need to test that with simple exemple with hexchat
 		// !!!!!!!!!!
 		//  Need to handle the nomenclature comment or not ????? JOIN, JOIIN, J_OIN ??
 		// !!!!!!!!!
 	}
 	else
-		sendError(Client* client, int codeError, const std::string& message) // to do
+		sendError(client, 421, command); // to do
 
 
 }
