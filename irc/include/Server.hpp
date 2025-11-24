@@ -25,7 +25,8 @@ class Server
 		struct sockaddr_in serverAddr;
 	public:
 		Server(int port, std::string password);
-		Server();
+		~Server();
+
 
 
 		void initServer();

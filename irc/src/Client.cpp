@@ -10,6 +10,11 @@ Client::Client(int fd) : clientFd(fd)
 {
 
 }
+// Client::~Client()
+// {
+// 	delete Client;
+// }
+
 
 // setter
 void Client::setBuffer(const std::string& Buffer)

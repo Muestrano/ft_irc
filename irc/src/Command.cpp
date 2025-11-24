@@ -33,6 +33,7 @@ std::map<std::string, Command::FtCommand> Command::CommandMap; // handle diferen
 */
 void Command::set_map(void)
 {
+	CommandMap["TEST"] = &Command::ft_test;
 	// CommandMap["PASS"] = &Command::ft_pass_chan;
 	// CommandMap["NICK"] = &Command::ft_nick;
 	// CommandMap["USER"] = &Command::ft_user;
@@ -45,6 +46,13 @@ void Command::set_map(void)
 	// CommandMap["PART"] = &Command::ft_exit;
 	// CommandMap["QUIT"] = &Command::ft_quit;
 
+}
+// void Command::ft_pass_chan(Client* client, Server* server, const std::string& params)
+void	Command::ft_test(Client* client, Server* server, std::string buffer)
+{
+	(void)server;
+    std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
+    send(client->getFd(), response.c_str(), response.length(), 0);
 }
 // /!\ A mettre dans les constructeurs
 
@@ -88,8 +96,7 @@ std::string Command::codeToString(int value)
 
 void Command::sendError(Client* client, int codeError, const std::string& command)
 {
-	 std::string error = ":localhost " + codeToString(codeError) + " " + 
-                       client->getNickName() + " " + command + "\r\n";
+	 std::string error = ":localhost " + codeToString(codeError) + " " + client->getNickName() + " " + command + ":unknow command\r\n";
     send(client->getFd(), error.c_str(), error.length(), 0);
 }
 
@@ -125,7 +132,6 @@ void Command::prepareCommand(Client* client, Server* server, std::string line)
 
 
 }
-
 
 /*
 

@@ -53,6 +53,8 @@ class Command
 	// static void executeCommand(Server* server, Client* client, const std::string& line);
 
 	// void	ft_pass_serv(std::string buffer, int client); ???????
+	static void	ft_test(Client* client, Server* server, std::string buffer);
+
 	static void	ft_pass_chan(Client* client, Server* server, std::string buffer);
 	static void	ft_nick(Client* client, Server* server, std::string buffer);
 	static void	ft_user(Client* client, Server* server, std::string buffer);

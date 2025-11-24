@@ -11,9 +11,14 @@ Server::Server(int port, std::string pass)
 	this->port = port;
 	this->password = pass;
 }
-Server::Server()
+Server::~Server()
 {
-
+    for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
+        delete it->second; // delete each Client
+    clients.clear();
+    
+    if (socketFd >= 0)
+        close(socketFd);
 }
 
 
@@ -72,11 +77,16 @@ void Server::initServer()
 */
 void Server::disconnectClient(int i)
 {
-	std::cout << "client disconnect: " << pollFd[i].fd << std::endl;
-	close(this->pollFd[i].fd);
-	this->pollFd.erase(pollFd.begin() + i);
-
-	// clean associate client object and map client if there is
+	int clientFd = pollFd[i].fd;
+	std::cout << "client disconnect: " << clientFd << std::endl;
+	if (clients.find(clientFd) != clients.end()) 
+	{
+        delete clients[clientFd];    // free client
+        clients.erase(clientFd);     // clean map
+    }
+    
+    close(clientFd);
+    pollFd.erase(pollFd.begin() + i);
 
 }
 
@@ -133,6 +143,8 @@ void Server::newConnection()
  	int clientFd = accept(socketFd, (struct sockaddr*)&addr, &addrlen);
 	if (clientFd >= 0)
 	{
+		Client* newClient = new Client(clientFd);
+        this->clients[clientFd] = newClient;
 		fcntl(clientFd, F_SETFL, O_NONBLOCK);
 		struct pollfd newPollFd; // to push it in the vector pollFd and we aren't limits by number of user
 		newPollFd.fd = clientFd;
@@ -151,7 +163,7 @@ void Server::startServer()
 
 	while (true)
 	{
-		int waitPoll = poll(pollFd.data(), pollFd.size(), -1);
+		int waitPoll = poll(pollFd.data(), pollFd.size(), 5000);
 		// check all socket with POLLIN if there up with revents ==0
 		if (waitPoll > 0)
 		{

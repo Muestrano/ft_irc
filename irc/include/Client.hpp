@@ -19,7 +19,7 @@ class Client
 
 	public:
 		Client(int fd);
-		
+		// ~Client();
 		std::string getNickName() const;
 		std::string getUser() const;
 		std::string getHostname() const;
