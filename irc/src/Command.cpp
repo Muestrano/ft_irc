@@ -6,9 +6,8 @@ Command::Command()
 	set_map();
 }
 
-Command::Command(const Command& c)
+Command::Command(const Command& c) : CommandMap(c.CommandMap)
 {
-	*this = c;
 }
 
 Command::~Command()
