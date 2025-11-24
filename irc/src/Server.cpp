@@ -75,7 +75,6 @@ void Server::initServer()
 	listenerPollFd.revents = 0;
 
 	this->pollFd.push_back(listenerPollFd);
-	Command::set_map();
 
 
 }
@@ -121,7 +120,8 @@ void Server::handleClientData(int i)
 		buffer[bytesRead] = '\0';
 		// std::cout << "data client " << clientFd << ": '" << buffer << "'" << std::endl;
 		client->setBuffer(buffer);
-		Command::extractCompleteCommand(client, this);
+		Command commandObj;
+		commandObj.extractCompleteCommand(client, this);
 		// client->clearbuff()
 		// add data to client buff
 		// parse the command (end by \r\n)

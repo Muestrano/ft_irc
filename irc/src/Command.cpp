@@ -1,31 +1,30 @@
 #include "../include/Server.hpp"
 #include "../include/include.hpp"
 
-// Command::Command()
-// {
+Command::Command()
+{
+	set_map();
+}
 
-// }
+Command::Command(const Command& c)
+{
+	if (this != &c)
+		*this = c;
+}
 
-// Command::Command(const Command& c)
-// {
-// 	if (this != &c)
-// 		*this = c;
-// }
+Command::~Command()
+{
+}
 
-// Command::~Command()
-// {
-// }
+Command& Command::operator=(const Command& c)
+{
+	if (this != &c)
+	{
+		this->CommandMap = c.CommandMap;
+	}
+	return (*this);
+}
 
-// Command& Command::operator=(const Command& c)
-// {
-// 	if (this != &c)
-// 	{
-// 		this->CommandMap = c.CommandMap;
-// 	}
-// 	return (*this);
-// }
-
-std::map<std::string, Command::FtCommand> Command::CommandMap; // handle diferently if we use non static class
 
 
 /**
@@ -134,7 +133,7 @@ void Command::prepareCommand(Client* client, Server* server, std::string line)
 	if (CommandMap.find(command) != CommandMap.end())
 	{
 		FtCommand funcMap = CommandMap[command];
-		funcMap(client, server, param); //need to test that with simple exemple with hexchat
+		(this->*funcMap)(client, server, param); //need to test that with simple exemple with hexchat
 		// !!!!!!!!!!
 		//  Need to handle the nomenclature comment or not ????? JOIN, JOIIN, J_OIN ??
 		// !!!!!!!!!
