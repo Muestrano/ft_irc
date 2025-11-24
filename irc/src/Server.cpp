@@ -1,27 +1,66 @@
 #include "../include/Server.hpp"
 #include "../include/include.hpp"
 
+/**
+ * @param AF_INET ipv4 protocol
+ * @param SOCK_STREAM TCP socket
+*/
+Server::Server(int port, std::string pass)
+{
+	this->socketFd = socket(AF_INET, SOCK_STREAM, 0);
+	this->port = port;
+	this->password = pass;
+}
+Server::~Server()
+{
+    for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
+        delete it->second; // delete each Client
+    clients.clear();
+    
+    if (socketFd >= 0)
+        close(socketFd);
+}
+
 
 /**
- * @brief Create a client fd and initialize poll struct
- * @param accept ectract connection to create a new fd
+ * @brief Create a server fd and initialize poll/sockaddr struct
  * @param fcntl open fd and configure it:
  * 
- * \li - F_SETFL: 
+ * \li - F_SETFL: Set File Status Flags, overwrites actual flags
  * 
- * \li - O_NONBLOCK: 
+ * \li - O_NONBLOCK: flag non blocking to accept(), connect(), recv(), et send(). 
+ * 			if no data socket function return directly −1 and global variable errno is define to EAGAIN or EWOULDBLOCK.
+ * @param sockadrr => serverAddr component
+ * 
+ * \li - AF_INET type of adress, this specify the ipv4 adress (AF_INET6 for ipv6)
+ * 
+ * \li - htons(this->port): Host To Network Short, convert port to short int (16 bit) for the server to read it => cf big enddian / little endian
+ * 
+ * \li - INADDR_ANY: The serv accept all local network interface (wifi, internet, loopback)
+ * 
+ * @param bind() : Ip and port association to one socket
+ * 
+ * @param listen() : put socket in listening mode to handle input connexion
+ * 
+ * \li - the backlog is 10 because we don't handle lot of connection in this project.
+ * 			backlog is a queue if to handle connection peak
+ * @param pollstruct handle events and re-events: wait to read, write, error with appropriate flags
 */
-void Server::initServer(std::string port, std::string password)
+void Server::initServer()
 {
-	this->port = atoi(port.c_str());
-	this->password = password; // need to cast it to have const password
-
 	// init serv
-	this->socketFd = socket(AF_INET, SOCK_STREAM, 0); //
 	if (this->socketFd < 0)
 		std::cerr << "Error: problem when creating socket" << std::endl;
 
 	fcntl(this->socketFd, F_SETFL, O_NONBLOCK);
+	// ----------TEMP potentialy rm this part if we handle signal--------------
+	int reuse = 1;
+    if (setsockopt(this->socketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+        std::cerr << "Error setsockopt(SO_REUSEADDR): " << std::endl;
+        close(this->socketFd);
+        exit(1);
+    }
+	// ----------TEMP potentialy rm this part if we handle signal--------------
 
 	this->serverAddr.sin_family = AF_INET;
 	this->serverAddr.sin_port = htons(this->port);
@@ -32,88 +71,75 @@ void Server::initServer(std::string port, std::string password)
 
 	struct pollfd listenerPollFd;
 	listenerPollFd.fd = this->socketFd;
-	listenerPollFd.events = POLLIN; // waiting rading (new connection)
+	listenerPollFd.events = POLLIN; // waiting reading (new connection)
 	listenerPollFd.revents = 0;
 
 	this->pollFd.push_back(listenerPollFd);
 
 
 }
+
 /**
  * @brief disconnect client and erase the client socket
 */
 void Server::disconnectClient(int i)
 {
-	std::cout << "client disconnect: " << pollFd[i].fd << std::endl;
-	close(this->pollFd[i].fd);
-	this->pollFd.erase(pollFd.begin() + i);
-
-	// clean associate client object and map client if there is
+	int clientFd = pollFd[i].fd;
+	std::cout << "client disconnect: " << clientFd << std::endl;
+	if (clients.find(clientFd) != clients.end()) 
+	{
+        delete clients[clientFd];    // free client
+        clients.erase(clientFd);     // clean map
+    }
+    
+    close(clientFd);
+    pollFd.erase(pollFd.begin() + i);
 
 }
 
-/**
- * @brief HexChat client pass three successive command to the serv to autentifiate and configure user
- * 
- * \li - it's: PASS, NICK, USER
-*/
-void Server::initHexchat(int clientFd, const char* msg)
-{
-	std::string totalMsg = msg;
-	std::istringstream iss(totalMsg);
-	std::string command;
-	iss >> command;
 
-	if (command == "PASS")
-	{
-		this->password = command;
-	}
 
-	iss >> command;
-	if (command == "NICK")
-	{
-		this-> = 
-	}
-}
+
 
 /**
  * @brief handle receive message and parse the command
  * @param ssize_t Use to count bytes
+ * @param buffer 1024 octets => conventional size to read TCP (three control protocol) data
 */
 void Server::handleClientData(int i)
 {
 	int clientFd = pollFd[i].fd;
-	char buffer[1024]; // Why 1024 ?? 
+	Client* client(this->clients[clientFd]);
+	char buffer[1024];
 
-	while (true)
+	ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
+	if (bytesRead > 0)
 	{
-		ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
-
-		if (bytesRead > 0)
-		{
-			buffer[bytesRead] = '\0';
-			// std::cout << "data client " << clientFd << ": '" << buffer << "'" << std::endl;
-			initHexchat(clientFd, buffer);
-			// add data to client buff
-			// parse the command (end by \r\n)
-			// addDataClient(clientFd, buffer, bytesRead);
-		}
-		else if (bytesRead == 0)
-		{
-			disconnectClient(i);
-			break;
-		}
+		std::cout << "received " << bytesRead << " bytes" << std::endl;
+		buffer[bytesRead] = '\0';
+		// std::cout << "data client " << clientFd << ": '" << buffer << "'" << std::endl;
+		client->setBuffer(buffer);
+		Command commandObj;
+		commandObj.extractCompleteCommand(client, this);
+		// client->clearbuff() // TODO need to see if it's necessary
+	}
+	else if (bytesRead == 0)
+	{
+		disconnectClient(i);
+	}
+	else //error
+	{ 
 		if (errno == EAGAIN || errno == EWOULDBLOCK)
-			break; // no data to read
-		else //error
+			return;
+		else 
 		{
 			disconnectClient(i);
-			break;
 		}
 	}
 }
 /**
- * @param sockaddr_in socket adress ipv4 (sockaddr_in6 for ipv6)
+ * @param sockaddr_in socket struct adress ipv4 (sockaddr_in6 for ipv6)
+ * @param accept extract connection to create a new fd with the three step handshake (SYN: Synchronize, SYN-ACK: Synchronize-Acknowledge, ACK: Acknowledge)
 */
 void Server::newConnection()
 {
@@ -123,6 +149,8 @@ void Server::newConnection()
  	int clientFd = accept(socketFd, (struct sockaddr*)&addr, &addrlen);
 	if (clientFd >= 0)
 	{
+		Client* newClient = new Client(clientFd);
+        this->clients[clientFd] = newClient;
 		fcntl(clientFd, F_SETFL, O_NONBLOCK);
 		struct pollfd newPollFd; // to push it in the vector pollFd and we aren't limits by number of user
 		newPollFd.fd = clientFd;
@@ -130,25 +158,23 @@ void Server::newConnection()
 		newPollFd.revents = 0;
 
 		this->pollFd.push_back(newPollFd);
-
 		std::cout << "new client connected: " << clientFd << std::endl;
+	}
+	else
+	{
+		  if (errno != EAGAIN && errno != EWOULDBLOCK)
+          std::cerr << "Erreur accept(): " << std::endl;
 	}
 }
 /**
- * @param serverAddre socketaddr_in struct contain the server adress
- * @param AF_INET ipv4 protocol
- * @param SOCK_STREAM TCP socket
- * @param htons convert port to network byte ordre
- * @param INADDR_ANY accept all ip conncetion
  * 
 */
-// poll evecnts: 
 void Server::startServer()
 {
 
 	while (true)
 	{
-		int waitPoll = poll(pollFd.data(), pollFd.size(), -1);
+		int waitPoll = poll(pollFd.data(), pollFd.size(), 5000);
 		// check all socket with POLLIN if there up with revents ==0
 		if (waitPoll > 0)
 		{
@@ -156,28 +182,17 @@ void Server::startServer()
 			{
 				if (pollFd[i].revents == 0)
 					continue;
-				// if (pollFd[i].revents & POLLIN)
-				if (pollFd[i].revents & POLLIN && pollFd[i].fd == socketFd)
+				if (/*pollFd[i].revents & POLLIN && */pollFd[i].fd == socketFd) // TODO test with flaqs in comment
 				{
 					newConnection();
 					// if (pollFd[i].fd == socketFd) // new connection
 					// else // data from an other client
 				}
-				else if (pollFd[i].revents & POLLIN)
+				else/* if (pollFd[i].revents & POLLIN)*/ // TODO test with uncomment if condition
 					handleClientData(i);
-
-				// chef if the socket is ready to send
-				// if (pollFd[i].revents & POLLOUT)
-				// 	// writeClient()
-				// // check if there is error with POLLHUP and POLLER
-				// if (pollFd[i].revents & (POLLHUP | POLLERR))
-				// {
-				// 	// disconnectClient(i)
-				// 	i--; // for disconnection
-				// }
 			
 			}
-			// check all events new connection or data give for one client
+			// check all events new connection or data give for one client // TODO
 		}
 	}
 }

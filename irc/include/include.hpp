@@ -15,6 +15,8 @@
 #include <iostream>
 #include <stdlib.h>
 #include <map>
+#include <algorithm>
+#include <err.h>
 
 #include "Channel.hpp"
 #include "Client.hpp"

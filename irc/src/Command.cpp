@@ -23,6 +23,34 @@ Command& Command::operator=(const Command& c)
 	return (*this);
 }
 
+
+
+/**
+ * @brief Sets the CommandMap attribute
+*/
+void Command::set_map(void)
+{
+	CommandMap["TEST"] = &Command::ft_test;
+	// CommandMap["PASS"] = &Command::ft_pass_chan;
+	// CommandMap["NICK"] = &Command::ft_nick;
+	// CommandMap["USER"] = &Command::ft_user;
+	// CommandMap["JOIN"] = &Command::ft_join;
+	// CommandMap["MODE"] = &Command::ft_mode;
+	// CommandMap["TOPIC"] = &Command::ft_topic;
+	// CommandMap["INVITE"] = &Command::ft_invite;
+	// CommandMap["KICK"] = &Command::ft_kick;
+	// CommandMap["PRIVMSG"] = &Command::ft_privmsg;
+	// CommandMap["PART"] = &Command::ft_exit;
+	// CommandMap["QUIT"] = &Command::ft_quit;
+
+}
+void	Command::ft_test(Client* client, Server* server, std::string buffer)
+{
+	(void)server;
+    std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
+    send(client->getFd(), response.c_str(), response.length(), 0);
+}
+
 /**
  * @brief Sets the CommandMap attribute
 */
@@ -45,20 +73,13 @@ void Command::set_map(void)
 
 void ft_join(std::string buffer, int client)
 {
-
 }
 
-void	Command::ft_test(Client* client, Server* server, std::string buffer)
-{
-	(void)server;
-    std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
-    send(client->getFd(), response.c_str(), response.length(), 0);
-}
-
+// }
 /**
  * @brief Extract all command to pass it in the handler command
  * @param buffer Input from the client
- * @param client Client's fd
+ * @param client Client's fd 
 */
 void Command::extractCompleteCommand(Client* client, Server* server)
 {
@@ -95,6 +116,12 @@ void Command::sendError(Client* client, int codeError, const std::string& comman
     send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
 
+void	Command::ft_test(Client* client, Server* server, std::string buffer)
+{
+	(void)server;
+    std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
+    send(client->getFd(), response.c_str(), response.length(), 0);
+}
 
 /**
  * @brief extract the command and params to handle it
@@ -123,8 +150,6 @@ void Command::prepareCommand(Client* client, Server* server, std::string line)
 	{
 		sendError(client, 421, command); // to do
 	}
-
-
 }
 
 /*
@@ -152,9 +177,6 @@ Command:
 #
 */
 
-
-
-
 /// MESSAGE PROCESSING ///
 // void Serv::processMessage(int user_fd, const char *message)
 // {
@@ -172,4 +194,3 @@ Command:
 // 	if (this->clients[user_fd])
 // 		this->clients[user_fd]->clearBuffer();
 // }
-
