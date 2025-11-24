@@ -94,13 +94,6 @@ void Command::sendError(Client* client, int codeError, const std::string& comman
     send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
 
-void	Command::ft_test(Client* client, Server* server, std::string buffer)
-{
-	(void)server;
-    std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
-    send(client->getFd(), response.c_str(), response.length(), 0);
-}
-
 /**
  * @brief extract the command and params to handle it
 */
