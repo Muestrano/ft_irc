@@ -26,13 +26,14 @@ class Command
 	public :
 
 	//Coplien form
+	
 	Command();
 	Command(const Command&);
 	~Command();
 	Command& operator=(const Command&);
 
 	//Methods to handle commands
-	void	set_map(void);
+
 	void extractCompleteCommand(Client* client, Server* server);
 	void prepareCommand(Client* client, Server* server, std::string line);
 	void sendError(Client* client, int codeError, const std::string& message);
