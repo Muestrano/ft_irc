@@ -74,7 +74,7 @@ void	Command::ft_test(Client* client, Server* server, std::string buffer)
 void Command::extractCompleteCommand(Client* client, Server* server)
 {
 	std::string& buffer = client->getBuffer();
-	
+
 	size_t pos;
 	while ((pos = buffer.find("\r\n")) != std::string::npos) 
 	{
