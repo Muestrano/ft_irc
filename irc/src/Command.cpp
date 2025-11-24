@@ -49,26 +49,6 @@ void	Command::ft_test(Client* client, Server* server, std::string buffer)
     send(client->getFd(), response.c_str(), response.length(), 0);
 }
 
-/**
- * @brief Sets the CommandMap attribute
-*/
-void Command::set_map(void)
-{
-	CommandMap["TEST"] = &Command::ft_test;
-	CommandMap["PASS"] = &Command::ft_pass_chan;
-	CommandMap["NICK"] = &Command::ft_nick;
-	CommandMap["USER"] = &Command::ft_user;
-	CommandMap["JOIN"] = &Command::ft_join;
-	CommandMap["MODE"] = &Command::ft_mode;
-	CommandMap["TOPIC"] = &Command::ft_topic;
-	CommandMap["INVITE"] = &Command::ft_invite;
-	CommandMap["KICK"] = &Command::ft_kick;
-	CommandMap["PRIVMSG"] = &Command::ft_privmsg;
-	CommandMap["PART"] = &Command::ft_exit;
-	CommandMap["QUIT"] = &Command::ft_quit;
-
-}
-
 // void ft_join(std::string buffer, int client)
 // {
 // }
