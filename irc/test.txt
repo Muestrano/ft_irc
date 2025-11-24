@@ -1,0 +1,5 @@
+* Connecting to 127.0.0.1 (127.0.0.1:6667)
+* Connected. Now logging in.
+* CAP :Unknown command
+* NICK :Unknown command
+* USER :Unknown command

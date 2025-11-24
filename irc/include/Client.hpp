@@ -12,7 +12,9 @@ class Client
 	private:
 		std::string nickName;
 		std::string userName;
-		std::string hostName;
+		std::string realName; // IP client
+		std::string hostName; // IP client
+		std::string passWord; // IP client
 		std::string buffer;
 
 		int clientFd;
@@ -23,7 +25,7 @@ class Client
 		std::string getNickName() const;
 		std::string getUser() const;
 		std::string getHostname() const;
-		std::string getBuffer() const;
+		std::string& getBuffer();
 		int getFd() const;
 
 

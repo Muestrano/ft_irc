@@ -76,7 +76,7 @@ void	Command::ft_test(Client* client, Server* server, std::string buffer)
 */
 void Command::extractCompleteCommand(Client* client, Server* server)
 {
-	std::string buffer = client->getBuffer();
+	std::string& buffer = client->getBuffer();
 	
 	size_t pos;
 	while ((pos = buffer.find("\r\n")) != std::string::npos) 
@@ -85,19 +85,30 @@ void Command::extractCompleteCommand(Client* client, Server* server)
 		buffer.erase(0, pos + 2); // Supp \r\n for the next  command        
 		prepareCommand(client, server, line);
 	}
+	buffer.erase(0, pos + 2);
 }
 
-std::string Command::codeToString(int value)
-{
-    std::stringstream ss;
-    ss << value;
-    return ss.str();
-}
+// std::string Command::codeToString(int value)
+// {
+//     std::stringstream ss;
+//     ss << value;
+//     return ss.str();
+// }
 
 void Command::sendError(Client* client, int codeError, const std::string& command)
 {
-	 std::string error = ":localhost " + codeToString(codeError) + " " + client->getNickName() + " " + command + ":unknow command\r\n";
-    send(client->getFd(), error.c_str(), error.length(), 0);
+	 std::string nickname = client->getNickName();
+    if (nickname.empty()) {
+        nickname = "*";  // Si le client n'a pas encore de nickname
+    }
+    
+    std::stringstream error;
+    error << ":localhost " << codeError << " " << nickname;
+    error << " " << command << " :Unknown command\r\n";
+    
+    // AJOUTEZ CE LOG POUR DEBUG
+	std::string stringError = error.str();
+    send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
 
 
@@ -111,7 +122,8 @@ void Command::prepareCommand(Client* client, Server* server, std::string line)
 	std::string command;
 	ss >> command;
 
-	// upper conversion case-intensive command
+	std::cout << "line received: '" << line << "'" << std::endl;
+	// upper conversion command
 	std::transform(command.begin(), command.end(), command.begin(), ::toupper);
 
 	std::string param;
@@ -128,7 +140,9 @@ void Command::prepareCommand(Client* client, Server* server, std::string line)
 		// !!!!!!!!!
 	}
 	else
+	{
 		sendError(client, 421, command); // to do
+	}
 
 
 }

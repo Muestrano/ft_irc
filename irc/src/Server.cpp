@@ -53,6 +53,14 @@ void Server::initServer()
 		std::cerr << "Error: problem when creating socket" << std::endl;
 
 	fcntl(this->socketFd, F_SETFL, O_NONBLOCK);
+	// ----------TEMP potentialy rm this part if we handle signal--------------
+	int reuse = 1;
+    if (setsockopt(this->socketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+        std::cerr << "Error setsockopt(SO_REUSEADDR): " << std::endl;
+        close(this->socketFd);
+        exit(1);
+    }
+	// ----------TEMP potentialy rm this part if we handle signal--------------
 
 	this->serverAddr.sin_family = AF_INET;
 	this->serverAddr.sin_port = htons(this->port);
@@ -105,14 +113,16 @@ void Server::handleClientData(int i)
 	Client* client(this->clients[clientFd]);
 	char buffer[1024];
 
-
+	// std::cout << "🔍 [RECV] Client " << pollFd[i].fd << std::endl;
 	ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
 	if (bytesRead > 0)
 	{
+		std::cout << "received " << bytesRead << " bytes" << std::endl;
 		buffer[bytesRead] = '\0';
 		// std::cout << "data client " << clientFd << ": '" << buffer << "'" << std::endl;
 		client->setBuffer(buffer);
 		Command::extractCompleteCommand(client, this);
+		// client->clearbuff()
 		// add data to client buff
 		// parse the command (end by \r\n)
 		// addDataClient(clientFd, buffer, bytesRead);
@@ -154,6 +164,11 @@ void Server::newConnection()
 		this->pollFd.push_back(newPollFd);
 		std::cout << "new client connected: " << clientFd << std::endl;
 	}
+	else
+	{
+		  if (errno != EAGAIN && errno != EWOULDBLOCK)
+          std::cerr << "Erreur accept(): " << std::endl;
+	}
 }
 /**
  * 
@@ -172,13 +187,13 @@ void Server::startServer()
 				if (pollFd[i].revents == 0)
 					continue;
 				// if (pollFd[i].revents & POLLIN)
-				if (pollFd[i].revents & POLLIN && pollFd[i].fd == socketFd)
+				if (/*pollFd[i].revents & POLLIN && */pollFd[i].fd == socketFd)
 				{
 					newConnection();
 					// if (pollFd[i].fd == socketFd) // new connection
 					// else // data from an other client
 				}
-				else if (pollFd[i].revents & POLLIN)
+				else/* if (pollFd[i].revents & POLLIN)*/
 					handleClientData(i);
 
 				// chef if the socket is ready to send

@@ -17,9 +17,9 @@ Client::Client(int fd) : clientFd(fd)
 
 
 // setter
-void Client::setBuffer(const std::string& Buffer)
+void Client::setBuffer(const std::string& appendBuffer)
 {
-	this->buffer = Buffer;
+	this->buffer += appendBuffer;
 }
 void Client::setNickName(const std::string &nick)
 {
@@ -47,7 +47,7 @@ std::string Client::getHostname() const
 	return (this->hostName);
 }
 
-std::string Client::getBuffer() const
+std::string& Client::getBuffer()
 {
 	return (this->buffer);
 }
