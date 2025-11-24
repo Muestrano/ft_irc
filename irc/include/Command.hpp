@@ -3,6 +3,15 @@
 
 #include "include.hpp"
 
+#define ERR_UNKNOWNCOMMAND "421"
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// What do you whant pierre, cammand associate directly by Server class or non instanciable class funtion with 
+	// command function to access in another cpp file ?
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 /*
 Forme canonique :
         T (); // Constructeur par défaut
@@ -10,6 +19,9 @@ Forme canonique :
         ~T (); // Destructeur éventuellement virtuel
         T &operator=(const T&); // Operator d'affectation
 */
+
+class Client;
+class Server;
 
 class Command
 {
@@ -27,10 +39,15 @@ class Command
 	Command& operator=(const Command&);
 
 	//Methods to handle commands
-	void	ft_redirect_buffer(std::string buffer, int client);
+
+	void extractCompleteCommand(Client* client, Server* server);
+	void prepareCommand(Client* client, Server* server, std::string line);
+	void sendError(Client* client, int codeError, const std::string& message);
+	std::string codeToString(int value);
 	void	set_map(void);
 
 	// void	ft_pass_serv(std::string buffer, int client); ???????
+	void	ft_test(Client* client, Server* server, std::string buffer);
 	void	ft_pass_chan(std::string buffer, int client);
 	void	ft_nick(std::string buffer, int client);
 	void	ft_user(std::string buffer, int client);
