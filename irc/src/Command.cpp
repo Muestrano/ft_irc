@@ -29,7 +29,7 @@ Command& Command::operator=(const Command& c)
 void Command::set_map(void)
 {
 	CommandMap["TEST"] = &Command::ft_test;
-	// CommandMap["PASS"] = &Command::ft_pass_chan;
+	CommandMap["PASS"] = &Command::ft_pass_serv;
 	// CommandMap["NICK"] = &Command::ft_nick;
 	// CommandMap["USER"] = &Command::ft_user;
 	// CommandMap["JOIN"] = &Command::ft_join;

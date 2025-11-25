@@ -40,7 +40,7 @@ class Command
 	std::string codeToString(int value);
 	void	set_map(void);
 
-	// void	ft_pass_serv(std::string buffer, int client); ???????
+	void	ft_pass_serv(std::string buffer, int client);
 	void	ft_test(Client* client, std::string buffer);
 	// void	ft_pass_chan(Client* client, std::string buffer);
 	// void	ft_nick(Client* client, std::string buffer);
