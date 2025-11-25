@@ -6,19 +6,23 @@
 	For handle non blocking we can put data into buffer
 */
 
-Client::Client() : isRegistered(false)
+Client::Client() : isAuthenticated(false), isRegistered(false)
 {
 }
-Client::Client(int fd) : clientFd(fd), Pass(false), Nick(false), User(false), isRegistered(false)
+
+Client::Client(int fd) : isAuthenticated(false), Nick(false), User(false), isRegistered(false), clientFd(fd)
 {
 }
-// Client::~Client()
-// {
-// 	delete Client;
-// }
+
+ Client::~Client()
+ {
+	// TODO : Define if usefull
+ 	//delete Client;
+ }
 
 
-// setter
+// Setters
+
 void Client::setBuffer(const std::string& appendBuffer)
 {
 	this->buffer += appendBuffer;
@@ -35,7 +39,14 @@ void Client::setHostname(const std::string& hostname)
 {
 	this->hostName = hostname;
 }
-// getter
+
+void Client::setIsAuthenticated(bool authenticated)
+{
+	this->isAuthenticated = authenticated;
+}
+
+// Getters
+
 std::string Client::getNickName() const
 {
 	return (this->nickName);
@@ -56,4 +67,9 @@ std::string& Client::getBuffer()
 int Client::getFd() const
 {
 	return (this->clientFd);
+}
+
+bool Client::getIsAuthenticated() const
+{
+	return (this->isAuthenticated);
 }

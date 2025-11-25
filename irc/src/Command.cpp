@@ -48,11 +48,11 @@ void	Command::test(Client* client, std::string buffer)
     send(client->getFd(), response.c_str(), response.length(), 0);
 }
 
-void	pass_serv(Client* client, std::string buffer)
+void	Command::pass_serv(Client* client, std::string buffer)
 {
-	if (buffer == "" || buffer != )
-		//TODO deconnection;
-	
+	// TODO logic pass
+	(void)client;
+	(void)buffer;
 }
 
 /**

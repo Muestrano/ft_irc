@@ -3,7 +3,6 @@
 
 #include "include.hpp"
 
-#define ERR_UNKNOWNCOMMAND "421"
 
 /*
 Forme canonique :
@@ -20,9 +19,9 @@ class Command
 {
 	private :
 
-	typedef void (Command::*FtCommand)(Client* client, std::string buffer);
-    std::map<std::string, FtCommand> CommandMap;
-	Server*	server;
+		typedef void (Command::*FtCommand)(Client* client, std::string buffer);
+		std::map<std::string, FtCommand> CommandMap;
+		Server*	server;
 
 	public :
 
@@ -35,11 +34,11 @@ class Command
 
 	//Methods to handle commands
 
-	void extractCompleteCommand(Client* client);
-	void prepareCommand(Client* client, std::string line);
-	void sendError(Client* client, int codeError, const std::string& message);
+	void 		extractCompleteCommand(Client* client);
+	void 		prepareCommand(Client* client, std::string line);
+	void 		sendError(Client* client, int codeError, const std::string& message);
 	std::string codeToString(int value);
-	void	set_map(void);
+	void		set_map(void);
 
 	void	test(Client* client, std::string buffer);
 	void	pass_serv(Client* client, std::string buffer);

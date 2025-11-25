@@ -23,6 +23,10 @@
 #include "Command.hpp"
 #include "Server.hpp"
 
+#define ERR_UNKNOWNCOMMAND "421"
+#define ERR_NEEDMOREPARAMS "461"
+#define ERR_ALREADYREGISTERED "462"
+#define ERR_PASSWDMISMATCH "464"
 
 class Commands;
 

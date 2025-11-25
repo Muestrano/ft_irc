@@ -10,6 +10,7 @@ class Client;
 class Server
 {
 	private:
+
 		int 		socketFd;
 		int 		port;
 		std::string password;
@@ -19,7 +20,9 @@ class Server
     	// std::map<std::string, Channel*> channels; TODO
 
 		struct sockaddr_in serverAddr;
+	
 	public:
+
 		Server(int port, std::string password);
 		~Server();
 	
@@ -31,7 +34,7 @@ class Server
 		void startServer();
 		void newConnection();
 		void handleClientData(int i);
-		void disconnectClient(int i);	
+		void disconnectClient(int i);
 };
 
 
