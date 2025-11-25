@@ -13,8 +13,7 @@ class Server
 		int 		socketFd;
 		int 		port;
 		std::string password;
-
-
+		Command	cmd;
 		std::vector<struct pollfd> pollFd;
 		std::map<int, Client*> clients;  // FD -> Client
     	// std::map<std::string, Channel*> channels; TODO
