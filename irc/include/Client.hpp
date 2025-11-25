@@ -13,7 +13,7 @@ class Client
 		std::string passWord;
 		std::string buffer;
 
-		int clientFd;
+		int 		clientFd;
 
 	public:
 		Client(int fd);

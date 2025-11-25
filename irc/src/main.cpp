@@ -83,3 +83,5 @@ Try to send msg with hexchat
 
 
 */
+
+// Afficher toutes les connexions TCP/UDP	netstat -tuln
