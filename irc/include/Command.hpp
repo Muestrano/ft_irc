@@ -3,8 +3,6 @@
 
 #include "include.hpp"
 
-#define ERR_UNKNOWNCOMMAND "421"
-
 /*
 Forme canonique :
         T (); // Constructeur par défaut
@@ -42,10 +40,10 @@ class Command
 	void	set_map(void);
 
 	void	test(Client* client, std::string buffer);
-	void	pass_serv(Client* client, std::string buffer);
+	// void	pass_serv(Client* client, std::string buffer);
 	// void	pass_chan(Client* client, std::string buffer);
 	void	nick(Client* client, std::string buffer);
-	void	user(Client* client, std::string buffer);
+	// void	user(Client* client, std::string buffer);
 	// void	join(Client* client, std::string buffer);
 	// void	mode(Client* client, std::string buffer);
 	// void	topic(Client* client, std::string buffer);

@@ -30,7 +30,7 @@ void Command::set_map(void)
 {
 	CommandMap["TEST"] = &Command::test;
 	// CommandMap["PASS"] = &Command::pass_serv;
-	// CommandMap["NICK"] = &Command::nick;
+	CommandMap["NICK"] = &Command::nick;
 	// CommandMap["USER"] = &Command::user;
 	// CommandMap["JOIN"] = &Command::join;
 	// CommandMap["MODE"] = &Command::mode;
@@ -55,11 +55,13 @@ void	Command::test(Client* client, std::string buffer)
 	
 // }
 
-// void nick(Client* client, std::string buffer)
-// {
-// 	if (!(client->getPass()))
+void nick(Client* client, std::string buffer)
+{
+	if (buffer.empty())
+		
+	client->setNickName(buffer);
+}
 
-// }
 // void user(Client* client, std::string buffer)
 // {
 
