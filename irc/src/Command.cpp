@@ -53,7 +53,6 @@ void	Command::ft_test(Client* client, Server* server, std::string buffer)
 // {
 // }
 
-// }
 /**
  * @brief Extract all command to pass it in the handler command
  * @param buffer Input from the client
