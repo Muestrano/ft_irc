@@ -22,6 +22,7 @@ class Command
 
 	typedef void (Command::*FtCommand)(Client* client, std::string buffer);
     std::map<std::string, FtCommand> CommandMap;
+	Server*	server;
 
 	public :
 
@@ -40,19 +41,19 @@ class Command
 	std::string codeToString(int value);
 	void	set_map(void);
 
-	// void	ft_pass_serv(std::string buffer, int client); ???????
-	void	ft_test(Client* client, std::string buffer);
-	// void	ft_pass_chan(Client* client, std::string buffer);
-	// void	ft_nick(Client* client, std::string buffer);
-	// void	ft_user(Client* client, std::string buffer);
-	// void	ft_join(Client* client, std::string buffer);
-	// void	ft_mode(Client* client, std::string buffer);
-	// void	ft_topic(Client* client, std::string buffer);
-	// void	ft_invite(Client* client, std::string buffer);
-	// void	ft_kick(Client* client, std::string buffer);
-	// void	ft_privmsg(Client* client, std::string buffer);
-	// void	ft_exit(Client* client, std::string buffer);
-	// void	ft_quit(Client* client, std::string buffer);
+	void	test(Client* client, std::string buffer);
+	void	pass_serv(Client* client, std::string buffer);
+	// void	pass_chan(Client* client, std::string buffer);
+	// void	nick(Client* client, std::string buffer);
+	// void	user(Client* client, std::string buffer);
+	// void	join(Client* client, std::string buffer);
+	// void	mode(Client* client, std::string buffer);
+	// void	topic(Client* client, std::string buffer);
+	// void	invite(Client* client, std::string buffer);
+	// void	kick(Client* client, std::string buffer);
+	// void	privmsg(Client* client, std::string buffer);
+	// void	exit(Client* client, std::string buffer);
+	// void	quit(Client* client, std::string buffer);
 
 /*
 	// /PASS <password>\

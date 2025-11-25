@@ -28,29 +28,32 @@ Command& Command::operator=(const Command& c)
 */
 void Command::set_map(void)
 {
-	CommandMap["TEST"] = &Command::ft_test;
-	// CommandMap["PASS"] = &Command::ft_pass_chan;
-	// CommandMap["NICK"] = &Command::ft_nick;
-	// CommandMap["USER"] = &Command::ft_user;
-	// CommandMap["JOIN"] = &Command::ft_join;
-	// CommandMap["MODE"] = &Command::ft_mode;
-	// CommandMap["TOPIC"] = &Command::ft_topic;
-	// CommandMap["INVITE"] = &Command::ft_invite;
-	// CommandMap["KICK"] = &Command::ft_kick;
-	// CommandMap["PRIVMSG"] = &Command::ft_privmsg;
-	// CommandMap["PART"] = &Command::ft_exit;
-	// CommandMap["QUIT"] = &Command::ft_quit;
+	CommandMap["TEST"] = &Command::test;
+	CommandMap["PASS"] = &Command::pass_serv;
+	// CommandMap["NICK"] = &Command::nick;
+	// CommandMap["USER"] = &Command::user;
+	// CommandMap["JOIN"] = &Command::join;
+	// CommandMap["MODE"] = &Command::mode;
+	// CommandMap["TOPIC"] = &Command::topic;
+	// CommandMap["INVITE"] = &Command::invite;
+	// CommandMap["KICK"] = &Command::kick;
+	// CommandMap["PRIVMSG"] = &Command::privmsg;
+	// CommandMap["PART"] = &Command::exit;
+	// CommandMap["QUIT"] = &Command::quit;
 
 }
-void	Command::ft_test(Client* client, std::string buffer)
+void	Command::test(Client* client, std::string buffer)
 {
     std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
     send(client->getFd(), response.c_str(), response.length(), 0);
 }
 
-// void ft_join(std::string buffer, int client)
-// {
-// }
+void	pass_serv(Client* client, std::string buffer)
+{
+	if (buffer == "" || buffer != )
+		//TODO deconnection;
+	
+}
 
 /**
  * @brief Extract all command to pass it in the handler command
