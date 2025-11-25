@@ -13,14 +13,12 @@ class Client
 		std::string passWord;
 		std::string buffer;
 		bool	Pass;
-		bool	Nick;
-		bool	User;
 		bool	isRegistered; // Pass -> Nick -> User
 
 		int 		clientFd;
 
 	public:
-		Client::Client();
+		Client();
 		Client(int fd);
 		// ~Client();
 		std::string getNickName() const;
@@ -28,6 +26,8 @@ class Client
 		std::string getHostname() const;
 		std::string& getBuffer();
 		int getFd() const;
+		bool getPass() const;
+		bool getIsRegistered() const;
 
 
 		void setNickName(const std::string& nick);

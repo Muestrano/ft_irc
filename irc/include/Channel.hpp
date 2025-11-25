@@ -6,11 +6,11 @@
 class Channel
 {
 	private:
-		unsigned int 	limitMember;
-		unsigned int 	nbMember;
-		std::string 	topic;
-		std::string 	password;
-		bool			isOperator;
+		// unsigned int 	limitMember;
+		// unsigned int 	nbMember;
+		// std::string 	topic;
+		// std::string 	password;
+		// bool			isOperator;
 
 		// std::vector<Client*> members; //brodcast msg
 		// std::map<std::string, Client*> member;
