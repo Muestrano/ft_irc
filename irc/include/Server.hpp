@@ -10,8 +10,8 @@ class Client;
 class Server
 {
 	private:
-		int socketFd;
-		int port;
+		int 		socketFd;
+		int 		port;
 		std::string password;
 
 
@@ -23,7 +23,7 @@ class Server
 	public:
 		Server(int port, std::string password);
 		~Server();
-
+	
 
 
 		void initServer();
