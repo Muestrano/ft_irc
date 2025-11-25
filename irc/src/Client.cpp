@@ -36,7 +36,7 @@ void Client::setHostname(const std::string& hostname)
 // getter
 std::string Client::getNickName() const
 {
-	return (this->hostName);
+	return (this->nickName);
 }
 std::string Client::getUser() const
 {
