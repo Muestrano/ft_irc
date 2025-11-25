@@ -42,9 +42,8 @@ void Command::set_map(void)
 	// CommandMap["QUIT"] = &Command::ft_quit;
 
 }
-void	Command::ft_test(Client* client, Server* server, std::string buffer)
+void	Command::ft_test(Client* client, std::string buffer)
 {
-	(void)server;
     std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
     send(client->getFd(), response.c_str(), response.length(), 0);
 }
@@ -58,7 +57,7 @@ void	Command::ft_test(Client* client, Server* server, std::string buffer)
  * @param buffer Input from the client
  * @param client Client's fd 
 */
-void Command::extractCompleteCommand(Client* client, Server* server)
+void Command::extractCompleteCommand(Client* client)
 {
 	std::string& buffer = client->getBuffer();
 
@@ -67,7 +66,7 @@ void Command::extractCompleteCommand(Client* client, Server* server)
 	{
 		std::string line = buffer.substr(0, pos);
 		buffer.erase(0, pos + 2); // Supp \r\n for the next  command        
-		prepareCommand(client, server, line);
+		prepareCommand(client, line);
 	}
 	buffer.erase(0, pos + 2);
 }
@@ -97,7 +96,7 @@ void Command::sendError(Client* client, int codeError, const std::string& comman
  * @brief extract the command and params to handle it
 */
 // this function don't handle the different name of command
-void Command::prepareCommand(Client* client, Server* server, std::string line)
+void Command::prepareCommand(Client* client, std::string line)
 {
 	std::istringstream ss(line);
 	std::string command;
@@ -114,7 +113,7 @@ void Command::prepareCommand(Client* client, Server* server, std::string line)
 	if (CommandMap.find(command) != CommandMap.end())
 	{
 		FtCommand funcMap = CommandMap[command]; // std::map<std::string, FtCommand> CommandMap;
-		(this->*funcMap)(client, server, param); 
+		(this->*funcMap)(client, param); 
 	}
 	else
 	{

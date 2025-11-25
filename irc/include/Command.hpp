@@ -20,7 +20,7 @@ class Command
 {
 	private :
 
-	typedef void (Command::*FtCommand)(Client* client, Server* server, std::string buffer);
+	typedef void (Command::*FtCommand)(Client* client, std::string buffer);
     std::map<std::string, FtCommand> CommandMap;
 
 	public :
@@ -34,27 +34,27 @@ class Command
 
 	//Methods to handle commands
 
-	void extractCompleteCommand(Client* client, Server* server);
-	void prepareCommand(Client* client, Server* server, std::string line);
+	void extractCompleteCommand(Client* client);
+	void prepareCommand(Client* client, std::string line);
 	void sendError(Client* client, int codeError, const std::string& message);
 	std::string codeToString(int value);
 	void	set_map(void);
 
 	// void	ft_pass_serv(std::string buffer, int client); ???????
-	void	ft_test(Client* client, Server* server, std::string buffer);
-	// void	ft_pass_chan(Client* client, Server* server, std::string buffer);
-	// void	ft_nick(Client* client, Server* server, std::string buffer);
-	// void	ft_user(Client* client, Server* server, std::string buffer);
-	// void	ft_join(Client* client, Server* server, std::string buffer);
-	// void	ft_mode(Client* client, Server* server, std::string buffer);
-	// void	ft_topic(Client* client, Server* server, std::string buffer);
-	// void	ft_invite(Client* client, Server* server, std::string buffer);
-	// void	ft_kick(Client* client, Server* server, std::string buffer);
-	// void	ft_privmsg(Client* client, Server* server, std::string buffer);
-	// void	ft_exit(Client* client, Server* server, std::string buffer);
-	// void	ft_quit(Client* client, Server* server, std::string buffer);
+	void	ft_test(Client* client, std::string buffer);
+	// void	ft_pass_chan(Client* client, std::string buffer);
+	// void	ft_nick(Client* client, std::string buffer);
+	// void	ft_user(Client* client, std::string buffer);
+	// void	ft_join(Client* client, std::string buffer);
+	// void	ft_mode(Client* client, std::string buffer);
+	// void	ft_topic(Client* client, std::string buffer);
+	// void	ft_invite(Client* client, std::string buffer);
+	// void	ft_kick(Client* client, std::string buffer);
+	// void	ft_privmsg(Client* client, std::string buffer);
+	// void	ft_exit(Client* client, std::string buffer);
+	// void	ft_quit(Client* client, std::string buffer);
 
-
+/*
 	// /PASS <password>\
 	// /NICK <nickname>\
 	// /USER <username> <hostname> <servername> <realname>\
@@ -66,6 +66,7 @@ class Command
 	// /PRIVMSG <nickname> <message>\
 	// /PART <#channel>\
 	// /QUIT <message>\n";
+*/
 };
 
 #endif

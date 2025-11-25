@@ -120,7 +120,7 @@ void Server::handleClientData(int i)
 		// std::cout << "data client " << clientFd << ": '" << buffer << "'" << std::endl;
 		client->setBuffer(buffer);
 		Command commandObj;
-		commandObj.extractCompleteCommand(client, this);
+		commandObj.extractCompleteCommand(client);
 		// client->clearbuff() // TODO need to see if it's necessary
 	}
 	else if (bytesRead == 0)
