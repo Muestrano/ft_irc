@@ -16,7 +16,7 @@ Client::Client(int fd) : isAuthenticated(false), Nick(false), User(false), isReg
 
  Client::~Client()
  {
-	// TODO : Define if usefull
+	// TODO : Define if the delete is usefull 
  	//delete Client;
  }
 

@@ -11,14 +11,15 @@ Server::Server(int port, std::string pass)
 	this->port = port;
 	this->password = pass;
 }
+
 Server::~Server()
 {
-    for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
-        delete it->second; // delete each Client
-    clients.clear();
-    
-    if (socketFd >= 0)
-        close(socketFd);
+	for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
+		delete it->second; // delete each Client
+	clients.clear();
+	
+	if (socketFd >= 0)
+		close(socketFd);
 }
 
 
@@ -55,11 +56,11 @@ void Server::initServer()
 	fcntl(this->socketFd, F_SETFL, O_NONBLOCK);
 	// ----------TEMP potentialy rm this part if we handle signal--------------
 	int reuse = 1;
-    if (setsockopt(this->socketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
-        std::cerr << "Error setsockopt(SO_REUSEADDR): " << std::endl;
-        close(this->socketFd);
-        exit(1);
-    }
+	if (setsockopt(this->socketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+		std::cerr << "Error setsockopt(SO_REUSEADDR): " << std::endl;
+		close(this->socketFd);
+		exit(1);
+	}
 	// ----------TEMP potentialy rm this part if we handle signal--------------
 
 	this->serverAddr.sin_family = AF_INET;
@@ -88,12 +89,12 @@ void Server::disconnectClient(int i)
 	std::cout << "client disconnect: " << clientFd << std::endl;
 	if (clients.find(clientFd) != clients.end()) 
 	{
-        delete clients[clientFd];    // free client
-        clients.erase(clientFd);     // clean map
-    }
-    
-    close(clientFd);
-    pollFd.erase(pollFd.begin() + i);
+		delete clients[clientFd];    // free client
+		clients.erase(clientFd);     // clean map
+	}
+	
+	close(clientFd);
+	pollFd.erase(pollFd.begin() + i);
 
 }
 
@@ -150,7 +151,7 @@ void Server::newConnection()
 	if (clientFd >= 0)
 	{
 		Client* newClient = new Client(clientFd);
-        this->clients[clientFd] = newClient;
+		this->clients[clientFd] = newClient;
 		fcntl(clientFd, F_SETFL, O_NONBLOCK);
 		struct pollfd newPollFd; // to push it in the vector pollFd and we aren't limits by number of user
 		newPollFd.fd = clientFd;
@@ -163,7 +164,7 @@ void Server::newConnection()
 	else
 	{
 		  if (errno != EAGAIN && errno != EWOULDBLOCK)
-          std::cerr << "Erreur accept(): " << std::endl;
+		  std::cerr << "Erreur accept(): " << std::endl;
 	}
 }
 /**
