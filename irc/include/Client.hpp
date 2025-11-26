@@ -12,15 +12,15 @@ class Client
 		std::string hostName; // IP client
 		std::string passWord;
 		std::string buffer;
-		bool	Pass;
-		bool	Nick;
-		bool	User;
-		bool	isRegistered; // Pass -> Nick -> User
+		// bool	Pass;
+		// bool	Nick;		
+		// bool	User;
+		// bool	isRegistered; // Pass -> Nick -> User
 
 		int 		clientFd;
 
 	public:
-		Client::Client();
+		Client();
 		Client(int fd);
 		// ~Client();
 		std::string getNickName() const;

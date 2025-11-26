@@ -42,7 +42,7 @@ class Command
 	void	set_map(void);
 
 	void	test(Client* client, std::string buffer);
-	void	pass_serv(Client* client, std::string buffer);
+	// void	pass_serv(Client* client, std::string buffer);
 	// void	pass_chan(Client* client, std::string buffer);
 	// void	nick(Client* client, std::string buffer);
 	// void	user(Client* client, std::string buffer);

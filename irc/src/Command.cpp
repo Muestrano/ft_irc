@@ -29,7 +29,7 @@ Command& Command::operator=(const Command& c)
 void Command::set_map(void)
 {
 	CommandMap["TEST"] = &Command::test;
-	CommandMap["PASS"] = &Command::pass_serv;
+	// CommandMap["PASS"] = &Command::pass_serv;
 	// CommandMap["NICK"] = &Command::nick;
 	// CommandMap["USER"] = &Command::user;
 	// CommandMap["JOIN"] = &Command::join;
@@ -48,12 +48,12 @@ void	Command::test(Client* client, std::string buffer)
     send(client->getFd(), response.c_str(), response.length(), 0);
 }
 
-void	pass_serv(Client* client, std::string buffer)
-{
-	if (buffer == "" || buffer != )
-		//TODO deconnection;
+// void	pass_serv(Client* client, std::string buffer)
+// {
+// 	if (buffer == "" || buffer != )
+// 		//TODO deconnection;
 	
-}
+// }
 
 /**
  * @brief Extract all command to pass it in the handler command
