@@ -3,13 +3,18 @@
 
 #include "include.hpp"
 
-/*
-Forme canonique :
-        T (); // Constructeur par défaut
-        T (const T&); // Constructeur de recopie
-        ~T (); // Destructeur éventuellement virtuel
-        T &operator=(const T&); // Operator d'affectation
-*/
+#define USERLEN = 18
+
+enum ErrorCode {
+    // ERR_UNKNOWNCOMMAND = 421,
+    ERR_NONICKNAMEGIVEN = 431,
+    ERR_ERRONEUSNICKNAME = 432,
+    ERR_NICKNAMEINUSE = 433,
+	ERR_TARGETLEO = 436,
+	ERR_TARGETESTEBAN = 437,
+	ERR_NEEDMOREPARAMS = 461,
+	ERR_ALREADYREGISTERED = 462,
+};
 
 class Client;
 class Server;
@@ -38,12 +43,13 @@ class Command
 	void sendError(Client* client, int codeError, const std::string& message);
 	std::string codeToString(int value);
 	void	set_map(void);
+	void sendErrorCode(Client* client, ErrorCode errorCode, std::string errorMsg);
 
 	void	test(Client* client, std::string buffer);
 	// void	pass_serv(Client* client, std::string buffer);
 	// void	pass_chan(Client* client, std::string buffer);
 	void	nick(Client* client, std::string buffer);
-	// void	user(Client* client, std::string buffer);
+	void	user(Client* client, std::string buffer);
 	// void	join(Client* client, std::string buffer);
 	// void	mode(Client* client, std::string buffer);
 	// void	topic(Client* client, std::string buffer);

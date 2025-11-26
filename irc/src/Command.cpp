@@ -31,7 +31,7 @@ void Command::set_map(void)
 	CommandMap["TEST"] = &Command::test;
 	// CommandMap["PASS"] = &Command::pass_serv;
 	CommandMap["NICK"] = &Command::nick;
-	// CommandMap["USER"] = &Command::user;
+	CommandMap["USER"] = &Command::user;
 	// CommandMap["JOIN"] = &Command::join;
 	// CommandMap["MODE"] = &Command::mode;
 	// CommandMap["TOPIC"] = &Command::topic;
@@ -48,24 +48,112 @@ void	Command::test(Client* client, std::string buffer)
     send(client->getFd(), response.c_str(), response.length(), 0);
 }
 
-// void	pass_serv(Client* client, std::string buffer)
-// {
-// 	if (buffer == "" || buffer != )
-// 		//TODO deconnection;
-	
-// }
-
-void nick(Client* client, std::string buffer)
+void Command::sendError(Client* client, int codeError, const std::string& command)
 {
+	 std::string nickname = client->getNickName();
+    if (nickname.empty())
+        nickname = "*";
+    
+    std::stringstream error;
+    error << ":localhost " << codeError << " " << nickname;
+    error << " " << command << " :Unknown command\r\n";
+    
+	std::string stringError = error.str();
+    send(client->getFd(), stringError.c_str(), stringError.length(), 0);
+}
+void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string errorMsg)
+{
+	std::string nickname = client->getNickName();
+    if (nickname.empty())
+        nickname = "*";
+    std::stringstream error;
+    error << ":localhost " << "Error " << errorCode << " : ";
+	switch (errorCode)
+	{
+	// case 421:
+	// 	error << "Unknown command.";
+	case 431:
+		error << "Nickname is empty.";
+		break;
+	case 432:
+		error << "The first character of your nickname cannot be \"#\" neither \":\". You can't have space character in your nickname.";
+		break;
+	case 433:
+		error << "This nickname is already registered.";
+		break;
+	case 436:
+		error << "Leo has been pre-shot. Try again bro!";
+		break;
+	case 437:
+		error << "Congrats Esteban! All test passed! 🫡";
+		break;
+	case 461:
+		error << "This command needs more parameters.";
+		break;
+	case 462:
+		error << "You already registered your user name.";
+		break;
+	default:
+		break;
+	}
+	error << errorMsg << std::endl;
+	std::string stringError = error.str();
+    send(client->getFd(), stringError.c_str(), stringError.length(), 0);
+}
+
+void Command::nick(Client* client, std::string buffer)
+{
+	std::string	error;
 	if (buffer.empty())
-		
+	{
+		sendErrorCode(client, ERR_NONICKNAMEGIVEN, "");
+		return ;
+	}
+	else if (buffer == client->getNickName())
+	{
+		sendErrorCode(client, ERR_NICKNAMEINUSE, "");
+		return ;
+	}
+	else if (buffer[0] == '#' || buffer[0] == ':' || buffer.find(" ") != std::string::npos)
+	{
+		sendErrorCode(client, ERR_ERRONEUSNICKNAME, "");
+		return ;
+	}
+	else if (buffer.find("zboub") != std::string::npos
+			|| buffer.find("zgeg") != std::string::npos
+				|| buffer.find("goumer")!= std::string::npos)
+	{
+		sendErrorCode(client, ERR_TARGETLEO, "");
+		return ;
+	}
+	else if (buffer == "test" || buffer == "Test" || buffer == "TEST")
+	{
+		sendErrorCode(client, ERR_TARGETESTEBAN, "");
+		return ;
+	}
+	std::string message = client->getNickName() + " changed his nickname to " + buffer + ".\r\n";
+	send(client->getFd(), message.c_str(), message.length(), 0);
 	client->setNickName(buffer);
 }
 
-// void user(Client* client, std::string buffer)
-// {
 
-// }
+void Command::user(Client* client, std::string buffer)
+{
+	std::string	error;
+	if (buffer.empty() || buffer.find("0 * ") == std::string::npos) //rajouter ou pas de realname, find 0 * a changer
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, " Synthax : /USER <username> 0 * <realname>");
+		return ;
+	}
+	else if (!(client->getNickName().empty()))
+	{
+		sendErrorCode(client, ERR_ALREADYREGISTERED, "");
+		return ;
+	}
+	client->setUser(buffer);
+	std::string message = client->getUser() + " set his username to " + buffer + ".\r\n";
+	send(client->getFd(), message.c_str(), message.length(), 0);
+}
 
 /**
  * @brief Extract all command to pass it in the handler command
@@ -92,20 +180,6 @@ void Command::extractCompleteCommand(Client* client)
 //     ss << value;
 //     return ss.str();
 // }
-
-void Command::sendError(Client* client, int codeError, const std::string& command)
-{
-	 std::string nickname = client->getNickName();
-    if (nickname.empty())
-        nickname = "*";
-    
-    std::stringstream error;
-    error << ":localhost " << codeError << " " << nickname;
-    error << " " << command << " :Unknown command\r\n";
-    
-	std::string stringError = error.str();
-    send(client->getFd(), stringError.c_str(), stringError.length(), 0);
-}
 
 /**
  * @brief extract the command and params to handle it
