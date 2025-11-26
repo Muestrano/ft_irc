@@ -15,6 +15,7 @@ Forme canonique :
 
 class Client;
 class Server;
+class Channel;
 
 class Command
 {

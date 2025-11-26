@@ -10,15 +10,18 @@ class Channel
 		unsigned int 	nbMember;
 		std::string 	topic;
 		std::string 	password;
-		bool			isOperator;
+		std::string name;
 
 		// std::vector<Client*> members; //brodcast msg
-		// std::map<std::string, Client*> member; string => Nickname, client
-		// std::map<std::string, Client*> operators;
-		// std::map<std::string, Client*> invited; // invite but not inside the canal
+		std::map<std::string, Client*> member; //string => Nickname, client
+		std::map<std::string, Client*> operators;
+		std::map<std::string, Client*> invited; // invite but not inside the canal
 	public:
-		Channel();
+		Channel(std::string name, Client* operator);
 		~Channel();
+
+		void addUser(const std::string, Client* client);
+
 
 
 	

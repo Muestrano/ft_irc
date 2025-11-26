@@ -68,9 +68,10 @@ void	Command::join(Client* client, std::string buffer)
 	std::string out;
 	while (std::getline(channelSS, out, ','))
 	{
-		if (!out.empty() && out[0] == '#')
-			out.erase(0, 1);
-		channelV.push_back(out);
+		// if (!out.empty() && out[0] == '#' || !out.empty() && out[0] == '&')
+		// 	out.erase(0, 1);
+		if (out[0] == '#' || out[0] == '&')
+			channelV.push_back(out);
 	}
 	
 
@@ -91,28 +92,13 @@ void	Command::join(Client* client, std::string buffer)
 	// if (keyV.size() > channelV.size()) TODO
 	// 	send error
 	// // TODO condition if to compare the channel name with the password with the mode +k
-
-
-	// while (ss >> token)
-	// {
 	// 	// if (chanKey.size() > 2)
 	// 	// 	return error // TODO
-	// 	channel.push_back(token);
-	// }
-	// for (size_t i = 0; i < chanKey.size(); i++)
-	// 	std::cout << "channel: " << chanKey[i] << std::endl;
-	
-	// if (chanKey[0].find('#', 0) != std::string::npos) //erase #
-	// {
-	// 	chanKey[0].erase(0, 1);
-	// 	while (chanKey[0].find('#', 0) != std::string::npos)
-	// 		chanKey[0].erase(chanKey[0].find('#', 0), 1);
-	// 	std::cout << "channel: " << chanKey[0] << std::endl;
 
-	// }
-	// std::string channel = chanKey[0];
-	// if ()
-	
+//   find if channel exist //TODO
+	Channel::addUser(channelV[0], client);
+
+		
 
 
 }
