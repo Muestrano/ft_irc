@@ -13,11 +13,14 @@ class Channel
 		bool			isOperator;
 
 		// std::vector<Client*> members; //brodcast msg
-		// std::map<std::string, Client*> member;
+		// std::map<std::string, Client*> member; string => Nickname, client
 		// std::map<std::string, Client*> operators;
-		// std::map<std::string, Client*> invited; // invite but not in the canal
-		// What kind of container for list operator and member
+		// std::map<std::string, Client*> invited; // invite but not inside the canal
 	public:
+		Channel();
+		~Channel();
+
+
 	
 };
 
@@ -31,6 +34,8 @@ class Channel
 		- First newMember have the welcom msg
 		- other newMember received topic and list member
 		- Creator rest the creator if he quit the Channel ?
+		failed:
+			3 channel need key but 2 key put
 
 
 	QUIT: 
