@@ -12,13 +12,12 @@ Server::Server(int port, std::string pass)
 	this->password = pass;
 	cmd.setServer(this);
 }
-
 Server::~Server()
 {
 	for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
-	delete it->second; // delete each Client
+		delete it->second; // delete each Client
 	clients.clear();
-
+	
 	if (socketFd >= 0)
 		close(socketFd);
 }
@@ -200,6 +199,23 @@ void Server::startServer()
 			// check all events new connection or data give for one client // TODO
 		}
 	}
+}
+
+Channel* Server::findChannel(const std::string name)
+{
+ 	std::cout << "Chanel name: '" << name << "'" << std::endl;
+	std::cout << "channels size: " << channels.size() << std::endl;
+	std::cout << "channels addr: " << &channels << std::endl;
+	
+	std::map<std::string, Channel*>::iterator it = channels.find(name);
+	if (it != channels.end())
+		return it->second;
+	return (NULL);
+}
+
+void Server::addChannel(const std::string name, Channel* channel)
+{
+	channels[name] = channel;
 }
 
 /*

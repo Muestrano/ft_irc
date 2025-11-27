@@ -43,7 +43,7 @@ void Command::set_map(void)
 	CommandMap["PASS"] = &Command::pass_serv;
 	// CommandMap["NICK"] = &Command::nick;
 	// CommandMap["USER"] = &Command::user;
-	// CommandMap["JOIN"] = &Command::join;
+	CommandMap["JOIN"] = &Command::join;
 	// CommandMap["MODE"] = &Command::mode;
 	// CommandMap["TOPIC"] = &Command::topic;
 	// CommandMap["INVITE"] = &Command::invite;
@@ -52,6 +52,65 @@ void Command::set_map(void)
 	// CommandMap["PART"] = &Command::exit;
 	// CommandMap["QUIT"] = &Command::quit;
 
+}
+
+/**
+ * @brief Create new channel if he exist
+ * @param channelV channel name
+ * @param keyV password
+ * 
+*/
+void	Command::join(Client* client, std::string buffer)
+{	
+	std::vector<std::string> channelV;
+	std::vector<std::string> keyV;
+	std::string channelStr;
+	std::string keyStr;
+
+	std::stringstream ss(buffer);
+	ss >> channelStr;
+	if (!ss.eof())
+		ss >> keyStr;
+	std::stringstream channelSS(channelStr);
+	std::string out;
+	while (std::getline(channelSS, out, ','))
+	{
+		// if (!out.empty() && out[0] == '#' || !out.empty() && out[0] == '&') //TEMP
+		// 	out.erase(0, 1);
+		if (out[0] == '#' || out[0] == '&')
+			channelV.push_back(out);
+	}
+	if (!keyStr.empty())
+	{
+		std::stringstream keySS(keyStr);
+		std::string keyS;
+		while (std::getline(keySS, keyS, ','))
+			keyV.push_back(keyS);
+	}
+	
+	for (size_t i = 0; i < channelV.size(); i++)
+		std::cout << "channel: " << channelV[i] << std::endl;
+	for (size_t i = 0; i < keyV.size(); i++)
+		std::cout << "key: " << keyV[i] << std::endl;
+	if (keyV.size() > channelV.size()) //TODO
+		return; // sendError //TODO
+
+	for (size_t i = 0; i < channelV.size(); i++)
+	{
+		std::string channelName = channelV[i];
+		std::string pass;
+		if (i < keyV.size())
+			pass = keyV[i];
+		else
+			pass = "";
+		Channel* channel = server->findChannel(channelName);
+		if (channel == NULL) // Canal don't exist, we create it
+		{
+			channel = new Channel(channelName, client);
+			server->addChannel(channelName, channel);
+		}
+		channel->addUser(pass, client);
+	}
 }
 
 /**

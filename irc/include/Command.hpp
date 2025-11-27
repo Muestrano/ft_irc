@@ -14,6 +14,7 @@ Forme canonique :
 
 class Client;
 class Server;
+class Channel;
 
 class Command
 {
@@ -28,17 +29,19 @@ class Command
 		// Coplien form
 
 		Command();
-		Command(const Command&);
+		Command(const Command& c);
 		~Command();
 		Command& operator=(const Command&);
 
 		// Setters
 
-		void setServer(Server *srv);
+		void setServer(Server *server);
 
-		// Methods to handle commands
+		//Methods to handle commands
+
 
 		void		set_map(void);
+		void		join(Client* client, std::string buffer);
 		void 		extractCompleteCommand(Client* client);
 		void 		prepareCommand(Client* client, std::string line);
 		void 		sendError(Client* client, int codeError, const std::string& message);
@@ -49,7 +52,6 @@ class Command
 		// void	pass_chan(Client* client, std::string buffer);
 		// void	nick(Client* client, std::string buffer);
 		// void	user(Client* client, std::string buffer);
-		// void	join(Client* client, std::string buffer);
 		// void	mode(Client* client, std::string buffer);
 		// void	topic(Client* client, std::string buffer);
 		// void	invite(Client* client, std::string buffer);

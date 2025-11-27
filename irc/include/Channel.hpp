@@ -3,21 +3,29 @@
 
 #include "include.hpp"
 
+class Client;
+
 class Channel
 {
 	private:
-
+		std::string 	name;
+		std::string 	password;
+		std::string 	topic;
 		unsigned int 	limitMember;
 		unsigned int 	nbMember;
-		std::string 	topic;
-		std::string 	password;
-		bool			isOperator;
+		bool			invitedOnly;
 
-		// std::vector<Client*> members; //brodcast msg
-		// std::map<std::string, Client*> member;
-		// std::map<std::string, Client*> operators;
-		// std::map<std::string, Client*> invited; // invite but not in the canal
-		// What kind of container for list operator and member
+		std::map<std::string, Client*> members; //string => Nickname, client
+		std::map<std::string, Client*> operators;
+		std::map<std::string, Client*> invited; // invite but not inside the canal
+	public:
+		Channel(std::string name, Client* clientOp);
+		~Channel();
+
+		void addUser(const std::string, Client* client);
+
+
+
 	
 	public:
 };
@@ -32,6 +40,8 @@ class Channel
 		- First newMember have the welcom msg
 		- other newMember received topic and list member
 		- Creator rest the creator if he quit the Channel ?
+		failed:
+			3 channel need key but 2 key put
 
 
 	QUIT: 
