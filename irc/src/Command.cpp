@@ -40,7 +40,7 @@ void Command::setServer(Server *srv)
 void Command::set_map(void)
 {
 	CommandMap["TEST"] = &Command::test;
-	CommandMap["PASS"] = &Command::pass_serv;
+	// CommandMap["PASS"] = &Command::pass_serv;
 	// CommandMap["NICK"] = &Command::nick;
 	// CommandMap["USER"] = &Command::user;
 	// CommandMap["JOIN"] = &Command::join;
