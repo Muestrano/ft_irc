@@ -6,6 +6,7 @@
 class Channel
 {
 	private:
+
 		unsigned int 	limitMember;
 		unsigned int 	nbMember;
 		std::string 	topic;
@@ -17,8 +18,8 @@ class Channel
 		// std::map<std::string, Client*> operators;
 		// std::map<std::string, Client*> invited; // invite but not in the canal
 		// What kind of container for list operator and member
-	public:
 	
+	public:
 };
 
 /*
