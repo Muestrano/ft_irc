@@ -24,6 +24,14 @@ Server::~Server()
 	close(socketFd);
 }
 
+// Getter
+
+std::string Server::getPassword() const
+{
+	return this->password;
+}
+
+// Public method
 
 /**
  * @brief Create a server fd and initialize poll/sockaddr struct
@@ -117,8 +125,7 @@ void Server::handleClientData(int i)
 		buffer[bytesRead] = '\0';
 		// std::cout << "data client " << clientFd << ": '" << buffer << "'" << std::endl;
 		client->setBuffer(buffer);
-		Command commandObj;
-		commandObj.extractCompleteCommand(client);
+		cmd.extractCompleteCommand(client);
 		// client->clearbuff() // TODO need to see if it's necessary
 	}
 	else if (bytesRead == 0)
@@ -197,10 +204,6 @@ void Server::startServer()
 	}
 }
 
-std::string Server::getPassword() const
-{
-	return this->password;
-}
 
 /*
 poll give info if the operand accept, recv, send can execute

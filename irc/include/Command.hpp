@@ -41,7 +41,7 @@ class Command
 		void		set_map(void);
 		void 		extractCompleteCommand(Client* client);
 		void 		prepareCommand(Client* client, std::string line);
-		void 		sendErrorCode(Client* client, ErrorCode codeError);
+		void 		sendError(Client* client, int codeError, const std::string& message);
 		//std::string codeToString(int value);
 		
 		void		pass_serv(Client* client, std::string buffer);

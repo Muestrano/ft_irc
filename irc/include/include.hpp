@@ -23,16 +23,12 @@
 #include "Command.hpp"
 #include "Server.hpp"
 
-// TEMP : Sorted by numeric values.
+// TEMP : Sorted by numeric values - TODO Rework of errors
 
-enum ErrorCode 
-{
-    ERR_UNKNOWNCOMMAND = 421,
-    ERR_NONICKNAMEGIVEN = 431,
-    ERR_ERRONEUSNICKNAME = 432,
-    ERR_NICKNAMEINUSE = 433,
-    ERR_NICKCOLLISION = 436
-};
+#define ERR_UNKNOWNCOMMAND "421"
+#define ERR_NEEDMOREPARAMS "461"
+#define ERR_ALREADYREGISTERED "462"
+#define ERR_PASSWDMISMATCH "464"
 
 class Commands;
 

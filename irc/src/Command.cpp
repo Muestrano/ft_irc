@@ -119,17 +119,18 @@ void Command::prepareCommand(Client* client, std::string line)
 //	send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 //}
 
-// TEMP WIP
+// TEMP test one
+
 void Command::sendError(Client* client, int codeError, const std::string& command)
 {
     std::string nickname = client->getNickName();
-    
-	if (nickname.empty())
+    if (nickname.empty())
         nickname = "*";
     
     std::stringstream error;
     error << ":localhost " << codeError << " " << nickname << " " << command;
     
+    // Messages personnalisés selon le code d'erreur
     if (codeError == 461)
         error << " :Not enough parameters";
     else if (codeError == 462)
@@ -138,7 +139,8 @@ void Command::sendError(Client* client, int codeError, const std::string& comman
         error << " :Password incorrect";
     else if (codeError == 421)
         error << " :Unknown command";
-    error << "\r" << std::endl;
+    
+    error << "\r\n";
     
     std::string stringError = error.str();
     send(client->getFd(), stringError.c_str(), stringError.length(), 0);
@@ -154,27 +156,32 @@ void Command::sendError(Client* client, int codeError, const std::string& comman
 
 void	Command::pass_serv(Client* client, std::string buffer)
 {
-	//(void)client;
-	//(void)buffer;
-
+	// Si client déjà authentifié
 	if (client->getIsAuthenticated())
 	{
 		sendError(client, 462, "PASS");
-		return ;
-	}	
+		return;
+	}
+
+	// Si pas de paramètre
 	if (buffer.empty())
 	{
 		sendError(client, 461, "PASS");
-		return ;
+		return;
 	}
+
+	// Vérifier mot de passe
 	if (buffer == server->getPassword())
 	{
 		client->setIsAuthenticated(true);
-		std::string response = ":localhost: Password accepted\r\n"; // TEMP for testing purpose.
+		std::cout << "[AUTH] Client " << client->getFd() << " - Authentication SUCCESS" << std::endl;
+		std::string response = ":localhost NOTICE * :Password accepted\r\n";
+		std::cout << 
 		send(client->getFd(), response.c_str(), response.length(), 0);
 	}
 	else
 	{
+		std::cout << "[AUTH] Client " << client->getFd() << " - Wrong password" << std::endl;
 		sendError(client, 464, "PASS");
 	}
 }
@@ -185,7 +192,6 @@ void	Command::test(Client* client, std::string buffer)
 	std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
 	send(client->getFd(), response.c_str(), response.length(), 0);
 }
-
 
 /*
 

@@ -17,6 +17,7 @@ class Channel
 		// std::map<std::string, Client*> operators;
 		// std::map<std::string, Client*> invited; // invite but not in the canal
 		// What kind of container for list operator and member
+	
 	public:
 	
 };

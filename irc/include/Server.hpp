@@ -14,7 +14,7 @@ class Server
 		int 		socketFd;
 		int 		port;
 		std::string password;
-		Command	cmd;
+		Command		cmd;
 		
 		std::vector<struct pollfd> pollFd;
 		std::map<int, Client*> clients;  // FD -> Client
@@ -26,6 +26,11 @@ class Server
 
 		Server(int port, std::string password);
 		~Server();
+		
+		// Getter
+		std::string getPassword() const;
+
+		// Public method
 
 		void initServer();
 		void extractCompleteCommand(Client* client);
@@ -35,7 +40,6 @@ class Server
 		void handleClientData(int i);
 		void disconnectClient(int i);
 
-		std::string getPassword() const;
 };
 
 

@@ -14,7 +14,7 @@ class Client
 		std::string passWord;
 		std::string buffer;
 		
-		bool isAuthenticated; // WIP pass
+		bool isAuthenticated;
 
 		bool	Nick;
 		bool	User;
