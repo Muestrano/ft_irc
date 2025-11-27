@@ -25,13 +25,16 @@ class Server
 	
 
 
-		void initServer();
-		void extractCompleteCommand(Client* client);
-		void prepareCommand(Client* client, std::string line);
-		void startServer();
-		void newConnection();
-		void handleClientData(int i);
-		void disconnectClient(int i);	
+		void 		initServer();
+		void 		extractCompleteCommand(Client* client);
+		void 		prepareCommand(Client* client, std::string line);
+		void 		startServer();
+		void 		newConnection();
+		void 		handleClientData(int i);
+		void 		disconnectClient(int i);
+
+		void		addChannel(const std::string name, Channel* channel);
+		Channel* 	findChannel(const std::string name);
 };
 
 

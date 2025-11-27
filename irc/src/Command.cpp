@@ -96,8 +96,23 @@ void	Command::join(Client* client, std::string buffer)
 	// 	// 	return error // TODO
 
 //   find if channel exist //TODO
-	Channel::addUser(channelV[0], client);
+	for (size_t i = 0; i < channelV.size(); i++)
+	{
+		std::string channelName = channelV[i];
+		std::string pass;
+		if (i < keyV.size())
+			pass = keyV[i];
+		else
+			pass = "";
 
+		Channel* channel = server->findChannel(channelName);
+		if (channel == NULL) // Canal don't exist, we create it
+		{
+			channel = new Channel(channelName, client);
+			server->addChannel(channelName, channel);
+		}
+		channel->addUser(pass, client);
+	}
 		
 
 

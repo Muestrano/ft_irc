@@ -21,6 +21,29 @@ Server::~Server()
         close(socketFd);
 }
 
+Channel* Server::findChannel(const std::string name)
+{
+ 	std::cout << "🔍 [findChannel] Recherche: '" << name << "'" << std::endl;
+    std::cout << "🔍 [findChannel] channels size: " << channels.size() << std::endl;
+    std::cout << "🔍 [findChannel] channels addr: " << &channels << std::endl;
+    
+    // VÉRIFIER si la map est valide
+    if (&channels == NULL) {
+        std::cout << "❌ [findChannel] channels MAP INVALIDE!" << std::endl;
+        return NULL;
+    }
+
+	std::map<std::string, Channel*>::iterator it = channels.find(name);
+	if (it != channels.end())
+		return it->second;
+	return (NULL);
+}
+
+void Server::addChannel(const std::string name, Channel* channel)
+{
+	channels[name] = channel;
+}
+
 
 /**
  * @brief Create a server fd and initialize poll/sockaddr struct

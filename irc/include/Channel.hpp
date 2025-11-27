@@ -3,21 +3,23 @@
 
 #include "include.hpp"
 
+class Client;
+
 class Channel
 {
 	private:
+		std::string 	name;
+		std::string 	password;
+		std::string 	topic;
 		unsigned int 	limitMember;
 		unsigned int 	nbMember;
-		std::string 	topic;
-		std::string 	password;
-		std::string name;
+		bool			invitedOnly;
 
-		// std::vector<Client*> members; //brodcast msg
-		std::map<std::string, Client*> member; //string => Nickname, client
+		std::map<std::string, Client*> members; //string => Nickname, client
 		std::map<std::string, Client*> operators;
 		std::map<std::string, Client*> invited; // invite but not inside the canal
 	public:
-		Channel(std::string name, Client* operator);
+		Channel(std::string name, Client* clientOp);
 		~Channel();
 
 		void addUser(const std::string, Client* client);
