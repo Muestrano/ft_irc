@@ -2,6 +2,7 @@
 # define IRC_HPP
 
 #include <string>
+#include <cstring>
 #include <cstdlib>
 #include <iostream>
 #include <unistd.h>
@@ -23,12 +24,9 @@
 #include "Command.hpp"
 #include "Server.hpp"
 
-// TEMP : Sorted by numeric values - TODO Rework of errors
+// TEMP : TODO Finalize the rework of errors.
 
 #define ERR_UNKNOWNCOMMAND "421"
-#define ERR_NEEDMOREPARAMS "461"
-#define ERR_ALREADYREGISTERED "462"
-#define ERR_PASSWDMISMATCH "464"
 
 class Commands;
 

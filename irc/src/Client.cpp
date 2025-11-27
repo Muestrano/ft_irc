@@ -6,11 +6,11 @@
 	For handle non blocking we can put data into buffer
 */
 
-Client::Client() : isAuthenticated(false), isRegistered(false)
+Client::Client() : isAuthenticated(false), nickName(""), userName(""), isRegistered(false)
 {
 }
 
-Client::Client(int fd) : isAuthenticated(false), Nick(false), User(false), isRegistered(false), clientFd(fd)
+Client::Client(int fd) : isAuthenticated(false), nickName(""), userName(""), isRegistered(false), clientFd(fd)
 {
 }
 
@@ -20,11 +20,53 @@ Client::~Client()
 	//delete Client;
 }
 
+// Getters
+
+std::string Client::getNickName() const
+{
+	return (this->nickName);
+}
+
+std::string Client::getUser() const
+{
+	return (this->userName);
+}
+
+std::string Client::getHostname() const
+{
+	return (this->hostName);
+}
+
+std::string& Client::getBuffer()
+{
+	return (this->buffer);
+}
+
+int Client::getFd() const
+{
+	return (this->clientFd);
+}
+
+bool Client::getIsRegistered() const
+{
+	return (this->isRegistered);
+}
+
+bool Client::getIsAuthenticated() const
+{
+	return (this->isAuthenticated);
+}
+
 // Setters
 
-void Client::setBuffer(const std::string& appendBuffer)
+void Client::setRealName(const std::string &real)
 {
-	this->buffer += appendBuffer;
+	this->realName = real;
+}
+
+void Client::setHostname(const std::string& hostname)
+{
+	this->hostName = hostname;
 }
 
 void Client::setNickName(const std::string &nick)
@@ -37,41 +79,17 @@ void Client::setUser(const std::string &user)
 	this->userName = user;
 }
 
-void Client::setHostname(const std::string& hostname)
+void Client::setBuffer(const std::string& appendBuffer)
 {
-	this->hostName = hostname;
+	this->buffer += appendBuffer;
+}
+
+void Client::setIsRegistered(const bool registered)
+{
+	this->isRegistered = registered;
 }
 
 void Client::setIsAuthenticated(bool authenticated)
 {
 	this->isAuthenticated = authenticated;
-}
-
-// Getters
-
-std::string Client::getNickName() const
-{
-	return (this->nickName);
-}
-std::string Client::getUser() const
-{
-	return (this->userName);
-}
-std::string Client::getHostname() const
-{
-	return (this->hostName);
-}
-
-std::string& Client::getBuffer()
-{
-	return (this->buffer);
-}
-int Client::getFd() const
-{
-	return (this->clientFd);
-}
-
-bool Client::getIsAuthenticated() const
-{
-	return (this->isAuthenticated);
 }

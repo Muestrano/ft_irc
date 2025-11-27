@@ -3,14 +3,18 @@
 
 #include "include.hpp"
 
-
-/*
-Forme canonique :
-        T (); // Constructeur par défaut
-        T (const T&); // Constructeur de recopie
-        ~T (); // Destructeur éventuellement virtuel
-        T &operator=(const T&); // Operator d'affectation
-*/
+enum ErrorCode 
+{
+    // ERR_UNKNOWNCOMMAND = 421,
+    ERR_NONICKNAMEGIVEN = 431,
+    ERR_ERRONEUSNICKNAME = 432,
+    ERR_NICKNAMEINUSE = 433,
+	ERR_TARGETLEO = 436,
+	ERR_TARGETESTEBAN = 437,
+	ERR_NEEDMOREPARAMS = 461,
+	ERR_ALREADYREGISTERED = 462,
+	ERR_PASSWDMISMATCH = 464
+};
 
 class Client;
 class Server;
@@ -37,21 +41,23 @@ class Command
 
 		void setServer(Server *server);
 
-		//Methods to handle commands
+		// Public methods
 
-
-		void		set_map(void);
-		void		join(Client* client, std::string buffer);
-		void 		extractCompleteCommand(Client* client);
-		void 		prepareCommand(Client* client, std::string line);
-		void 		sendError(Client* client, int codeError, const std::string& message);
-		//std::string codeToString(int value);
+		void set_map(void);
+		void prepareCommand(Client* client, std::string line);
+		void extractCompleteCommand(Client* client);
+		void sendError(Client* client, int codeError, const std::string& message);
+		void sendErrorCode(Client* client, ErrorCode errorCode, std::string errorMsg);
+		void pass_serv(Client* client, std::string buffer);
+		void nick(Client* client, std::string buffer);
+		void user(Client* client, std::string buffer);
+		void join(Client* client, std::string buffer);
 		
-		void		pass_serv(Client* client, std::string buffer);
-		void		test(Client* client, std::string buffer);
+		void test(Client* client, std::string buffer); // TODO Delete later.
+		//std::string codeToString(int value); // TODO Delete.
+		
 		// void	pass_chan(Client* client, std::string buffer);
-		// void	nick(Client* client, std::string buffer);
-		// void	user(Client* client, std::string buffer);
+		// void	join(Client* client, std::string buffer);
 		// void	mode(Client* client, std::string buffer);
 		// void	topic(Client* client, std::string buffer);
 		// void	invite(Client* client, std::string buffer);
@@ -72,7 +78,7 @@ class Command
 		// /PRIVMSG <nickname> <message>\
 		// /PART <#channel>\
 		// /QUIT <message>\n";
-	*/
+		*/
 };
 
 #endif

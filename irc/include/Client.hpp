@@ -23,7 +23,6 @@ class Client
 		int 		clientFd;
 
 	public:
-
 		Client();
 		Client(int fd);
 		~Client();
@@ -34,13 +33,16 @@ class Client
 		std::string getHostname() const;
 		std::string& getBuffer();
 		int getFd() const;
+		bool getIsRegistered() const;
 		bool getIsAuthenticated() const;
 
 		// setters
+		void setRealName(const std::string& real);
+		void setHostname(const std::string& hostname);
 		void setNickName(const std::string& nick);
 		void setUser(const std::string& user);
-		void setHostname(const std::string& hostname);
 		void setBuffer(const std::string& buffer);
+		void setIsRegistered(const bool registered);
 		void setIsAuthenticated(bool isAuthenticated);
 };
 
