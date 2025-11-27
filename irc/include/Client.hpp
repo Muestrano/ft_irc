@@ -23,6 +23,7 @@ class Client
 		int 		clientFd;
 
 	public:
+	
 		Client();
 		Client(int fd);
 		~Client();

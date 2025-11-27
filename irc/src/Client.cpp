@@ -6,11 +6,11 @@
 	For handle non blocking we can put data into buffer
 */
 
-Client::Client() : isAuthenticated(false), nickName(""), userName(""), isRegistered(false)
+Client::Client() : nickName(""), userName(""), isAuthenticated(false), isRegistered(false) 
 {
 }
 
-Client::Client(int fd) : isAuthenticated(false), nickName(""), userName(""), isRegistered(false), clientFd(fd)
+Client::Client(int fd) : nickName(""), userName(""), isAuthenticated(false), isRegistered(false), clientFd(fd)
 {
 }
 
