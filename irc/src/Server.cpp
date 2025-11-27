@@ -23,15 +23,10 @@ Server::~Server()
 
 Channel* Server::findChannel(const std::string name)
 {
- 	std::cout << "🔍 [findChannel] Recherche: '" << name << "'" << std::endl;
-    std::cout << "🔍 [findChannel] channels size: " << channels.size() << std::endl;
-    std::cout << "🔍 [findChannel] channels addr: " << &channels << std::endl;
+ 	std::cout << "Chanel name: '" << name << "'" << std::endl;
+    std::cout << "channels size: " << channels.size() << std::endl;
+    std::cout << "channels addr: " << &channels << std::endl;
     
-    // VÉRIFIER si la map est valide
-    if (&channels == NULL) {
-        std::cout << "❌ [findChannel] channels MAP INVALIDE!" << std::endl;
-        return NULL;
-    }
 
 	std::map<std::string, Channel*>::iterator it = channels.find(name);
 	if (it != channels.end())
