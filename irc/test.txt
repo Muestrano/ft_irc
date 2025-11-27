@@ -1,7 +1,0 @@
-* Connecting to 127.0.0.1 (127.0.0.1:6667)
-* Connected. Now logging in. // is ignore in modern Client
-CAP => check if it's modern irc server (IRCV3)
-List all fonctionnality of the server (sasl, multi-prefix, batch)
-* CAP :Unknown command
-* NICK :Unknown command
-* USER :Unknown command

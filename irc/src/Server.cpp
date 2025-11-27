@@ -4,23 +4,32 @@
 /**
  * @param AF_INET ipv4 protocol
  * @param SOCK_STREAM TCP socket
-*/
+ */
 Server::Server(int port, std::string pass)
 {
 	this->socketFd = socket(AF_INET, SOCK_STREAM, 0);
 	this->port = port;
 	this->password = pass;
+	cmd.setServer(this);
 }
 Server::~Server()
 {
-    for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
-        delete it->second; // delete each Client
-    clients.clear();
-    
-    if (socketFd >= 0)
-        close(socketFd);
+	for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
+		delete it->second; // delete each Client
+	clients.clear();
+	
+	if (socketFd >= 0)
+		close(socketFd);
 }
 
+// Getter
+
+std::string Server::getPassword() const
+{
+	return this->password;
+}
+
+// Public method
 
 /**
  * @brief Create a server fd and initialize poll/sockaddr struct
@@ -55,11 +64,11 @@ void Server::initServer()
 	fcntl(this->socketFd, F_SETFL, O_NONBLOCK);
 	// ----------TEMP potentialy rm this part if we handle signal--------------
 	int reuse = 1;
-    if (setsockopt(this->socketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
-        std::cerr << "Error setsockopt(SO_REUSEADDR): " << std::endl;
-        close(this->socketFd);
-        exit(1);
-    }
+	if (setsockopt(this->socketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) {
+		std::cerr << "Error setsockopt(SO_REUSEADDR): " << std::endl;
+		close(this->socketFd);
+		exit(1);
+	}
 	// ----------TEMP potentialy rm this part if we handle signal--------------
 
 	this->serverAddr.sin_family = AF_INET;
@@ -75,8 +84,6 @@ void Server::initServer()
 	listenerPollFd.revents = 0;
 
 	this->pollFd.push_back(listenerPollFd);
-
-
 }
 
 /**
@@ -88,18 +95,14 @@ void Server::disconnectClient(int i)
 	std::cout << "client disconnect: " << clientFd << std::endl;
 	if (clients.find(clientFd) != clients.end()) 
 	{
-        delete clients[clientFd];    // free client
-        clients.erase(clientFd);     // clean map
-    }
-    
-    close(clientFd);
-    pollFd.erase(pollFd.begin() + i);
+		delete clients[clientFd];    // free client
+		clients.erase(clientFd);     // clean map
+	}
+	
+	close(clientFd);
+	pollFd.erase(pollFd.begin() + i);
 
 }
-
-
-
-
 
 /**
  * @brief handle receive message and parse the command
@@ -119,8 +122,7 @@ void Server::handleClientData(int i)
 		buffer[bytesRead] = '\0';
 		// std::cout << "data client " << clientFd << ": '" << buffer << "'" << std::endl;
 		client->setBuffer(buffer);
-		Command commandObj;
-		commandObj.extractCompleteCommand(client);
+		cmd.extractCompleteCommand(client);
 		// client->clearbuff() // TODO need to see if it's necessary
 	}
 	else if (bytesRead == 0)
@@ -137,6 +139,7 @@ void Server::handleClientData(int i)
 		}
 	}
 }
+
 /**
  * @param sockaddr_in socket struct adress ipv4 (sockaddr_in6 for ipv6)
  * @param accept extract connection to create a new fd with the three step handshake (SYN: Synchronize, SYN-ACK: Synchronize-Acknowledge, ACK: Acknowledge)
@@ -150,7 +153,7 @@ void Server::newConnection()
 	if (clientFd >= 0)
 	{
 		Client* newClient = new Client(clientFd);
-        this->clients[clientFd] = newClient;
+		this->clients[clientFd] = newClient;
 		fcntl(clientFd, F_SETFL, O_NONBLOCK);
 		struct pollfd newPollFd; // to push it in the vector pollFd and we aren't limits by number of user
 		newPollFd.fd = clientFd;
@@ -163,11 +166,12 @@ void Server::newConnection()
 	else
 	{
 		  if (errno != EAGAIN && errno != EWOULDBLOCK)
-          std::cerr << "Erreur accept(): " << std::endl;
+		  std::cerr << "Erreur accept(): " << std::endl;
 	}
 }
+
 /**
- * 
+ * TODO Doxygen comment
 */
 void Server::startServer()
 {
@@ -196,6 +200,24 @@ void Server::startServer()
 		}
 	}
 }
+
+Channel* Server::findChannel(const std::string name)
+{
+ 	std::cout << "Chanel name: '" << name << "'" << std::endl;
+	std::cout << "channels size: " << channels.size() << std::endl;
+	std::cout << "channels addr: " << &channels << std::endl;
+	
+	std::map<std::string, Channel*>::iterator it = channels.find(name);
+	if (it != channels.end())
+		return it->second;
+	return (NULL);
+}
+
+void Server::addChannel(const std::string name, Channel* channel)
+{
+	channels[name] = channel;
+}
+
 /*
 poll give info if the operand accept, recv, send can execute
 fcntl with O_NONBLOCK flag to handle A/I operation

@@ -24,9 +24,10 @@
 #include "Command.hpp"
 #include "Server.hpp"
 
-
-class Commands;
+// TEMP : TODO Finalize the rework of errors.
 
 #define ERR_UNKNOWNCOMMAND "421"
+
+class Commands;
 
 #endif
