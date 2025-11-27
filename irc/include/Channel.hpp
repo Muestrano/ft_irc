@@ -6,6 +6,7 @@
 class Channel
 {
 	private:
+
 		unsigned int 	limitMember;
 		unsigned int 	nbMember;
 		std::string 	topic;
@@ -19,7 +20,6 @@ class Channel
 		// What kind of container for list operator and member
 	
 	public:
-	
 };
 
 /*

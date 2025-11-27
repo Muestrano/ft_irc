@@ -1,7 +1,6 @@
 #include "../include/include.hpp"
 #include "../include/Server.hpp"
 
-
 /**
  * @brief Take two arg ./ircserv <port> <password>
 */

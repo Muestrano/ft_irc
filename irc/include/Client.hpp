@@ -34,7 +34,6 @@ class Client
 		std::string getHostname() const;
 		std::string& getBuffer();
 		int getFd() const;
-		
 		bool getIsAuthenticated() const;
 
 		// setters
@@ -42,9 +41,7 @@ class Client
 		void setUser(const std::string& user);
 		void setHostname(const std::string& hostname);
 		void setBuffer(const std::string& buffer);
-		
 		void setIsAuthenticated(bool isAuthenticated);
-
 };
 
 #endif

@@ -25,13 +25,12 @@ Command& Command::operator=(const Command& c)
 	return (*this);
 }
 
-// Setters / Getters
+// Setters
 
 void Command::setServer(Server *srv)
 {
 	this->server = srv;
 }
-
 
 // Methods to handle commands.
 
@@ -90,7 +89,7 @@ void Command::prepareCommand(Client* client, std::string line)
 	std::string param;
 	std::getline(ss, param);
 
-	param.erase(0, param.find_first_not_of(" ")); //erase space befor param
+	param.erase(0, param.find_first_not_of(" ")); //erase space befor params
 
 	if (CommandMap.find(command) != CommandMap.end())
 	{
@@ -103,24 +102,7 @@ void Command::prepareCommand(Client* client, std::string line)
 	}
 }
 
-// Old
-
-//void Command::sendError(Client* client, int codeError, const std::string& command)
-//{
-//	 std::string nickname = client->getNickName();
-//	if (nickname.empty())
-//		nickname = "*";
-	
-//	std::stringstream error;
-//	error << ":localhost " << codeError << " " << nickname;
-//	error << " " << command << " :Unknown command\r\n";
-	
-//	std::string stringError = error.str();
-//	send(client->getFd(), stringError.c_str(), stringError.length(), 0);
-//}
-
-// TEMP test one
-
+// TEMP Error handling - TODO need to rework the way we handle error and error code
 void Command::sendError(Client* client, int codeError, const std::string& command)
 {
     std::string nickname = client->getNickName();
@@ -153,39 +135,36 @@ void Command::sendError(Client* client, int codeError, const std::string& comman
 //     return ss.str();
 // }
 
-
+/**
+ * TODO Doxygen comment.
+ */
 void	Command::pass_serv(Client* client, std::string buffer)
 {
-	// Si client déjà authentifié
 	if (client->getIsAuthenticated())
 	{
 		sendError(client, 462, "PASS");
 		return;
 	}
 
-	// Si pas de paramètre
 	if (buffer.empty())
 	{
 		sendError(client, 461, "PASS");
 		return;
 	}
 
-	// Vérifier mot de passe
 	if (buffer == server->getPassword())
 	{
 		client->setIsAuthenticated(true);
 		std::cout << "[AUTH] Client " << client->getFd() << " - Authentication SUCCESS" << std::endl;
-		std::string response = ":localhost NOTICE * :Password accepted\r\n";
-		std::cout << 
+		std::string response = ":localhost NOTICE * :Password accepted\r\n"; // TODO Replace \n by std::endl and '*' by good name ?
 		send(client->getFd(), response.c_str(), response.length(), 0);
 	}
 	else
 	{
-		std::cout << "[AUTH] Client " << client->getFd() << " - Wrong password" << std::endl;
 		sendError(client, 464, "PASS");
+		std::cout << "[AUTH] Client " << client->getFd() << " - Wrong password" << std::endl;
 	}
 }
-
 
 void	Command::test(Client* client, std::string buffer)
 {

@@ -26,13 +26,13 @@ class Command
 	public :
 
 		// Coplien form
-		
+
 		Command();
 		Command(const Command&);
 		~Command();
 		Command& operator=(const Command&);
 
-		// Setters / Getters
+		// Setters
 
 		void setServer(Server *srv);
 

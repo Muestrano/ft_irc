@@ -1,7 +1,6 @@
 #include "../include/Server.hpp"
 #include "../include/include.hpp"
 
-
 /**
  * @param AF_INET ipv4 protocol
  * @param SOCK_STREAM TCP socket
@@ -19,9 +18,9 @@ Server::~Server()
 	for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
 	delete it->second; // delete each Client
 	clients.clear();
-	
+
 	if (socketFd >= 0)
-	close(socketFd);
+		close(socketFd);
 }
 
 // Getter
@@ -57,7 +56,6 @@ std::string Server::getPassword() const
  * 			backlog is a queue if to handle connection peak
  * @param pollstruct handle events and re-events: wait to read, write, error with appropriate flags
 */
-
 void Server::initServer()
 {
 	// init serv
@@ -174,7 +172,7 @@ void Server::newConnection()
 }
 
 /**
- * 
+ * TODO Doxygen comment
 */
 void Server::startServer()
 {
@@ -203,7 +201,6 @@ void Server::startServer()
 		}
 	}
 }
-
 
 /*
 poll give info if the operand accept, recv, send can execute
