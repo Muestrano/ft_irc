@@ -8,7 +8,7 @@ Channel::Channel(std::string name, Client* clientOp) : name(name), password(""),
 	operators[clientOp->getNickName()] = clientOp;
 }
 /**
- * ´
+ * @brief check all Mode operator before add user in std::map members
 */
 void	Channel::addUser(const std::string key, Client* client)
 {
@@ -34,9 +34,8 @@ void	Channel::addUser(const std::string key, Client* client)
 		members[nickName] = client;
 		nbMember++;
 	}
-	else // client is already in the channel
+	else // client is already in the channel, need to see if we just ignore it
 		// sendError() //TODO
-	
 	if (nbMember == 1)
 		operators[nickName] = client;
 	// sendJoinMsg(client); //TODO

@@ -34,6 +34,10 @@ class Command
 	~Command();
 	Command& operator=(const Command&);
 
+	// Setters / Getters
+
+	void setServer(Server *server);
+
 	//Methods to handle commands
 
 	void extractCompleteCommand(Client* client);

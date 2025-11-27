@@ -1,7 +1,7 @@
 #include "../include/Server.hpp"
 #include "../include/include.hpp"
 
-Command::Command()
+Command::Command() : server(NULL)
 {
 	set_map();
 }
@@ -21,6 +21,11 @@ Command& Command::operator=(const Command& c)
 		this->CommandMap = c.CommandMap;
 	}
 	return (*this);
+}
+
+void Command::setServer(Server *srv)
+{
+	this->server = srv;
 }
 
 /**
@@ -49,18 +54,20 @@ void	Command::test(Client* client, std::string buffer)
 }
 
 
-
+/**
+ * @brief Create new channel if he exist
+ * @param channelV channel name
+ * @param keyV password
+ * 
+*/
 void	Command::join(Client* client, std::string buffer)
-{
-	(void)*client;
-	
+{	
 	std::vector<std::string> channelV;
-	std::string channelStr;
 	std::vector<std::string> keyV;
+	std::string channelStr;
 	std::string keyStr;
 
 	std::stringstream ss(buffer);
-	std::cout << "buffer: " << buffer << std::endl;
 	ss >> channelStr;
 	if (!ss.eof())
 		ss >> keyStr;
@@ -68,13 +75,11 @@ void	Command::join(Client* client, std::string buffer)
 	std::string out;
 	while (std::getline(channelSS, out, ','))
 	{
-		// if (!out.empty() && out[0] == '#' || !out.empty() && out[0] == '&')
+		// if (!out.empty() && out[0] == '#' || !out.empty() && out[0] == '&') //TEMP
 		// 	out.erase(0, 1);
 		if (out[0] == '#' || out[0] == '&')
 			channelV.push_back(out);
 	}
-	
-
 	if (!keyStr.empty())
 	{
 		std::stringstream keySS(keyStr);
@@ -83,19 +88,13 @@ void	Command::join(Client* client, std::string buffer)
 			keyV.push_back(keyS);
 	}
 	
-	std::cout << "channel: " << std::endl;
 	for (size_t i = 0; i < channelV.size(); i++)
 		std::cout << "channel: " << channelV[i] << std::endl;
-	std::cout << "key: " << std::endl;
 	for (size_t i = 0; i < keyV.size(); i++)
 		std::cout << "key: " << keyV[i] << std::endl;
-	// if (keyV.size() > channelV.size()) TODO
-	// 	send error
-	// // TODO condition if to compare the channel name with the password with the mode +k
-	// 	// if (chanKey.size() > 2)
-	// 	// 	return error // TODO
+	if (keyV.size() > channelV.size()) //TODO
+		return; // sendError //TODO
 
-//   find if channel exist //TODO
 	for (size_t i = 0; i < channelV.size(); i++)
 	{
 		std::string channelName = channelV[i];
@@ -104,7 +103,6 @@ void	Command::join(Client* client, std::string buffer)
 			pass = keyV[i];
 		else
 			pass = "";
-
 		Channel* channel = server->findChannel(channelName);
 		if (channel == NULL) // Canal don't exist, we create it
 		{
@@ -113,9 +111,6 @@ void	Command::join(Client* client, std::string buffer)
 		}
 		channel->addUser(pass, client);
 	}
-		
-
-
 }
 
 
@@ -144,13 +139,6 @@ void Command::extractCompleteCommand(Client* client)
 	}
 	buffer.erase(0, pos + 2);
 }
-
-// std::string Command::codeToString(int value) // TODO, test again this format std::string (like lorenzo) for sendError(actualy stringstream)
-// {
-//     std::stringstream ss;
-//     ss << value;
-//     return ss.str();
-// }
 
 // TEMP
 void Command::sendError(Client* client, int codeError, const std::string& command)
