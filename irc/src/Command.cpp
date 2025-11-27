@@ -61,6 +61,13 @@ void Command::sendError(Client* client, int codeError, const std::string& comman
 	std::string stringError = error.str();
     send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
+
+/**
+ * @brief Handles error codes and send the appropriate message
+ * @param Client The pointer of the client
+ * @param errorCode <ERR_ERROREXAMPLE> the type of error
+ * @param errorMsg The string appended at the end of the error message
+ */
 void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string errorMsg)
 {
 	std::string nickname = client->getNickName();
@@ -101,6 +108,11 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
     send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
 
+/**
+ * @brief Handles the /NICK command
+ * @param client the pointer of the client
+ * @param buffer the parameters of the command
+ */
 void Command::nick(Client* client, std::string buffer)
 {
 	std::string	error;
@@ -136,16 +148,11 @@ void Command::nick(Client* client, std::string buffer)
 	client->setNickName(buffer);
 }
 
-/*sendWelcome(client) TODO
-
-RPL_WELCOME (001)
-
-RPL_YOURHOST (002)
-
-RPL_CREATED (003)
-
-RPL_MYINFO (004)*/
-
+/**
+ * @brief Handles the /USER command
+ * @param client the pointer of the client
+ * @param buffer the parameters of the command
+ */
 void Command::user(Client* client, std::string buffer)
 {
 	std::vector<std::string>	params;
@@ -186,7 +193,7 @@ void Command::user(Client* client, std::string buffer)
 	client->setUser(params[0]);
 	client->setRealName(params[3]);
 	send(client->getFd(), message.c_str(), message.length(), 0);
-	// sendWelcome(client); TODO
+	// sendWelcome(client); TODO (see at bottom)
 }
 
 /**
@@ -286,3 +293,13 @@ Command:
 // 	if (this->clients[user_fd])
 // 		this->clients[user_fd]->clearBuffer();
 // }
+
+/*sendWelcome(client) TODO
+
+RPL_WELCOME (001)
+
+RPL_YOURHOST (002)
+
+RPL_CREATED (003)
+
+RPL_MYINFO (004)*/
