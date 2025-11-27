@@ -3,8 +3,6 @@
 
 #include "include.hpp"
 
-#define USERLEN = 18
-
 enum ErrorCode {
     // ERR_UNKNOWNCOMMAND = 421,
     ERR_NONICKNAMEGIVEN = 431,

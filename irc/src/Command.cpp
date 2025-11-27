@@ -50,7 +50,7 @@ void	Command::test(Client* client, std::string buffer)
 
 void Command::sendError(Client* client, int codeError, const std::string& command)
 {
-	 std::string nickname = client->getNickName();
+	std::string nickname = client->getNickName();
     if (nickname.empty())
         nickname = "*";
     
@@ -76,22 +76,22 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 		error << "Nickname is empty.";
 		break;
 	case 432:
-		error << "The first character of your nickname cannot be \"#\" neither \":\". You can't have space character in your nickname.";
+		error << "The first character of your nickname cannot be \"#\" neither \":\". You can't have space character in your nickname. ";
 		break;
 	case 433:
-		error << "This nickname is already registered.";
+		error << "This nickname is already registered. ";
 		break;
 	case 436:
-		error << "Leo has been pre-shot. Try again bro!";
+		error << "Leo has been pre-shot. Try again bro! ";
 		break;
 	case 437:
-		error << "Congrats Esteban! All test passed! 🫡";
+		error << "Congrats Esteban! All test passed! 🫡 ";
 		break;
 	case 461:
-		error << "This command needs more parameters.";
+		error << "This command needs more parameters. ";
 		break;
 	case 462:
-		error << "You already registered your user name.";
+		error << "You already registered your user name. ";
 		break;
 	default:
 		break;
@@ -136,23 +136,57 @@ void Command::nick(Client* client, std::string buffer)
 	client->setNickName(buffer);
 }
 
+/*sendWelcome(client) TODO
+
+RPL_WELCOME (001)
+
+RPL_YOURHOST (002)
+
+RPL_CREATED (003)
+
+RPL_MYINFO (004)*/
 
 void Command::user(Client* client, std::string buffer)
 {
-	std::string	error;
-	if (buffer.empty() || buffer.find("0 * ") == std::string::npos) //rajouter ou pas de realname, find 0 * a changer
-	{
-		sendErrorCode(client, ERR_NEEDMOREPARAMS, " Synthax : /USER <username> 0 * <realname>");
-		return ;
-	}
-	else if (!(client->getNickName().empty()))
+	std::vector<std::string>	params;
+	std::stringstream			ss(buffer);
+	std::string					token;
+	std::string					error;
+
+	if (client->getIsRegistered())
 	{
 		sendErrorCode(client, ERR_ALREADYREGISTERED, "");
 		return ;
 	}
-	client->setUser(buffer);
-	std::string message = client->getUser() + " set his username to " + buffer + ".\r\n";
+	while (ss >> token)
+	{
+		if (token[0] == ':')
+		{
+			std::string real = token.substr(1);
+			std::string tmp;
+			while (ss >> tmp)
+				real += " " + tmp;
+			params.push_back(real);
+			break;
+		}
+		params.push_back(token);
+	}
+	if (params.size() < 4)
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "Syntax : /USER <username> 0 * :<realname>");
+		return;
+	}
+	if (params.size() > 4)
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "You need \":\" before your realname if it contains spaces.");
+		return;
+	}
+	client->setIsRegistered(true);
+	std::string message = client->getNickName() + " set his username to " + params[0] + " (" + params[3] + ").\r\n";
+	client->setUser(params[0]);
+	client->setRealName(params[3]);
 	send(client->getFd(), message.c_str(), message.length(), 0);
+	// sendWelcome(client); TODO
 }
 
 /**
@@ -165,10 +199,10 @@ void Command::extractCompleteCommand(Client* client)
 	std::string& buffer = client->getBuffer();
 
 	size_t pos;
-	while ((pos = buffer.find("\r\n")) != std::string::npos) 
+	while ((pos = buffer.find("\r\n")) != std::string::npos)
 	{
 		std::string line = buffer.substr(0, pos);
-		buffer.erase(0, pos + 2); // Supp \r\n for the next  command        
+		buffer.erase(0, pos + 2); // Supp \r\n for the next  command
 		prepareCommand(client, line);
 	}
 	buffer.erase(0, pos + 2);

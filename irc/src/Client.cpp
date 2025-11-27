@@ -37,9 +37,19 @@ void Client::setUser(const std::string &user)
 	this->userName = user;
 }
 
+void Client::setRealName(const std::string &real)
+{
+	this->realName = real;
+}
+
 void Client::setHostname(const std::string& hostname)
 {
 	this->hostName = hostname;
+}
+
+void Client::setIsRegistered(const bool registered)
+{
+	this->isRegistered = registered;
 }
 
 // getter

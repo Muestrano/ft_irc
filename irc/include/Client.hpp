@@ -32,8 +32,10 @@ class Client
 
 		void setNickName(const std::string& nick);
 		void setUser(const std::string& user);
+		void setRealName(const std::string& real);
 		void setHostname(const std::string& hostname);
 		void setBuffer(const std::string& buffer);
+		void setIsRegistered(const bool registered);
 
 
 };
