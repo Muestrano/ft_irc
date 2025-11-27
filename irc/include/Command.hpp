@@ -25,23 +25,27 @@ class Command
 
 	public :
 
-		//Coplien form
+		// Coplien form
 		
 		Command();
 		Command(const Command&);
 		~Command();
 		Command& operator=(const Command&);
 
-		//Methods to handle commands
+		// Setters / Getters
 
+		void setServer(Server *srv);
+
+		// Methods to handle commands
+
+		void		set_map(void);
 		void 		extractCompleteCommand(Client* client);
 		void 		prepareCommand(Client* client, std::string line);
-		void 		sendError(Client* client, int codeError, const std::string& message);
-		std::string codeToString(int value);
-		void		set_map(void);
-
-		void	test(Client* client, std::string buffer);
-		void	pass_serv(Client* client, std::string buffer);
+		void 		sendErrorCode(Client* client, ErrorCode codeError);
+		//std::string codeToString(int value);
+		
+		void		pass_serv(Client* client, std::string buffer);
+		void		test(Client* client, std::string buffer);
 		// void	pass_chan(Client* client, std::string buffer);
 		// void	nick(Client* client, std::string buffer);
 		// void	user(Client* client, std::string buffer);

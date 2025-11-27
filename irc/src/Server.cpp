@@ -1,25 +1,27 @@
 #include "../include/Server.hpp"
 #include "../include/include.hpp"
 
+
 /**
  * @param AF_INET ipv4 protocol
  * @param SOCK_STREAM TCP socket
-*/
+ */
 Server::Server(int port, std::string pass)
 {
 	this->socketFd = socket(AF_INET, SOCK_STREAM, 0);
 	this->port = port;
 	this->password = pass;
+	cmd.setServer(this);
 }
 
 Server::~Server()
 {
 	for (std::map<int, Client*>::iterator it = clients.begin(); it != clients.end(); ++it)
-		delete it->second; // delete each Client
+	delete it->second; // delete each Client
 	clients.clear();
 	
 	if (socketFd >= 0)
-		close(socketFd);
+	close(socketFd);
 }
 
 
@@ -47,6 +49,7 @@ Server::~Server()
  * 			backlog is a queue if to handle connection peak
  * @param pollstruct handle events and re-events: wait to read, write, error with appropriate flags
 */
+
 void Server::initServer()
 {
 	// init serv
@@ -76,8 +79,6 @@ void Server::initServer()
 	listenerPollFd.revents = 0;
 
 	this->pollFd.push_back(listenerPollFd);
-
-
 }
 
 /**
@@ -97,10 +98,6 @@ void Server::disconnectClient(int i)
 	pollFd.erase(pollFd.begin() + i);
 
 }
-
-
-
-
 
 /**
  * @brief handle receive message and parse the command
@@ -138,6 +135,7 @@ void Server::handleClientData(int i)
 		}
 	}
 }
+
 /**
  * @param sockaddr_in socket struct adress ipv4 (sockaddr_in6 for ipv6)
  * @param accept extract connection to create a new fd with the three step handshake (SYN: Synchronize, SYN-ACK: Synchronize-Acknowledge, ACK: Acknowledge)
@@ -167,6 +165,7 @@ void Server::newConnection()
 		  std::cerr << "Erreur accept(): " << std::endl;
 	}
 }
+
 /**
  * 
 */
@@ -197,6 +196,12 @@ void Server::startServer()
 		}
 	}
 }
+
+std::string Server::getPassword() const
+{
+	return this->password;
+}
+
 /*
 poll give info if the operand accept, recv, send can execute
 fcntl with O_NONBLOCK flag to handle A/I operation

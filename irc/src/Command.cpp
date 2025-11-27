@@ -1,12 +1,14 @@
 #include "../include/Server.hpp"
 #include "../include/include.hpp"
 
-Command::Command()
+// Coplien form
+
+Command::Command() : server(NULL)
 {
 	set_map();
 }
 
-Command::Command(const Command& c) : CommandMap(c.CommandMap)
+Command::Command(const Command& c) : CommandMap(c.CommandMap) 
 {
 }
 
@@ -22,6 +24,16 @@ Command& Command::operator=(const Command& c)
 	}
 	return (*this);
 }
+
+// Setters / Getters
+
+void Command::setServer(Server *srv)
+{
+	this->server = srv;
+}
+
+
+// Methods to handle commands.
 
 /**
  * @brief Sets the CommandMap attribute
@@ -42,18 +54,6 @@ void Command::set_map(void)
 	// CommandMap["QUIT"] = &Command::quit;
 
 }
-void	Command::test(Client* client, std::string buffer)
-{
-    std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
-    send(client->getFd(), response.c_str(), response.length(), 0);
-}
-
-void	Command::pass_serv(Client* client, std::string buffer)
-{
-	// TODO logic pass
-	(void)client;
-	(void)buffer;
-}
 
 /**
  * @brief Extract all command to pass it in the handler command
@@ -72,27 +72,6 @@ void Command::extractCompleteCommand(Client* client)
 		prepareCommand(client, line);
 	}
 	buffer.erase(0, pos + 2);
-}
-
-// std::string Command::codeToString(int value) // TODO, test again this format std::string (like lorenzo) for sendError(actualy stringstream)
-// {
-//     std::stringstream ss;
-//     ss << value;
-//     return ss.str();
-// }
-
-void Command::sendError(Client* client, int codeError, const std::string& command)
-{
-	 std::string nickname = client->getNickName();
-    if (nickname.empty())
-        nickname = "*";
-    
-    std::stringstream error;
-    error << ":localhost " << codeError << " " << nickname;
-    error << " " << command << " :Unknown command\r\n";
-    
-	std::string stringError = error.str();
-    send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
 
 /**
@@ -123,6 +102,90 @@ void Command::prepareCommand(Client* client, std::string line)
 		sendError(client, 421, command); // to do
 	}
 }
+
+// Old
+
+//void Command::sendError(Client* client, int codeError, const std::string& command)
+//{
+//	 std::string nickname = client->getNickName();
+//	if (nickname.empty())
+//		nickname = "*";
+	
+//	std::stringstream error;
+//	error << ":localhost " << codeError << " " << nickname;
+//	error << " " << command << " :Unknown command\r\n";
+	
+//	std::string stringError = error.str();
+//	send(client->getFd(), stringError.c_str(), stringError.length(), 0);
+//}
+
+// TEMP WIP
+void Command::sendError(Client* client, int codeError, const std::string& command)
+{
+    std::string nickname = client->getNickName();
+    
+	if (nickname.empty())
+        nickname = "*";
+    
+    std::stringstream error;
+    error << ":localhost " << codeError << " " << nickname << " " << command;
+    
+    if (codeError == 461)
+        error << " :Not enough parameters";
+    else if (codeError == 462)
+        error << " :You may not reregister";
+    else if (codeError == 464)
+        error << " :Password incorrect";
+    else if (codeError == 421)
+        error << " :Unknown command";
+    error << "\r" << std::endl;
+    
+    std::string stringError = error.str();
+    send(client->getFd(), stringError.c_str(), stringError.length(), 0);
+}
+
+// std::string Command::codeToString(int value) // TODO, test again this format std::string (like lorenzo) for sendError(actualy stringstream)
+// {
+//     std::stringstream ss;
+//     ss << value;
+//     return ss.str();
+// }
+
+
+void	Command::pass_serv(Client* client, std::string buffer)
+{
+	//(void)client;
+	//(void)buffer;
+
+	if (client->getIsAuthenticated())
+	{
+		sendError(client, 462, "PASS");
+		return ;
+	}	
+	if (buffer.empty())
+	{
+		sendError(client, 461, "PASS");
+		return ;
+	}
+	if (buffer == server->getPassword())
+	{
+		client->setIsAuthenticated(true);
+		std::string response = ":localhost: Password accepted\r\n"; // TEMP for testing purpose.
+		send(client->getFd(), response.c_str(), response.length(), 0);
+	}
+	else
+	{
+		sendError(client, 464, "PASS");
+	}
+}
+
+
+void	Command::test(Client* client, std::string buffer)
+{
+	std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
+	send(client->getFd(), response.c_str(), response.length(), 0);
+}
+
 
 /*
 

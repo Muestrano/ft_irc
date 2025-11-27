@@ -26,8 +26,6 @@ class Server
 
 		Server(int port, std::string password);
 		~Server();
-	
-
 
 		void initServer();
 		void extractCompleteCommand(Client* client);
@@ -36,6 +34,8 @@ class Server
 		void newConnection();
 		void handleClientData(int i);
 		void disconnectClient(int i);
+
+		std::string getPassword() const;
 };
 
 
