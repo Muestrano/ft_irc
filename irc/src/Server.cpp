@@ -4,7 +4,7 @@
 /**
  * @param AF_INET ipv4 protocol
  * @param SOCK_STREAM TCP socket
-*/
+ */
 Server::Server(int port, std::string pass)
 {
 	this->socketFd = socket(AF_INET, SOCK_STREAM, 0);
@@ -22,23 +22,14 @@ Server::~Server()
 		close(socketFd);
 }
 
-Channel* Server::findChannel(const std::string name)
+// Getter
+
+std::string Server::getPassword() const
 {
- 	std::cout << "Chanel name: '" << name << "'" << std::endl;
-	std::cout << "channels size: " << channels.size() << std::endl;
-	std::cout << "channels addr: " << &channels << std::endl;
-	
-	std::map<std::string, Channel*>::iterator it = channels.find(name);
-	if (it != channels.end())
-		return it->second;
-	return (NULL);
+	return this->password;
 }
 
-void Server::addChannel(const std::string name, Channel* channel)
-{
-	channels[name] = channel;
-}
-
+// Public method
 
 /**
  * @brief Create a server fd and initialize poll/sockaddr struct
@@ -93,8 +84,6 @@ void Server::initServer()
 	listenerPollFd.revents = 0;
 
 	this->pollFd.push_back(listenerPollFd);
-
-
 }
 
 /**
@@ -114,10 +103,6 @@ void Server::disconnectClient(int i)
 	pollFd.erase(pollFd.begin() + i);
 
 }
-
-
-
-
 
 /**
  * @brief handle receive message and parse the command
@@ -154,6 +139,7 @@ void Server::handleClientData(int i)
 		}
 	}
 }
+
 /**
  * @param sockaddr_in socket struct adress ipv4 (sockaddr_in6 for ipv6)
  * @param accept extract connection to create a new fd with the three step handshake (SYN: Synchronize, SYN-ACK: Synchronize-Acknowledge, ACK: Acknowledge)
@@ -183,8 +169,9 @@ void Server::newConnection()
 		  std::cerr << "Erreur accept(): " << std::endl;
 	}
 }
+
 /**
- * 
+ * TODO Doxygen comment
 */
 void Server::startServer()
 {
@@ -213,6 +200,24 @@ void Server::startServer()
 		}
 	}
 }
+
+Channel* Server::findChannel(const std::string name)
+{
+ 	std::cout << "Chanel name: '" << name << "'" << std::endl;
+	std::cout << "channels size: " << channels.size() << std::endl;
+	std::cout << "channels addr: " << &channels << std::endl;
+	
+	std::map<std::string, Channel*>::iterator it = channels.find(name);
+	if (it != channels.end())
+		return it->second;
+	return (NULL);
+}
+
+void Server::addChannel(const std::string name, Channel* channel)
+{
+	channels[name] = channel;
+}
+
 /*
 poll give info if the operand accept, recv, send can execute
 fcntl with O_NONBLOCK flag to handle A/I operation
