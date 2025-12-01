@@ -40,4 +40,11 @@ void	Channel::addUser(const std::string key, Client* client)
 		operators[nickName] = client;
 	// sendJoinMsg(client); //TODO
 	std::cout << "new client: " << nickName << std::endl;
+	std::map<std::string, Client*>::iterator it;
+	it = members.begin();
+	while (it != members.end())
+	{
+		std::cout << "client member: " << it->first << std::endl;
+		it++;
+	}
 }

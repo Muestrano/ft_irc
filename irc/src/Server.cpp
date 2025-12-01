@@ -166,7 +166,7 @@ void Server::newConnection()
 	else
 	{
 		  if (errno != EAGAIN && errno != EWOULDBLOCK)
-		  std::cerr << "Erreur accept(): " << std::endl;
+		  	std::cerr << "Erreur accept(): " << std::endl;
 	}
 }
 
@@ -216,6 +216,13 @@ Channel* Server::findChannel(const std::string name)
 void Server::addChannel(const std::string name, Channel* channel)
 {
 	channels[name] = channel;
+	std::map<std::string, Channel*>::iterator it;
+	it = channels.begin();
+	while (it != channels.end())
+	{
+		std::cout << "channel list: " << it->first << std::endl;
+		it++;
+	}
 }
 
 /*
