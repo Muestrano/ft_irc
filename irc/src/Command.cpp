@@ -133,8 +133,9 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 	
 	switch (errorCode)
 	{
-		//case 421:
-		 	//error << "Unknown command."; // SOMETHIN TODO
+		case 421:
+		 	error << "Unknown command."; // SOMETHIN TODO
+			break;
 		case 431:
 			error << "Nickname is empty.";
 			break;
@@ -158,6 +159,16 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 			break;
 		case 464:
 			error << " :Password incorrect";
+			break;
+		case 471:
+			error << client->getNickName() << " " << errorMsg << " " ":Cannot join channel (+l)";
+			break;
+		case 473:
+			error << client->getNickName() << " " << errorMsg << " " ":Cannot join channel (+i)";
+			break;
+		case 475:
+			error << client->getNickName() << " " << errorMsg << " " ":Cannot join channel (+k)";
+			break;
 		default:
 			break;
 	}

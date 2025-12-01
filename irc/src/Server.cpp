@@ -118,9 +118,7 @@ void Server::handleClientData(int i)
 	ssize_t bytesRead = recv(clientFd, buffer, sizeof(buffer) - 1, 0);
 	if (bytesRead > 0)
 	{
-		std::cout << "received " << bytesRead << " bytes" << std::endl;
 		buffer[bytesRead] = '\0';
-		// std::cout << "data client " << clientFd << ": '" << buffer << "'" << std::endl;
 		client->setBuffer(buffer);
 		cmd.extractCompleteCommand(client);
 		// client->clearbuff() // TODO need to see if it's necessary
@@ -205,7 +203,7 @@ Channel* Server::findChannel(const std::string name)
 {
  	std::cout << "Chanel name: '" << name << "'" << std::endl;
 	std::cout << "channels size: " << channels.size() << std::endl;
-	std::cout << "channels addr: " << &channels << std::endl;
+	// std::cout << "channels addr: " << &channels << std::endl;
 	
 	std::map<std::string, Channel*>::iterator it = channels.find(name);
 	if (it != channels.end())
@@ -216,13 +214,13 @@ Channel* Server::findChannel(const std::string name)
 void Server::addChannel(const std::string name, Channel* channel)
 {
 	channels[name] = channel;
-	std::map<std::string, Channel*>::iterator it;
-	it = channels.begin();
-	while (it != channels.end())
-	{
-		std::cout << "channel list: " << it->first << std::endl;
-		it++;
-	}
+	// std::map<std::string, Channel*>::iterator it;
+	// it = channels.begin();
+	// while (it != channels.end())
+	// {
+	// 	std::cout << "channel list: " << it->first << std::endl;
+	// 	it++;
+	// }
 }
 
 /*
