@@ -12,23 +12,16 @@ Channel::Channel(std::string name, Client* clientOp) : name(name), password(""),
  * @brief msg to all user of one channel when someone joint it
  * @param MSG_CONFIRM flag confirm the msg il send
 */	
-void Channel::sendJoinMsg(Client *client)
+void Channel::sendAllChan(std::string message)
 {
-	// (void)*client;
-	// std::string msg = ":" + client->getNickName() + "!" + client->getUser() + "@" + client->getHostname() + " JOIN "  ":" + this->name + "\r\n";
-	// send(client->getFd(), msg.c_str(), msg.size(), 0);
-
-	// std::string msg = ":" + client->getNickName() + "!" + client->getUser() + "@" + client->getHostname() + " JOIN "  ":" + this->name + "\r\n";
-	std::string msg = ":" + client->getNickName() + "!" + client->getUser() + "@" + client->getHostname() + " JOIN " + this->name + "\r\n";
+	std::cout << "HHHHHHHHHHHH" << std::endl;
 	std::map<std::string, Client*>::iterator it;
 	it = members.begin();
 	while(it != members.end())
 	{
-		send(it->second->getFd(), msg.c_str(), msg.size(), MSG_CONFIRM);
+		send(it->second->getFd(), message.c_str(), message.size(), 0); //MSG_CONFIRM TEMP (check this flag)
 		it++;
 	} 
-	// 332, 353 et 366 rpl mandatory
-	// 400- 599 error code
 }
 
 /**
@@ -61,13 +54,14 @@ void	Channel::addUser(const std::string key, Client* client)
 	}
 	if (nbMember == 1)
 		operators[nickName] = client;
-	sendJoinMsg(client); //TODO
+	std::string message = ":" + client->getNickName() + "!" + client->getUser() + "@" + client->getHostname() + " JOIN " + this->name + "\r\n";
+	sendAllChan(message);
 	std::cout << "new client: " << nickName << std::endl;
-	std::map<std::string, Client*>::iterator it;
-	it = members.begin();
-	while (it != members.end())
-	{
-		std::cout << "client member: " << it->first << std::endl;
-		it++;
-	}
+	// std::map<std::string, Client*>::iterator it;
+	// it = members.begin();
+	// while (it != members.end())
+	// {
+	// 	std::cout << "client member: " << it->first << std::endl;
+	// 	it++;
+	// }
 }

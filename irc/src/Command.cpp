@@ -351,6 +351,9 @@ void	Command::join(Client* client, std::string buffer)
 			server->addChannel(channelName, channel);
 		}
 		channel->addUser(pass, client);
+	// 332, 353 et 366 rpl mandatory TODO
+	// 400- 599 error code
+
 	}
 }
 
