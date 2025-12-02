@@ -45,7 +45,8 @@ void Command::set_map(void)
 	CommandMap["USER"] = &Command::user;
 	CommandMap["JOIN"] = &Command::join;
 	
-	// CommandMap["MODE"] = &Command::mode;
+	CommandMap["MODE"] = &Command::mode;
+	CommandMap["WHO"] = &Command::mode;
 	// CommandMap["TOPIC"] = &Command::topic;
 	// CommandMap["INVITE"] = &Command::invite;
 	// CommandMap["KICK"] = &Command::kick;
@@ -105,15 +106,15 @@ void Command::extractCompleteCommand(Client* client)
 void Command::sendError(Client* client, int codeError, const std::string& command)
 {
 	std::string nickname = client->getNickName();
-    if (nickname.empty())
-        nickname = "*";
-    
-    std::stringstream error;
-    error << ":localhost " << codeError << " " << nickname;
-    error << " " << command << " :Unknown command\r\n";
-    
+	if (nickname.empty())
+		nickname = "*";
+	
+	std::stringstream error;
+	error << ":localhost " << codeError << " " << nickname;
+	error << " " << command << " :Unknown command\r\n";
+	
 	std::string stringError = error.str();
-    send(client->getFd(), stringError.c_str(), stringError.length(), 0);
+	send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
 
 /**
@@ -124,17 +125,18 @@ void Command::sendError(Client* client, int codeError, const std::string& comman
  */
 void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string errorMsg)
 {
-	std::string nickname = client->getNickName(); // TODO check if useful to avoid segfault
-    if (nickname.empty())
-        nickname = "*";
+	std::string nickname = client->getNickName();
+	if (nickname.empty())
+		nickname = "*";
 
-    std::stringstream error;
-    error << ":localhost " << "Error " << errorCode << " : ";
-	
+	std::stringstream error;
+	error << ":localhost " << errorCode << " " << nickname << " :";
+	(void)errorMsg;
 	switch (errorCode)
 	{
-		//case 421:
-		 	//error << "Unknown command."; // SOMETHIN TODO
+		case 421:
+		 	error << "Unknown command."; // SOMETHIN TODO
+			break;
 		case 431:
 			error << "Nickname is empty.";
 			break;
@@ -151,19 +153,29 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 			error << "Congrats Esteban! All test passed! 🫡 ";
 			break;
 		case 461:
-			error << "This command needs more parameters. ";
+			error << client->getNickName() << errorMsg << ":Not enough parameters";
 			break;
 		case 462:
 			error << "You already registered."; //TODO Add diff PASS et USER
 			break;
 		case 464:
 			error << " :Password incorrect";
+			break;
+		case 471:
+			error << client->getNickName() << " " << errorMsg << " " ":Cannot join channel (+l)";
+			break;
+		case 473:
+			error << client->getNickName() << " " << errorMsg << " " ":Cannot join channel (+i)";
+			break;
+		case 475:
+			error << client->getNickName() << " " << errorMsg << " " ":Cannot join channel (+k)";
+			break;
 		default:
 			break;
 	}
 	error << errorMsg << std::endl;
 	std::string stringError = error.str();
-    send(client->getFd(), stringError.c_str(), stringError.length(), 0);
+	send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
 
 /**
@@ -306,9 +318,7 @@ void	Command::join(Client* client, std::string buffer)
 	std::string out;
 	while (std::getline(channelSS, out, ','))
 	{
-		// if (!out.empty() && out[0] == '#' || !out.empty() && out[0] == '&') //TEMP
-		// 	out.erase(0, 1);
-		if (out[0] == '#' || out[0] == '&')
+		if (out[0] == '#' || out[0] == '&' || out[0] == '!' || out[0] == '+')
 			channelV.push_back(out);
 	}
 	if (!keyStr.empty())
@@ -343,6 +353,29 @@ void	Command::join(Client* client, std::string buffer)
 		channel->addUser(pass, client);
 	}
 }
+
+void Command::mode(Client* client, std::string buffer) //TODO
+{
+	if (buffer.empty())
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
+		return;
+	}
+	std::string msg = ":" + client->getHostname() +  " 324 " + client->getNickName() + " " + buffer + " +\r\n"; // RPL_CHANNELMODEIS (324)
+	send(client->getFd(), msg.c_str(), msg.size(), 0);
+}
+
+void Command::who(Client* client, std::string buffer) //TODO
+{
+	if (buffer.empty())
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
+		return;
+	}
+	std::string msg = client->getFd() + " " + buffer + " " + client->getUser() + " " + client->getHostname() + client->getNickName() + " :" + "0 " + client->getRealName() + "\r\n"; //RPL_WHOREPLY (352)
+	send(client->getFd(), msg.c_str(), msg.size(), 0);
+}
+
 
 void	Command::test(Client* client, std::string buffer)
 {

@@ -6,11 +6,11 @@
 	For handle non blocking we can put data into buffer
 */
 
-Client::Client() : nickName(""), userName(""), isAuthenticated(false), isRegistered(false) 
+Client::Client() : nickName(""), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isRegistered(false)
 {
 }
 
-Client::Client(int fd) : nickName(""), userName(""), isAuthenticated(false), isRegistered(false), clientFd(fd)
+Client::Client(int fd) : nickName(""), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isRegistered(false), clientFd(fd)
 {
 }
 
@@ -41,6 +41,11 @@ std::string& Client::getBuffer()
 {
 	return (this->buffer);
 }
+std::string Client::getRealName() const
+{
+	return (this->realName);
+}
+
 
 int Client::getFd() const
 {

@@ -33,6 +33,7 @@ class Client
 		std::string getUser() const;
 		std::string getHostname() const;
 		std::string& getBuffer();
+		std::string getRealName() const;
 		int getFd() const;
 		bool getIsRegistered() const;
 		bool getIsAuthenticated() const;

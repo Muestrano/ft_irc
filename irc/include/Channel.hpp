@@ -4,6 +4,7 @@
 #include "include.hpp"
 
 class Client;
+class Command;
 
 class Channel
 {
@@ -23,6 +24,8 @@ class Channel
 		~Channel();
 
 		void addUser(const std::string, Client* client);
+		void sendJoinMsg(Client* client); //TODO
+
 
 
 

@@ -18,7 +18,7 @@ class Server
 
 		std::vector<struct pollfd> pollFd;
 		std::map<int, Client*> clients;  // FD -> Client
-    	std::map<std::string, Channel*> channels; //TODO
+		std::map<std::string, Channel*> channels; //TODO
 
 		struct sockaddr_in serverAddr;
 	
