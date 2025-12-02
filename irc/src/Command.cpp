@@ -106,15 +106,15 @@ void Command::extractCompleteCommand(Client* client)
 void Command::sendError(Client* client, int codeError, const std::string& command)
 {
 	std::string nickname = client->getNickName();
-    if (nickname.empty())
-        nickname = "*";
-    
-    std::stringstream error;
-    error << ":localhost " << codeError << " " << nickname;
-    error << " " << command << " :Unknown command\r\n";
-    
+	if (nickname.empty())
+		nickname = "*";
+	
+	std::stringstream error;
+	error << ":localhost " << codeError << " " << nickname;
+	error << " " << command << " :Unknown command\r\n";
+	
 	std::string stringError = error.str();
-    send(client->getFd(), stringError.c_str(), stringError.length(), 0);
+	send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
 
 /**
@@ -125,12 +125,12 @@ void Command::sendError(Client* client, int codeError, const std::string& comman
  */
 void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string errorMsg)
 {
-	std::string nickname = client->getNickName(); // TODO check if useful to avoid segfault
-    if (nickname.empty())
-        nickname = "*";
+	std::string nickname = client->getNickName();
+	if (nickname.empty())
+		nickname = "*";
 
-    std::stringstream error;
-    error << ":localhost " << "Error " << errorCode << " : ";
+	std::stringstream error;
+	error << ":localhost " << errorCode << " " << nickname << " :";
 	(void)errorMsg;
 	switch (errorCode)
 	{
@@ -175,7 +175,7 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 	}
 	error << errorMsg << std::endl;
 	std::string stringError = error.str();
-    send(client->getFd(), stringError.c_str(), stringError.length(), 0);
+	send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
 
 /**
@@ -318,9 +318,7 @@ void	Command::join(Client* client, std::string buffer)
 	std::string out;
 	while (std::getline(channelSS, out, ','))
 	{
-		// if (!out.empty() && out[0] == '#' || !out.empty() && out[0] == '&') //TEMP
-		// 	out.erase(0, 1);
-		if (out[0] == '#' || out[0] == '&')
+		if (out[0] == '#' || out[0] == '&' || out[0] == '!' || out[0] == '+')
 			channelV.push_back(out);
 	}
 	if (!keyStr.empty())
