@@ -41,6 +41,11 @@ std::string& Client::getBuffer()
 {
 	return (this->buffer);
 }
+std::string Client::getRealName() const
+{
+	return (this->realName);
+}
+
 
 int Client::getFd() const
 {

@@ -45,7 +45,8 @@ void Command::set_map(void)
 	CommandMap["USER"] = &Command::user;
 	CommandMap["JOIN"] = &Command::join;
 	
-	// CommandMap["MODE"] = &Command::mode;
+	CommandMap["MODE"] = &Command::mode;
+	CommandMap["WHO"] = &Command::mode;
 	// CommandMap["TOPIC"] = &Command::topic;
 	// CommandMap["INVITE"] = &Command::invite;
 	// CommandMap["KICK"] = &Command::kick;
@@ -130,7 +131,7 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 
     std::stringstream error;
     error << ":localhost " << "Error " << errorCode << " : ";
-	
+	(void)errorMsg;
 	switch (errorCode)
 	{
 		case 421:
@@ -152,7 +153,7 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 			error << "Congrats Esteban! All test passed! 🫡 ";
 			break;
 		case 461:
-			error << "This command needs more parameters. ";
+			error << client->getNickName() << errorMsg << ":Not enough parameters";
 			break;
 		case 462:
 			error << "You already registered."; //TODO Add diff PASS et USER
@@ -354,6 +355,29 @@ void	Command::join(Client* client, std::string buffer)
 		channel->addUser(pass, client);
 	}
 }
+
+void Command::mode(Client* client, std::string buffer) //TODO
+{
+	if (buffer.empty())
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
+		return;
+	}
+	std::string msg = ":" + client->getHostname() +  " 324 " + client->getNickName() + " " + buffer + " +\r\n"; // RPL_CHANNELMODEIS (324)
+	send(client->getFd(), msg.c_str(), msg.size(), 0);
+}
+
+void Command::who(Client* client, std::string buffer) //TODO
+{
+	if (buffer.empty())
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
+		return;
+	}
+	std::string msg = client->getFd() + " " + buffer + " " + client->getUser() + " " + client->getHostname() + client->getNickName() + " :" + "0 " + client->getRealName() + "\r\n"; //RPL_WHOREPLY (352)
+	send(client->getFd(), msg.c_str(), msg.size(), 0);
+}
+
 
 void	Command::test(Client* client, std::string buffer)
 {

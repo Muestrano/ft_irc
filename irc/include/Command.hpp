@@ -55,13 +55,14 @@ class Command
 		void nick(Client* client, std::string buffer);
 		void user(Client* client, std::string buffer);
 		void join(Client* client, std::string buffer);
+		void mode(Client* client, std::string buffer);
+		void who(Client* client, std::string buffer);
 		
 		void test(Client* client, std::string buffer); // TODO Delete later.
 		//std::string codeToString(int value); // TODO Delete.
 		
 		// void	pass_chan(Client* client, std::string buffer);
 		// void	join(Client* client, std::string buffer);
-		// void	mode(Client* client, std::string buffer);
 		// void	topic(Client* client, std::string buffer);
 		// void	invite(Client* client, std::string buffer);
 		// void	kick(Client* client, std::string buffer);
