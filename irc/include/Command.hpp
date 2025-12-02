@@ -49,7 +49,7 @@ class Command
 		void set_map(void);
 		void prepareCommand(Client* client, std::string line);
 		void extractCompleteCommand(Client* client);
-		void sendError(Client* client, int codeError, const std::string& message);
+		// void sendError(Client* client, int codeError, const std::string& message);
 		void sendErrorCode(Client* client, ErrorCode errorCode, std::string errorMsg);
 		void pass_serv(Client* client, std::string buffer);
 		void nick(Client* client, std::string buffer);

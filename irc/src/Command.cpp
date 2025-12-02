@@ -79,7 +79,7 @@ void Command::prepareCommand(Client* client, std::string line)
 	}
 	else
 	{
-		sendError(client, 421, command); // to do
+		sendErrorCode(client, ERR_UNKNOWNCOMMAND, command); // to do
 	}
 }
 
@@ -103,19 +103,19 @@ void Command::extractCompleteCommand(Client* client)
 }
 
 // TEMP - TODO implement in sendErrorCode funct to get rid of it.
-void Command::sendError(Client* client, int codeError, const std::string& command)
-{
-	std::string nickname = client->getNickName();
-	if (nickname.empty())
-		nickname = "*";
+// void Command::sendError(Client* client, int codeError, const std::string& command)
+// {
+// 	std::string nickname = client->getNickName();
+// 	if (nickname.empty())
+// 		nickname = "*";
 	
-	std::stringstream error;
-	error << ":localhost " << codeError << " " << nickname;
-	error << " " << command << " :Unknown command\r\n";
+// 	std::stringstream error;
+// 	error << ":localhost " << codeError << " " << nickname;
+// 	error << " " << command << " :Unknown command\r\n";
 	
-	std::string stringError = error.str();
-	send(client->getFd(), stringError.c_str(), stringError.length(), 0);
-}
+// 	std::string stringError = error.str();
+// 	send(client->getFd(), stringError.c_str(), stringError.length(), 0);
+// }
 
 /**
  * @brief Handles error codes and send the appropriate message
@@ -135,7 +135,7 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 	switch (errorCode)
 	{
 		case 421:
-		 	error << "Unknown command."; // SOMETHIN TODO
+		 	error << errorMsg << " :Unknown command\r\n"; // SOMETHIN TODO
 			break;
 		case 431:
 			error << "Nickname is empty.";
@@ -173,7 +173,8 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 		default:
 			break;
 	}
-	error << errorMsg << std::endl;
+	if (errorCode != 421)
+		error << errorMsg << std::endl;
 	std::string stringError = error.str();
 	send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
@@ -185,13 +186,13 @@ void	Command::pass_serv(Client* client, std::string buffer)
 {
 	if (client->getIsAuthenticated())
 	{
-		sendError(client, 462, "PASS");
+		sendErrorCode(client, ERR_ALREADYREGISTERED, "PASS");
 		return;
 	}
 
 	if (buffer.empty())
 	{
-		sendError(client, 461, "PASS");
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "PASS");
 		return;
 	}
 
@@ -204,7 +205,7 @@ void	Command::pass_serv(Client* client, std::string buffer)
 	}
 	else
 	{
-		sendError(client, 464, "PASS");
+		sendErrorCode(client, ERR_PASSWDMISMATCH, "PASS");
 		std::cout << "[AUTH] Client " << client->getFd() << " - Wrong password" << std::endl;
 	}
 }
@@ -219,12 +220,12 @@ void Command::nick(Client* client, std::string buffer)
 	std::string	error;
 	if (buffer.empty())
 	{
-		sendErrorCode(client, ERR_NONICKNAMEGIVEN, "");
+		sendErrorCode(client, ERR_NONICKNAMEGIVEN, " Use /NICK <nickname> to set your nickname.");
 		return ;
 	}
 	else if (buffer == client->getNickName())
 	{
-		sendErrorCode(client, ERR_NICKNAMEINUSE, "");
+		sendErrorCode(client, ERR_NICKNAMEINUSE, " Use /NICK <nickname> and try again with another one.");
 		return ;
 	}
 	else if (buffer[0] == '#' || buffer[0] == ':' || buffer.find(" ") != std::string::npos)
@@ -247,6 +248,7 @@ void Command::nick(Client* client, std::string buffer)
 	std::string message = client->getNickName() + " changed his nickname to " + buffer + ".\r\n";
 	send(client->getFd(), message.c_str(), message.length(), 0);
 	client->setNickName(buffer);
+	client->setIsNick(true);
 }
 
 /**
@@ -291,8 +293,9 @@ void Command::user(Client* client, std::string buffer)
 	}
 	client->setIsRegistered(true);
 	std::string message = client->getNickName() + " set his username to " + params[0] + " (" + params[3] + ").\r\n";
-	client->setUser(params[0]);
+	client->setUserName(params[0]);
 	client->setRealName(params[3]);
+	client->setIsUser(true);
 	send(client->getFd(), message.c_str(), message.length(), 0);
 	// sendWelcome(client); TODO (see at bottom)
 }
@@ -372,7 +375,8 @@ void Command::who(Client* client, std::string buffer) //TODO
 		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
 		return;
 	}
-	std::string msg = client->getFd() + " " + buffer + " " + client->getUser() + " " + client->getHostname() + client->getNickName() + " :" + "0 " + client->getRealName() + "\r\n"; //RPL_WHOREPLY (352)
+	
+	std::string msg = client->getStringFd() + " " + buffer + " " + client->getUser() + " " + client->getHostname() + client->getNickName() + " :" + "0 " + client->getRealName() + "\r\n"; //RPL_WHOREPLY (352)
 	send(client->getFd(), msg.c_str(), msg.size(), 0);
 }
 
