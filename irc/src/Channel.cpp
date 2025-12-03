@@ -14,7 +14,7 @@ Channel::Channel(std::string name, Client* clientOp) : name(name), password(""),
 */	
 void Channel::sendAllChan(std::string message)
 {
-	std::cout << "HHHHHHHHHHHH" << std::endl;
+	std::cout << message << std::endl;
 	std::map<std::string, Client*>::iterator it;
 	it = members.begin();
 	while(it != members.end())
@@ -23,6 +23,9 @@ void Channel::sendAllChan(std::string message)
 		it++;
 	} 
 }
+
+
+// }
 
 /**
  * @brief check all Mode operator before add user in std::map members
@@ -57,11 +60,4 @@ void	Channel::addUser(const std::string key, Client* client)
 	std::string message = ":" + client->getNickName() + "!" + client->getUser() + "@" + client->getHostname() + " JOIN " + this->name + "\r\n";
 	sendAllChan(message);
 	std::cout << "new client: " << nickName << std::endl;
-	// std::map<std::string, Client*>::iterator it;
-	// it = members.begin();
-	// while (it != members.end())
-	// {
-	// 	std::cout << "client member: " << it->first << std::endl;
-	// 	it++;
-	// }
 }
