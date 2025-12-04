@@ -380,12 +380,15 @@ void Command::who(Client* client, std::string buffer) //TODO
 		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
 		return;
 	}
-	std::string msg = client->getFd() + " " + buffer 
-						+ " " + client->getUser() 
-						+ " " + client->getHostname() 
-						+ client->getNickName() + " :" 
-						+ "0 " + client->getRealName() + "\r\n"; //RPL_WHOREPLY (352)
-	send(client->getFd(), msg.c_str(), msg.size(), 0);
+	std::ostringstream oss;
+	oss << client->getFd() << " " << buffer 
+						<< " " << client->getUser() 
+						<< " " << client->getHostname() 
+						<< client->getNickName() << " :" 
+						<< "0 " << client->getRealName() << "\r\n"; //RPL_WHOREPLY (352)
+
+	std::string msg = oss.str();
+	send(client->getFd(), msg.c_str() , msg.size(), 0);
 }
 
 void Command::privmsg(Client* client, std::string buffer)
