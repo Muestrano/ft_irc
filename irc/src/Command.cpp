@@ -445,7 +445,7 @@ void Command::part(Client* client, std::string buffer)
 			sendErrorCode(client, ERR_NOTONCHANNEL, ""); // 442
 		else if (channel->isOnChan(client, channel))
 		{
-			channel->removeMember(client, channel);
+			channel->removeMember(client, channel, server);
 		}
 		else // channel == NULL
 			sendErrorCode(client, ERR_NOSUCHCHANNEL, ""); //403

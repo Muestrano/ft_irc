@@ -74,7 +74,7 @@ bool Channel::isOnChan(Client* client, Channel* channel)
 	return (false);
 }
 
-void Channel::removeMember(Client* client, Channel* channel) // we can make switch case with string "member" or "comment" to remove one of them
+void Channel::removeMember(Client* client, Channel* channel, Server* server) // we can make switch case with string "member" or "comment" to remove one of them
 {
 	std::map<std::string, Client*>::iterator it;
 	it = channel->members.begin();
@@ -85,11 +85,13 @@ void Channel::removeMember(Client* client, Channel* channel) // we can make swit
 		{
 			nbMember--;
 			members.erase(it);
-			it--;
+			it = channel->members.begin();
+			// TODOrm channel if the last leave
 		}
+		// operator.erase(it); //TODO
 		else 
-			it++;
-		std::cout << it->first << std::endl;
-		
+			it++;		
 	}
+	if (nbMember == 0) //TODO
+		server->channels;
 }
