@@ -16,8 +16,8 @@ class Client
 		
 		bool isAuthenticated;
 
-		bool	Nick;
-		bool	User;
+		bool	IsNick;
+		bool	IsUser;
 		bool	isRegistered; // Pass -> Nick -> User
 
 		int 		clientFd;
@@ -37,15 +37,20 @@ class Client
 		int getFd() const;
 		bool getIsRegistered() const;
 		bool getIsAuthenticated() const;
+		bool getIsNick() const;
+		bool getIsUser() const;
+		std::string getStringFd() const;
 
 		// setters
 		void setRealName(const std::string& real);
 		void setHostname(const std::string& hostname);
 		void setNickName(const std::string& nick);
-		void setUser(const std::string& user);
+		void setUserName(const std::string& user);
 		void setBuffer(const std::string& buffer);
 		void setIsRegistered(const bool registered);
 		void setIsAuthenticated(bool isAuthenticated);
+		void setIsNick(bool nick_registered);
+		void setIsUser(bool user_registered);
 };
 
 #endif

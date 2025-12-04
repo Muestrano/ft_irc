@@ -6,11 +6,11 @@
 	For handle non blocking we can put data into buffer
 */
 
-Client::Client() : nickName(""), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isRegistered(false)
+Client::Client() : nickName("guest42"), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isRegistered(false)
 {
 }
 
-Client::Client(int fd) : nickName(""), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isRegistered(false), clientFd(fd)
+Client::Client(int fd) : nickName("guest42"), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isRegistered(false), clientFd(fd)
 {
 }
 
@@ -62,6 +62,23 @@ bool Client::getIsAuthenticated() const
 	return (this->isAuthenticated);
 }
 
+bool Client::getIsNick() const
+{
+	return (this->IsNick);
+}
+
+bool Client::getIsUser() const
+{
+	return (this->IsUser);
+}
+
+std::string Client::getStringFd() const
+{
+	std::ostringstream oss;
+    oss << this->getFd();
+    return(oss.str());
+}
+
 // Setters
 
 void Client::setRealName(const std::string &real)
@@ -79,7 +96,7 @@ void Client::setNickName(const std::string &nick)
 	this->nickName = nick;
 }
 
-void Client::setUser(const std::string &user)
+void Client::setUserName(const std::string &user)
 {
 	this->userName = user;
 }
@@ -97,4 +114,13 @@ void Client::setIsRegistered(const bool registered)
 void Client::setIsAuthenticated(bool authenticated)
 {
 	this->isAuthenticated = authenticated;
+}
+
+void Client::setIsNick(bool nick_registered)
+{
+	this->IsNick = nick_registered;
+}
+void Client::setIsUser(bool user_registered)
+{
+	this->IsUser = user_registered;
 }
