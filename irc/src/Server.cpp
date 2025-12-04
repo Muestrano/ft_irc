@@ -216,6 +216,18 @@ void Server::addChannel(const std::string name, Channel* channel)
 	channels[name] = channel;
 }
 
+bool Server::isNickRegistered(std::string nick)
+{
+	std::map<int, Client*>::iterator it = this->clients.begin();
+	while (it != this->clients.end())
+	{
+		if (nick == it->second->getNickName())
+			return (true);
+		it++;
+	}
+	return (false);
+}
+
 /*
 poll give info if the operand accept, recv, send can execute
 fcntl with O_NONBLOCK flag to handle A/I operation

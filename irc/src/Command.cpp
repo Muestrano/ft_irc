@@ -128,53 +128,42 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 	std::string nickname = client->getNickName();
 	if (nickname.empty())
 		nickname = "*";
-
 	std::stringstream error;
-	error << ":localhost " << errorCode << " " << nickname << " :";
-	(void)errorMsg;
 	switch (errorCode)
 	{
-		case 421:
-		 	error << errorMsg << " :Unknown command\r\n"; // SOMETHIN TODO
+		case ERR_UNKNOWNCOMMAND: // "<client> <command> :Unknown command"
+			error << client->getNickName() << " " << errorMsg << " :Unknown command.\r\n";
 			break;
-		case 431:
-			error << "Nickname is empty.";
+		case ERR_NONICKNAMEGIVEN: // "<client> :No nickname given"
+			error << client->getNickName() << " :No nickname given.\r\n";
 			break;
-		case 432:
-			error << "The first character of your nickname cannot be \"#\" neither \":\". You can't have space character in your nickname. ";
+		case ERR_ERRONEUSNICKNAME: // "<client> <nick> :Erroneus nickname"
+			error << client->getNickName() << " " << errorMsg << " :Erroneus nickname. The first character of your nickname cannot be \"#\" neither \":\". You can't have space character in your nickname.\r\n";
 			break;
-		case 433:
-			error << "This nickname is already registered. ";
+		case ERR_NICKNAMEINUSE: // "<client> <nick> :Nickname is already in use"
+			error << client->getNickName() << " " << errorMsg << " :Nickname is already in use. Please try again with another one.\r\n";
 			break;
-		case 436:
-			error << "Leo has been pre-shot. Try again bro! ";
+		case ERR_NEEDMOREPARAMS: // "<client> <command> :Not enough parameters"
+			error << client->getNickName() << " " << errorMsg << " :Not enough parameters.\r\n";
 			break;
-		case 437:
-			error << "Congrats Esteban! All test passed! 🫡 ";
+		case ERR_ALREADYREGISTERED: // "<client> :You may not reregister"
+			error << client->getNickName() << " :You may not register.\r\n";
 			break;
-		case 461:
-			error << client->getNickName() << errorMsg << ":Not enough parameters";
+		case ERR_PASSWDMISMATCH: // "<client> :Password incorrect"
+			error << client->getNickName() << " :Password incorrect\r\n";
 			break;
-		case 462:
-			error << "You already registered."; //TODO Add diff PASS et USER
+		case ERR_CHANNELISFULL: //"<client> <channel> :Cannot join channel (+l)"
+			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+l)\r\n";
 			break;
-		case 464:
-			error << " :Password incorrect";
+		case ERR_INVITEONLYCHAN: // "<client> <channel> :Cannot join channel (+i)"
+			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+i)\r\n";
 			break;
-		case 471:
-			error << client->getNickName() << " " << errorMsg << " " ":Cannot join channel (+l)";
-			break;
-		case 473:
-			error << client->getNickName() << " " << errorMsg << " " ":Cannot join channel (+i)";
-			break;
-		case 475:
-			error << client->getNickName() << " " << errorMsg << " " ":Cannot join channel (+k)";
+		case ERR_BADCHANNELKEY: // "<client> <channel> :Cannot join channel (+k)"
+			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+k)\r\n";
 			break;
 		default:
 			break;
 	}
-	if (errorCode != 421)
-		error << errorMsg << std::endl;
 	std::string stringError = error.str();
 	send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
@@ -220,12 +209,12 @@ void Command::nick(Client* client, std::string buffer)
 	std::string	error;
 	if (buffer.empty())
 	{
-		sendErrorCode(client, ERR_NONICKNAMEGIVEN, " Use /NICK <nickname> to set your nickname.");
+		sendErrorCode(client, ERR_NONICKNAMEGIVEN, "");
 		return ;
 	}
-	else if (buffer == client->getNickName())
+	else if (this->server->isNickRegistered(buffer))
 	{
-		sendErrorCode(client, ERR_NICKNAMEINUSE, " Use /NICK <nickname> and try again with another one.");
+		sendErrorCode(client, ERR_NICKNAMEINUSE, buffer);
 		return ;
 	}
 	else if (buffer[0] == '#' || buffer[0] == ':' || buffer.find(" ") != std::string::npos)
@@ -233,22 +222,12 @@ void Command::nick(Client* client, std::string buffer)
 		sendErrorCode(client, ERR_ERRONEUSNICKNAME, "");
 		return ;
 	}
-	else if (buffer.find("zboub") != std::string::npos
-			|| buffer.find("zgeg") != std::string::npos
-				|| buffer.find("goumer")!= std::string::npos)
-	{
-		sendErrorCode(client, ERR_TARGETLEO, "");
-		return ;
-	}
-	else if (buffer == "test" || buffer == "Test" || buffer == "TEST")
-	{
-		sendErrorCode(client, ERR_TARGETESTEBAN, "");
-		return ;
-	}
 	std::string message = client->getNickName() + " changed his nickname to " + buffer + ".\r\n";
 	send(client->getFd(), message.c_str(), message.length(), 0);
 	client->setNickName(buffer);
 	client->setIsNick(true);
+	if (client->getIsUser())
+		client->setIsRegistered(true);
 }
 
 /**
@@ -263,7 +242,7 @@ void Command::user(Client* client, std::string buffer)
 	std::string					token;
 	std::string					error;
 
-	if (client->getIsRegistered())
+	if (client->getIsUser())
 	{
 		sendErrorCode(client, ERR_ALREADYREGISTERED, "");
 		return ;
@@ -283,12 +262,12 @@ void Command::user(Client* client, std::string buffer)
 	}
 	if (params.size() < 4)
 	{
-		sendErrorCode(client, ERR_NEEDMOREPARAMS, "Syntax : /USER <username> 0 * :<realname>");
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "USER"); // "Syntax : /USER <username> 0 * :<realname>"
 		return;
 	}
 	if (params.size() > 4)
 	{
-		sendErrorCode(client, ERR_NEEDMOREPARAMS, "You need \":\" before your realname if it contains spaces.");
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "USER"); // "You need \":\" before your realname if it contains spaces."
 		return;
 	}
 	client->setIsRegistered(true);
@@ -296,6 +275,8 @@ void Command::user(Client* client, std::string buffer)
 	client->setUserName(params[0]);
 	client->setRealName(params[3]);
 	client->setIsUser(true);
+	if (client->getIsNick())
+		client->setIsRegistered(true);
 	send(client->getFd(), message.c_str(), message.length(), 0);
 	// sendWelcome(client); TODO (see at bottom)
 }
