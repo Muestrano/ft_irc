@@ -50,7 +50,7 @@ void Command::set_map(void)
 	// CommandMap["TOPIC"] = &Command::topic;
 	// CommandMap["INVITE"] = &Command::invite;
 	// CommandMap["KICK"] = &Command::kick;
-	// CommandMap["PRIVMSG"] = &Command::privmsg;
+	CommandMap["PRIVMSG"] = &Command::privmsg;
 	// CommandMap["PART"] = &Command::exit;
 	// CommandMap["QUIT"] = &Command::quit;
 }
@@ -351,6 +351,9 @@ void	Command::join(Client* client, std::string buffer)
 			server->addChannel(channelName, channel);
 		}
 		channel->addUser(pass, client);
+	// 332, 353 et 366 rpl mandatory TODO
+	// 400- 599 error code
+
 	}
 }
 
@@ -361,7 +364,9 @@ void Command::mode(Client* client, std::string buffer) //TODO
 		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
 		return;
 	}
-	std::string msg = ":" + client->getHostname() +  " 324 " + client->getNickName() + " " + buffer + " +\r\n"; // RPL_CHANNELMODEIS (324)
+	std::string msg = ":" + client->getHostname() +  " 324 " 
+						+ client->getNickName() 
+						+ " " + buffer + " +\r\n"; // RPL_CHANNELMODEIS (324)
 	send(client->getFd(), msg.c_str(), msg.size(), 0);
 }
 
@@ -372,8 +377,31 @@ void Command::who(Client* client, std::string buffer) //TODO
 		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
 		return;
 	}
-	std::string msg = client->getFd() + " " + buffer + " " + client->getUser() + " " + client->getHostname() + client->getNickName() + " :" + "0 " + client->getRealName() + "\r\n"; //RPL_WHOREPLY (352)
+	std::string msg = client->getFd() + " " + buffer 
+						+ " " + client->getUser() 
+						+ " " + client->getHostname() 
+						+ client->getNickName() + " :" 
+						+ "0 " + client->getRealName() + "\r\n"; //RPL_WHOREPLY (352)
 	send(client->getFd(), msg.c_str(), msg.size(), 0);
+}
+
+void Command::privmsg(Client* client, std::string buffer)
+{
+	(void)*client;
+	std::stringstream ss(buffer);
+	std::string channelName;
+	std::string message;
+	ss >> channelName;
+	std::getline(ss, message);
+	message.erase(0, 2);
+
+	Channel* channel = server->findChannel(channelName);
+	std::string ircMsg = ":" + client->getNickName() + "!" 
+                                    + client->getUser() + "@" 
+                                    + client->getHostname() 
+                                    + " PRIVMSG " + channelName	 
+                                    + " :" + message + "\r\n";
+	channel->sendAllChan(ircMsg);
 }
 
 

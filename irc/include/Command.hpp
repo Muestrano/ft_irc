@@ -66,7 +66,7 @@ class Command
 		// void	topic(Client* client, std::string buffer);
 		// void	invite(Client* client, std::string buffer);
 		// void	kick(Client* client, std::string buffer);
-		// void	privmsg(Client* client, std::string buffer);
+		void	privmsg(Client* client, std::string buffer);
 		// void	exit(Client* client, std::string buffer);
 		// void	quit(Client* client, std::string buffer);
 

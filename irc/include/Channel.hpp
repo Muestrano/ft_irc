@@ -24,7 +24,7 @@ class Channel
 		~Channel();
 
 		void addUser(const std::string, Client* client);
-		void sendJoinMsg(Client* client); //TODO
+		void sendAllChan(std::string message); //TODO
 
 
 
