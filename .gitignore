@@ -7,6 +7,7 @@ obj/
 # Ignore vscode config files
 
 .vscode
+.vscode/
 *.json
 
 # Ignore ircserv compiled files
