@@ -56,7 +56,10 @@ void Command::set_map(void)
 }
 
 /**
- * @brief extract the command and params to handle it
+ * @brief Extract the command and params.
+ * Performs the appropriate rights check depending on the command called.
+ * Call the command from the command map.
+ * 
 */
 void Command::prepareCommand(Client* client, std::string line)
 {
