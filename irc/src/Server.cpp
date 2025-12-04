@@ -201,9 +201,8 @@ void Server::startServer()
 
 Channel* Server::findChannel(const std::string name)
 {
- 	std::cout << "Chanel name: '" << name << "'" << std::endl;
-	std::cout << "channels size: " << channels.size() << std::endl;
-	// std::cout << "channels addr: " << &channels << std::endl;
+ 	std::cout << "Chanel name: '" << name << "'" << std::endl; //TEMP
+	std::cout << "channels size: " << channels.size() << std::endl; //TEMP
 	
 	std::map<std::string, Channel*>::iterator it = channels.find(name);
 	if (it != channels.end())

@@ -9,6 +9,7 @@ enum ErrorCode
 	ERR_NONICKNAMEGIVEN = 431,
 	ERR_ERRONEUSNICKNAME = 432,
 	ERR_NICKNAMEINUSE = 433,
+	ERR_NOTREGISTERED = 451, // Check if useful
 	ERR_NEEDMOREPARAMS = 461,
 	ERR_ALREADYREGISTERED = 462,
 	ERR_PASSWDMISMATCH = 464,
@@ -64,7 +65,7 @@ class Command
 		// void	topic(Client* client, std::string buffer);
 		// void	invite(Client* client, std::string buffer);
 		// void	kick(Client* client, std::string buffer);
-		// void	privmsg(Client* client, std::string buffer);
+		void	privmsg(Client* client, std::string buffer);
 		// void	exit(Client* client, std::string buffer);
 		// void	quit(Client* client, std::string buffer);
 

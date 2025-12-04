@@ -50,13 +50,16 @@ void Command::set_map(void)
 	// CommandMap["TOPIC"] = &Command::topic;
 	// CommandMap["INVITE"] = &Command::invite;
 	// CommandMap["KICK"] = &Command::kick;
-	// CommandMap["PRIVMSG"] = &Command::privmsg;
+	CommandMap["PRIVMSG"] = &Command::privmsg;
 	// CommandMap["PART"] = &Command::exit;
 	// CommandMap["QUIT"] = &Command::quit;
 }
 
 /**
- * @brief extract the command and params to handle it
+ * @brief Extract the command and params.
+ * Performs the appropriate rights check depending on the command called.
+ * Call the command from the command map.
+ * 
 */
 void Command::prepareCommand(Client* client, std::string line)
 {
@@ -72,14 +75,36 @@ void Command::prepareCommand(Client* client, std::string line)
 
 	param.erase(0, param.find_first_not_of(" ")); //erase space befor params
 
+	// Authentication checking
+	if (command != "PASS" && command != "CAP" && command != "QUIT")
+	{
+		if (!client->getIsAuthenticated())
+		{
+			sendErrorCode(client, ERR_NOTREGISTERED, command);
+			return;
+		}
+	}
+
+	// Registration checking
+	if (command == "JOIN" || command == "PRIVMSG" || command == "MODE" 
+		|| command == "WHO" || command == "TOPIC" || command == "INVITE"
+		|| command == "KICK" || command == "PART")
+	{
+		if (!client->getIsRegistered())
+		{
+			sendErrorCode(client, ERR_NOTREGISTERED, command);
+			return;
+		}
+	}
+
 	if (CommandMap.find(command) != CommandMap.end())
 	{
-		FtCommand funcMap = CommandMap[command]; // std::map<std::string, FtCommand> CommandMap;
+		FtCommand funcMap = CommandMap[command];
 		(this->*funcMap)(client, param); 
 	}
 	else
 	{
-		sendErrorCode(client, ERR_UNKNOWNCOMMAND, command); // to do
+		sendErrorCode(client, ERR_UNKNOWNCOMMAND, command);
 	}
 }
 
@@ -132,44 +157,53 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 	switch (errorCode)
 	{
 		case ERR_UNKNOWNCOMMAND: // "<client> <command> :Unknown command"
-			error << client->getNickName() << " " << errorMsg << " :Unknown command.\r\n";
+			error << client->getNickName() << " " << errorMsg << " :Unknown command.";
 			break;
 		case ERR_NONICKNAMEGIVEN: // "<client> :No nickname given"
-			error << client->getNickName() << " :No nickname given.\r\n";
+			error << client->getNickName() << " :No nickname given.";
 			break;
 		case ERR_ERRONEUSNICKNAME: // "<client> <nick> :Erroneus nickname"
-			error << client->getNickName() << " " << errorMsg << " :Erroneus nickname. The first character of your nickname cannot be \"#\" neither \":\". You can't have space character in your nickname.\r\n";
+			error << client->getNickName() << " " << errorMsg << " :Erroneus nickname. The first character of your nickname cannot be \"#\" neither \":\". You can't have space character in your nickname.";
 			break;
 		case ERR_NICKNAMEINUSE: // "<client> <nick> :Nickname is already in use"
-			error << client->getNickName() << " " << errorMsg << " :Nickname is already in use. Please try again with another one.\r\n";
+			error << client->getNickName() << " " << errorMsg << " :Nickname is already in use. Please try again with another one.";
 			break;
+		case ERR_NOTREGISTERED: // "<client> :You have not registered"
+			error << client->getNickName() << " :You have not registered"; 
 		case ERR_NEEDMOREPARAMS: // "<client> <command> :Not enough parameters"
-			error << client->getNickName() << " " << errorMsg << " :Not enough parameters.\r\n";
+			error << client->getNickName() << " " << errorMsg << " :Not enough parameters.";
 			break;
 		case ERR_ALREADYREGISTERED: // "<client> :You may not reregister"
-			error << client->getNickName() << " :You may not register.\r\n";
+			error << client->getNickName() << " :You may not register.";
 			break;
 		case ERR_PASSWDMISMATCH: // "<client> :Password incorrect"
-			error << client->getNickName() << " :Password incorrect\r\n";
+			error << client->getNickName() << " :Password incorrect";
 			break;
 		case ERR_CHANNELISFULL: //"<client> <channel> :Cannot join channel (+l)"
-			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+l)\r\n";
+			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+l)";
 			break;
 		case ERR_INVITEONLYCHAN: // "<client> <channel> :Cannot join channel (+i)"
-			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+i)\r\n";
+			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+i)";
 			break;
 		case ERR_BADCHANNELKEY: // "<client> <channel> :Cannot join channel (+k)"
-			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+k)\r\n";
+			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+k)";
 			break;
 		default:
 			break;
 	}
+	error << "\r\n";
 	std::string stringError = error.str();
 	send(client->getFd(), stringError.c_str(), stringError.length(), 0);
 }
 
 /**
- * TODO Doxygen comment.
+ * @brief Handles the PASS command for client authentication.
+ * 
+ * Verifies the password provided by the client against the server password.
+ * Sends appropriate error codes in cases of errors
+ * 
+ * @param client Pointer to the Client attempting to authenticate.
+ * @param buffer String containing the password provided by the client.
  */
 void	Command::pass_serv(Client* client, std::string buffer)
 {
@@ -206,7 +240,6 @@ void	Command::pass_serv(Client* client, std::string buffer)
  */
 void Command::nick(Client* client, std::string buffer)
 {
-	std::string	error;
 	if (buffer.empty())
 	{
 		sendErrorCode(client, ERR_NONICKNAMEGIVEN, "");
@@ -240,13 +273,13 @@ void Command::user(Client* client, std::string buffer)
 	std::vector<std::string>	params;
 	std::stringstream			ss(buffer);
 	std::string					token;
-	std::string					error;
 
 	if (client->getIsUser())
 	{
 		sendErrorCode(client, ERR_ALREADYREGISTERED, "");
 		return ;
 	}
+
 	while (ss >> token)
 	{
 		if (token[0] == ':')
@@ -335,6 +368,9 @@ void	Command::join(Client* client, std::string buffer)
 			server->addChannel(channelName, channel);
 		}
 		channel->addUser(pass, client);
+	// 332, 353 et 366 rpl mandatory TODO
+	// 400- 599 error code
+
 	}
 }
 
@@ -345,7 +381,9 @@ void Command::mode(Client* client, std::string buffer) //TODO
 		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
 		return;
 	}
-	std::string msg = ":" + client->getHostname() +  " 324 " + client->getNickName() + " " + buffer + " +\r\n"; // RPL_CHANNELMODEIS (324)
+	std::string msg = ":" + client->getHostname() +  " 324 " 
+						+ client->getNickName() 
+						+ " " + buffer + " +\r\n"; // RPL_CHANNELMODEIS (324)
 	send(client->getFd(), msg.c_str(), msg.size(), 0);
 }
 
@@ -356,9 +394,31 @@ void Command::who(Client* client, std::string buffer) //TODO
 		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
 		return;
 	}
-	
-	std::string msg = client->getStringFd() + " " + buffer + " " + client->getUser() + " " + client->getHostname() + client->getNickName() + " :" + "0 " + client->getRealName() + "\r\n"; //RPL_WHOREPLY (352)
+	std::string msg = client->getFd() + " " + buffer 
+						+ " " + client->getUser() 
+						+ " " + client->getHostname() 
+						+ client->getNickName() + " :" 
+						+ "0 " + client->getRealName() + "\r\n"; //RPL_WHOREPLY (352)
 	send(client->getFd(), msg.c_str(), msg.size(), 0);
+}
+
+void Command::privmsg(Client* client, std::string buffer)
+{
+	(void)*client;
+	std::stringstream ss(buffer);
+	std::string channelName;
+	std::string message;
+	ss >> channelName;
+	std::getline(ss, message);
+	message.erase(0, 2);
+
+	Channel* channel = server->findChannel(channelName);
+	std::string ircMsg = ":" + client->getNickName() + "!" 
+									+ client->getUser() + "@" 
+									+ client->getHostname() 
+									+ " PRIVMSG " + channelName	 
+									+ " :" + message + "\r\n";
+	channel->sendAllChan(ircMsg);
 }
 
 
