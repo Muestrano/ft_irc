@@ -48,7 +48,6 @@ class Command
 		void set_map(void);
 		void prepareCommand(Client* client, std::string line);
 		void extractCompleteCommand(Client* client);
-		// void sendError(Client* client, int codeError, const std::string& message);
 		void sendErrorCode(Client* client, ErrorCode errorCode, std::string errorMsg);
 		void pass_serv(Client* client, std::string buffer);
 		void nick(Client* client, std::string buffer);
@@ -58,7 +57,6 @@ class Command
 		void who(Client* client, std::string buffer);
 		
 		void test(Client* client, std::string buffer); // TODO Delete later.
-		//std::string codeToString(int value); // TODO Delete.
 		
 		// void	pass_chan(Client* client, std::string buffer);
 		// void	join(Client* client, std::string buffer);

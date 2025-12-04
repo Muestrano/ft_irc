@@ -127,21 +127,6 @@ void Command::extractCompleteCommand(Client* client)
 	buffer.erase(0, pos + 2);
 }
 
-// TEMP - TODO implement in sendErrorCode funct to get rid of it.
-// void Command::sendError(Client* client, int codeError, const std::string& command)
-// {
-// 	std::string nickname = client->getNickName();
-// 	if (nickname.empty())
-// 		nickname = "*";
-	
-// 	std::stringstream error;
-// 	error << ":localhost " << codeError << " " << nickname;
-// 	error << " " << command << " :Unknown command\r\n";
-	
-// 	std::string stringError = error.str();
-// 	send(client->getFd(), stringError.c_str(), stringError.length(), 0);
-// }
-
 /**
  * @brief Handles error codes and send the appropriate message
  * @param Client The pointer of the client
@@ -427,38 +412,6 @@ void	Command::test(Client* client, std::string buffer)
 	std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
 	send(client->getFd(), response.c_str(), response.length(), 0);
 }
-
-// std::string Command::codeToString(int value) // TODO, test again this format std::string (like lorenzo) for sendError(actualy stringstream)
-// {
-//     std::stringstream ss;
-//     ss << value;
-//     return ss.str();
-// }
-
-/*
-
-Command:
-	authentication:
-		- PASS <password>
-		- NICK <nickname>
-		- USER <username> <hostname> <servername> <realname>
-	canal:
-		- JOIN <#canal>
-		- PART <#canal>
-	
-	message: 
-		- For canal<#> or an user: PRIVMSG <target> <message>
-	operator:
-		- KICK
-		- INVITE
-		- TOPIC
-		- MODE 
-			flags:  i, t, k, o, l
-	
-	!!WARNING!! need to handle \r\n in each command
-	
-#
-*/
 
 /// MESSAGE PROCESSING ///
 // void Serv::processMessage(int user_fd, const char *message)
