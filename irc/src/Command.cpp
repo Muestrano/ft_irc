@@ -72,14 +72,36 @@ void Command::prepareCommand(Client* client, std::string line)
 
 	param.erase(0, param.find_first_not_of(" ")); //erase space befor params
 
+	// Authentication checking
+	if (command != "PASS" && command != "CAP" && command != "QUIT")
+	{
+		if (!client->getIsAuthenticated())
+		{
+			sendErrorCode(client, ERR_NOTREGISTERED, command);
+			return;
+		}
+	}
+
+	// Registration checking
+	if (command == "JOIN" || command == "PRIVMSG" || command == "MODE" 
+		|| command == "WHO" || command == "TOPIC" || command == "INVITE"
+		|| command == "KICK" || command == "PART")
+	{
+		if (!client->getIsRegistered())
+		{
+			sendErrorCode(client, ERR_NOTREGISTERED, command);
+			return;
+		}
+	}
+
 	if (CommandMap.find(command) != CommandMap.end())
 	{
-		FtCommand funcMap = CommandMap[command]; // std::map<std::string, FtCommand> CommandMap;
+		FtCommand funcMap = CommandMap[command];
 		(this->*funcMap)(client, param); 
 	}
 	else
 	{
-		sendError(client, 421, command); // to do
+		sendErrorCode(client, ERR_UNKNOWNCOMMAND, command);
 	}
 }
 
@@ -179,19 +201,25 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 }
 
 /**
- * TODO Doxygen comment.
+ * @brief Handles the PASS command for client authentication.
+ * 
+ * Verifies the password provided by the client against the server password.
+ * Sends appropriate error codes in cases of errors
+ * 
+ * @param client Pointer to the Client attempting to authenticate.
+ * @param buffer String containing the password provided by the client.
  */
 void	Command::pass_serv(Client* client, std::string buffer)
 {
 	if (client->getIsAuthenticated())
 	{
-		sendError(client, 462, "PASS");
+		sendErrorCode(client, ERR_ALREADYREGISTERED, "PASS");
 		return;
 	}
 
 	if (buffer.empty())
 	{
-		sendError(client, 461, "PASS");
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "PASS");
 		return;
 	}
 
@@ -216,7 +244,6 @@ void	Command::pass_serv(Client* client, std::string buffer)
  */
 void Command::nick(Client* client, std::string buffer)
 {
-	std::string	error;
 	if (buffer.empty())
 	{
 		sendErrorCode(client, ERR_NONICKNAMEGIVEN, "");
@@ -259,13 +286,13 @@ void Command::user(Client* client, std::string buffer)
 	std::vector<std::string>	params;
 	std::stringstream			ss(buffer);
 	std::string					token;
-	std::string					error;
 
 	if (client->getIsRegistered())
 	{
 		sendErrorCode(client, ERR_ALREADYREGISTERED, "");
 		return ;
 	}
+
 	while (ss >> token)
 	{
 		if (token[0] == ':')
@@ -397,10 +424,10 @@ void Command::privmsg(Client* client, std::string buffer)
 
 	Channel* channel = server->findChannel(channelName);
 	std::string ircMsg = ":" + client->getNickName() + "!" 
-                                    + client->getUser() + "@" 
-                                    + client->getHostname() 
-                                    + " PRIVMSG " + channelName	 
-                                    + " :" + message + "\r\n";
+									+ client->getUser() + "@" 
+									+ client->getHostname() 
+									+ " PRIVMSG " + channelName	 
+									+ " :" + message + "\r\n";
 	channel->sendAllChan(ircMsg);
 }
 
