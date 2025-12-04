@@ -154,7 +154,8 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 			error << client->getNickName() << " " << errorMsg << " :Nickname is already in use. Please try again with another one.";
 			break;
 		case ERR_NOTREGISTERED: // "<client> :You have not registered"
-			error << client->getNickName() << " :You have not registered"; 
+			error << client->getNickName() << " :You have not registered";
+			break;
 		case ERR_NEEDMOREPARAMS: // "<client> <command> :Not enough parameters"
 			error << client->getNickName() << " " << errorMsg << " :Not enough parameters.";
 			break;
