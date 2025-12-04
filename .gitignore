@@ -1,0 +1,14 @@
+
+# Ignore all obj's folder and files :
+
+obj/
+*.o
+
+# Ignore vscode config files
+
+.vscode
+*.json
+
+# Ignore ircserv compiled files
+
+ircserv
