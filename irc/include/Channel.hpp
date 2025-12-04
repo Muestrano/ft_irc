@@ -25,6 +25,8 @@ class Channel
 
 		void addUser(const std::string, Client* client);
 		void sendAllChan(std::string message); //TODO
+		bool isOnChan(Client* client, Channel* channel);
+		void removeMember(Client* client, Channel* channel);
 
 
 

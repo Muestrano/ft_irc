@@ -61,3 +61,35 @@ void	Channel::addUser(const std::string key, Client* client)
 	sendAllChan(message);
 	std::cout << "new client: " << nickName << std::endl;
 }
+
+bool Channel::isOnChan(Client* client, Channel* channel)
+{
+	std::map<std::string, Client*>::iterator it;
+	it = channel->members.begin();
+	while (it != members.end()) //TEMP CHECK if there is the client on chan
+	{
+		if (it->first == client->getNickName())
+			return (true);
+	}
+	return (false);
+}
+
+void Channel::removeMember(Client* client, Channel* channel) // we can make switch case with string "member" or "comment" to remove one of them
+{
+	std::map<std::string, Client*>::iterator it;
+	it = channel->members.begin();
+	std::cout << it->first << std::endl;
+	while (it != members.end())
+	{
+		if (client->getNickName() == it->first)
+		{
+			nbMember--;
+			members.erase(it);
+			it--;
+		}
+		else 
+			it++;
+		std::cout << it->first << std::endl;
+		
+	}
+}

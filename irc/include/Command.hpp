@@ -5,12 +5,14 @@
 
 enum ErrorCode 
 {
+	ERR_NOSUCHCHANNEL = 403,
 	ERR_UNKNOWNCOMMAND = 421,
 	ERR_NONICKNAMEGIVEN = 431,
 	ERR_ERRONEUSNICKNAME = 432,
 	ERR_NICKNAMEINUSE = 433,
 	ERR_TARGETLEO = 436,
 	ERR_TARGETESTEBAN = 437,
+	ERR_NOTONCHANNEL = 442,
 	ERR_NEEDMOREPARAMS = 461,
 	ERR_ALREADYREGISTERED = 462,
 	ERR_PASSWDMISMATCH = 464,
@@ -57,6 +59,8 @@ class Command
 		void join(Client* client, std::string buffer);
 		void mode(Client* client, std::string buffer);
 		void who(Client* client, std::string buffer);
+		void privmsg(Client* client, std::string buffer);
+		void part(Client* client, std::string buffer);
 		
 		void test(Client* client, std::string buffer); // TODO Delete later.
 		//std::string codeToString(int value); // TODO Delete.
@@ -66,8 +70,6 @@ class Command
 		// void	topic(Client* client, std::string buffer);
 		// void	invite(Client* client, std::string buffer);
 		// void	kick(Client* client, std::string buffer);
-		void	privmsg(Client* client, std::string buffer);
-		// void	exit(Client* client, std::string buffer);
 		// void	quit(Client* client, std::string buffer);
 
 	/*

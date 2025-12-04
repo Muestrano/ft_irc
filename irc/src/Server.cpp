@@ -199,6 +199,10 @@ void Server::startServer()
 	}
 }
 
+/**
+ * @brief Find Channel
+ * @return name of channel if exist, else return NULL
+*/
 Channel* Server::findChannel(const std::string name)
 {
  	std::cout << "Chanel name: '" << name << "'" << std::endl; //TEMP
