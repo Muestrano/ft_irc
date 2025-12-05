@@ -134,6 +134,9 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 	(void)errorMsg;
 	switch (errorCode)
 	{
+		case 404:
+		 	error << client->getNickName() << "Cannot send to channel"; // TODO put channel in error msg
+			break;
 		case 421:
 		 	error << "Unknown command."; // SOMETHIN TODO
 			break;
@@ -387,15 +390,25 @@ void Command::who(Client* client, std::string buffer) //TODO
 
 void Command::privmsg(Client* client, std::string buffer)
 {
-	(void)*client;
 	std::stringstream ss(buffer);
-	std::string channelName;
 	std::string message;
+	std::string channelName;
 	ss >> channelName;
 	std::getline(ss, message);
 	message.erase(0, 2);
 
 	Channel* channel = server->findChannel(channelName);
+	std::cout << client->getNickName() << std::endl;
+	// if (client->getNickName().empty() || client->getUser().empty())
+    // {
+    //     sendErrorCode(client, ERR_NOTREGISTERED, ""); // 451
+    //     return;
+    // }
+	if (channel == NULL)
+	{
+		sendErrorCode(client, ERR_CANNOTSENDTOCHAN, ""); // 404
+		return;
+	}
 	std::string ircMsg = ":" + client->getNickName() + "!" 
 									+ client->getUser() + "@" 
 									+ client->getHostname() 
@@ -433,19 +446,26 @@ void Command::part(Client* client, std::string buffer)
 	}
 
 	for (size_t i = 0; i < channelV.size(); i++)
+		std::cout << "channel: " << channelV[i] << std::endl;
+	for (size_t i = 0; i < reasonV.size(); i++)
+		std::cout << "reason: " << reasonV[i] << std::endl;
+	
+	for (size_t i = 0; i < channelV.size(); i++)
 	{
 		std::string channelName = channelV[i];
-		std::string pass;
-		if (i < reasonV.size())
-			pass = reasonV[i];
-		else
-			pass = "";
+		// std::string reason; //TODO put in reason broadcastmsg
+		// if (i < reasonV.size())
+		// 	reason = reasonV[i];
+		// else
+		// 	reason = "";
 		Channel* channel = server->findChannel(channelName);
-		if(!channel->isOnChan(client, channel))
+		if(!channel) // Channel don't exist
 			sendErrorCode(client, ERR_NOTONCHANNEL, ""); // 442
 		else if (channel->isOnChan(client, channel))
 		{
-			channel->removeMember(client, channel, server);
+			channel->removeMember(client);
+			if (channel->chanIsEmpty())
+				server->removeChan(channelName);
 		}
 		else // channel == NULL
 			sendErrorCode(client, ERR_NOSUCHCHANNEL, ""); //403

@@ -219,6 +219,19 @@ void Server::addChannel(const std::string name, Channel* channel)
 	channels[name] = channel;
 }
 
+void Server::removeChan(std::string channelName)
+{
+	std::map<std::string, Channel*>::iterator it;
+	it = channels.find(channelName);
+	if (it != channels.end())
+	{
+		delete it->second;
+		channels.erase(it);
+		std::cout << "hhhhhhhhhhh" << std::endl;
+	}
+}
+
+
 /*
 poll give info if the operand accept, recv, send can execute
 fcntl with O_NONBLOCK flag to handle A/I operation

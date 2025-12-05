@@ -1,12 +1,15 @@
 #include "../include/Channel.hpp"
 #include "../include/include.hpp"
 
-Channel::Channel(std::string name, Client* clientOp) : name(name), password(""), topic(""), limitMember(0), nbMember(0), invitedOnly(false)
+Channel::Channel(std::string name, Client* clientOp) : name(name), password(""), topic(""), limitMember(0), nbMember(0), nbOperator(0), invitedOnly(false)
 {
 	members[clientOp->getNickName()] = clientOp;
 	nbMember = 1;
 	operators[clientOp->getNickName()] = clientOp;
 }
+Channel::~Channel()
+{}
+
 
 /**
  * @brief msg to all user of one channel when someone joint it
@@ -56,7 +59,10 @@ void	Channel::addUser(const std::string key, Client* client)
 		nbMember++;
 	}
 	if (nbMember == 1)
+	{
+		nbOperator++;
 		operators[nickName] = client;
+	}
 	std::string message = ":" + client->getNickName() + "!" + client->getUser() + "@" + client->getHostname() + " JOIN " + this->name + "\r\n";
 	sendAllChan(message);
 	std::cout << "new client: " << nickName << std::endl;
@@ -74,24 +80,27 @@ bool Channel::isOnChan(Client* client, Channel* channel)
 	return (false);
 }
 
-void Channel::removeMember(Client* client, Channel* channel, Server* server) // we can make switch case with string "member" or "comment" to remove one of them
+void Channel::removeMember(Client* client) // we can make switch case with string "member" or "comment" to remove one of them
 {
 	std::map<std::string, Client*>::iterator it;
-	it = channel->members.begin();
-	std::cout << it->first << std::endl;
-	while (it != members.end())
+	it = members.find(client->getNickName());
+	if (it->first == client->getNickName())
 	{
-		if (client->getNickName() == it->first)
-		{
-			nbMember--;
-			members.erase(it);
-			it = channel->members.begin();
-			// TODOrm channel if the last leave
-		}
-		// operator.erase(it); //TODO
-		else 
-			it++;		
+		nbMember--;
+		members.erase(it);
 	}
-	if (nbMember == 0) //TODO
-		server->channels;
+	std::map<std::string, Client*>::iterator itOp;
+	itOp = operators.find(client->getNickName());
+	if (itOp->first == client->getNickName())
+	{
+		nbOperator--;
+		operators.erase(itOp);
+	}
+}
+
+bool Channel::chanIsEmpty()
+{
+	if (nbMember == 0)
+		return (true);
+	return (false);
 }
