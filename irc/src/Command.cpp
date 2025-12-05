@@ -419,15 +419,15 @@ void Command::privmsg(Client* client, std::string buffer)
 // "<client> :Your host is <servername>, running version <version>"
 // "<client> :This server was created <datetime>"
 // "<client> <servername> <version> <available user modes> <available channel modes> [<channel modes with a parameter>]"
-// void Command::sendWelcome(Client* client)
-// {
-// 	std::string welcomeMsg;
-// 	welcomeMsg = client->getNickName() + " :Welcome to the irc42 Network, " + client->getNickName() + "[!" + client->getUser() + "@localhost]\r\n";
-// 	welcomeMsg += client->getNickName() + " :Your host is ft_irc, running version 42.42.\r\n";
-// 	welcomeMsg += client->getNickName() + " :This server was created the 11/13/25.\r\n";
-// 	welcomeMsg += client->getNickName() + " ft_irc 42.42. There is no available user modes. The available channel modes are : 
-// 	send(.......)
-// }
+void Command::sendWelcome(Client* client)
+{
+	std::string welcomeMsg;
+	welcomeMsg = client->getNickName() + " :Welcome to the irc42 Network, " + client->getNickName() + "[!" + client->getUser() + "@localhost]\r\n";
+	welcomeMsg += client->getNickName() + " :Your host is ft_irc, running version 42.42.\r\n";
+	welcomeMsg += client->getNickName() + " :This server was created the 11/13/25.\r\n";
+	welcomeMsg += client->getNickName() + " ft_irc 42.42. There is no available user modes. The available channel modes are : i (invite only), t (restricted topic), o (operator privilege), l (user limit). The available channel mode with a parameter is k (channel key).\r\n";
+	send(client->getFd(), welcomeMsg.c_str() , welcomeMsg.size(), 0);
+}
 
 void	Command::test(Client* client, std::string buffer)
 {

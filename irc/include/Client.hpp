@@ -16,8 +16,8 @@ class Client
 		
 		bool isAuthenticated;
 
-		bool	IsNick;
-		bool	IsUser;
+		bool	isNick;
+		bool	isUser;
 		bool	isRegistered; // Pass -> Nick -> User
 
 		int 		clientFd;
