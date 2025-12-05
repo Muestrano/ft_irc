@@ -55,7 +55,7 @@ class Command
 		void join(Client* client, std::string buffer);
 		void mode(Client* client, std::string buffer);
 		void who(Client* client, std::string buffer);
-		void sendWelcome(Client* client);
+		//void sendWelcome(Client* client);
 		
 		void test(Client* client, std::string buffer); // TODO Delete later.
 		

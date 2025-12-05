@@ -248,7 +248,7 @@ void Command::nick(Client* client, std::string buffer)
 	if (client->getIsUser())
 	{
 		client->setIsRegistered(true);
-		sendWelcome(client);
+		//sendWelcome(client);
 	}
 }
 
@@ -301,7 +301,7 @@ void Command::user(Client* client, std::string buffer)
 	if (client->getIsNick())
 	{
 		client->setIsRegistered(true);
-		sendWelcome(client);
+		//sendWelcome(client);
 	}
 }
 
