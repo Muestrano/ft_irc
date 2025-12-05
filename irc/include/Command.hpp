@@ -56,6 +56,7 @@ class Command
 		void mode(Client* client, std::string buffer);
 		void who(Client* client, std::string buffer);
 		void sendWelcome(Client* client);
+		void sendMOTD(Client* client);
 		
 		void test(Client* client, std::string buffer); // TODO Delete later.
 		
