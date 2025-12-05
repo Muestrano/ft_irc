@@ -419,15 +419,28 @@ void Command::privmsg(Client* client, std::string buffer)
 // "<client> :Your host is <servername>, running version <version>"
 // "<client> :This server was created <datetime>"
 // "<client> <servername> <version> <available user modes> <available channel modes> [<channel modes with a parameter>]"
-// void Command::sendWelcome(Client* client)
-// {
-// 	std::string welcomeMsg;
-// 	welcomeMsg = client->getNickName() + " :Welcome to the irc42 Network, " + client->getNickName() + "[!" + client->getUser() + "@localhost]\r\n";
-// 	welcomeMsg += client->getNickName() + " :Your host is ft_irc, running version 42.42.\r\n";
-// 	welcomeMsg += client->getNickName() + " :This server was created the 11/13/25.\r\n";
-// 	welcomeMsg += client->getNickName() + " ft_irc 42.42. There is no available user modes. The available channel modes are : 
-// 	send(.......)
-// }
+void Command::sendWelcome(Client* client)
+{
+	std::string welcomeMsg;
+	welcomeMsg = ":ft_irc 001 " + client->getNickName() + " :Welcome to the irc42 Network, " + client->getNickName() + "[!" + client->getUser() + "@localhost]\r\n";
+	welcomeMsg += ":ft_irc 002 " + client->getNickName() + " :Your host is ft_irc, running version 42.42.\r\n";
+	welcomeMsg += ":ft_irc 003 " + client->getNickName() + " :This server was created the 11/13/25.\r\n";
+	welcomeMsg += ":ft_irc 004 " + client->getNickName() + " ft_irc 42.42. There is no available user modes. The available channel modes are : i (invite only), t (restricted topic), o (operator privilege), l (user limit). The available channel mode with a parameter is k (channel key).\r\n";
+	send(client->getFd(), welcomeMsg.c_str() , welcomeMsg.size(), 0);
+	sendMOTD(client);
+}
+
+// 375 "<client> :- <server> Message of the day - "
+// 372  "<client> :<line of the motd>"
+// 376  "<client> :End of /MOTD command."
+void Command::sendMOTD(Client* client)
+{
+	std::string msgMOTD;
+	msgMOTD = client->getNickName() + " :- ft_irc Message of the day -\r\n";
+	msgMOTD += client->getNickName() + " :Merry Xmas !\r\n";
+	msgMOTD += client->getNickName() + " :End of MOTD command\r\n";
+	send(client->getFd(), msgMOTD.c_str() , msgMOTD.size(), 0);
+}
 
 void	Command::test(Client* client, std::string buffer)
 {
@@ -452,13 +465,3 @@ void	Command::test(Client* client, std::string buffer)
 // 	if (this->clients[user_fd])
 // 		this->clients[user_fd]->clearBuffer();
 // }
-
-/*sendWelcome(client) TODO
-
-RPL_WELCOME (001)
-
-RPL_YOURHOST (002)
-
-RPL_CREATED (003)
-
-RPL_MYINFO (004)*/
