@@ -141,6 +141,15 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 	std::stringstream error;
 	switch (errorCode)
 	{
+		case ERR_NOSUCHNICK: // "<client> <nick> :No such nick/channel"
+			error << client->getNickName() << " " << errorMsg << " :No such nick/channel";
+			break;
+		case ERR_NOSUCHCHANNEL: // "<client> <channel> :No such channel"
+			error << client->getNickName() << " " << errorMsg << " :No such channel";
+			break;
+		case ERR_CANNOTSENDTOCHAN: // "<client> <channel> :Cannot send to channel"
+			error << client->getNickName() << " " << errorMsg << " :Cannot send to channel";
+			break;
 		case ERR_UNKNOWNCOMMAND: // "<client> <command> :Unknown command"
 			error << client->getNickName() << " " << errorMsg << " :Unknown command.";
 			break;
