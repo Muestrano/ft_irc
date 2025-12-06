@@ -10,8 +10,8 @@ Channel::Channel(std::string name, Client* clientOp) : name(name), password(""),
 
 /**
  * @brief msg to all user of one channel when someone joint it
- * @param MSG_CONFIRM flag confirm the msg il send
-*/	
+ * @param MSG_CONFIRM flag confirm the msg is send
+*/
 void Channel::sendAllChan(std::string message)
 {
 	std::cout << message << std::endl;
@@ -23,9 +23,6 @@ void Channel::sendAllChan(std::string message)
 		it++;
 	} 
 }
-
-
-// }
 
 /**
  * @brief check all Mode operator before add user in std::map members
