@@ -183,6 +183,9 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 		case ERR_BADCHANNELKEY: // "<client> <channel> :Cannot join channel (+k)"
 			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+k)";
 			break;
+		case ERR_NOTONCHANNEL: // "<client> <channel> :You're not on that channel"
+			error << client->getNickName() << " " << errorMsg << " :You're not on that channel";
+			break;
 		default:
 			break;
 	}
@@ -496,56 +499,67 @@ void Command::sendMOTD(Client* client)
 
 void Command::part(Client* client, std::string buffer)
 {
-	if (buffer == "")
-		sendErrorCode(client, ERR_NEEDMOREPARAMS, "") ;
+	if (buffer.empty())
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "PART");
+		return;
+	}
+
 	std::vector<std::string> channelV;
-	std::vector<std::string> reasonV;
 	std::string channelStr;
-	std::string reasonStr;
+	std::string reason;
 
 	std::stringstream ss(buffer);
 	ss >> channelStr;
+
 	if (!ss.eof())
-		ss >> reasonStr;
-	std::stringstream channelSS(channelStr);
-	std::string out;
-	while (std::getline(channelSS, out, ','))
 	{
-		if (out[0] == '#' || out[0] == '&' || out[0] == '!' || out[0] == '+')
-			channelV.push_back(out);
+		std::getline(ss, reason);
+		if (!reason.empty() && reason[0] == ' ')
+			reason.erase(0, 1);
+		if (!reason.empty() && reason[0] == ':')
+			reason.erase(0, 1);
 	}
-	if (!reasonStr.empty())
+
+	std::stringstream channelSS(channelStr);
+	std::string chanName;
+	while (std::getline(channelSS, chanName, ','))
 	{
-		std::stringstream reasonSS(reasonStr);
-		std::string reasonS;
-		while (std::getline(reasonSS, reasonS, ','))
-			reasonV.push_back(reasonS);
+		if (!chanName.empty() && (chanName[0] == '#' || chanName[0] == '&' ||chanName[0] == '!' || chanName[0] == '+'))
+			channelV.push_back(chanName);
 	}
 
 	for (size_t i = 0; i < channelV.size(); i++)
-		std::cout << "channel: " << channelV[i] << std::endl;
-	for (size_t i = 0; i < reasonV.size(); i++)
-		std::cout << "reason: " << reasonV[i] << std::endl;
-	
-	for (size_t i = 0; i < channelV.size(); i++)
 	{
 		std::string channelName = channelV[i];
-		// std::string reason; //TODO put in reason broadcastmsg
-		// if (i < reasonV.size())
-		// 	reason = reasonV[i];
-		// else
-		// 	reason = "";
 		Channel* channel = server->findChannel(channelName);
-		if(!channel) // Channel don't exist
-			sendErrorCode(client, ERR_NOTONCHANNEL, ""); // 442
-		else if (channel->isOnChan(client, channel))
+
+		if (!channel)
 		{
-			channel->removeMember(client);
-			if (channel->chanIsEmpty())
-				server->removeChan(channelName);
+			sendErrorCode(client, ERR_NOSUCHCHANNEL, channelName);
+			continue;
 		}
-		else // channel == NULL
-			sendErrorCode(client, ERR_NOSUCHCHANNEL, ""); //403
+
+		if (!channel->isMember(client))
+		{
+			sendErrorCode(client, ERR_NOTONCHANNEL, channelName);
+			continue;
+		}
+
+		std::string partMsg = ":" + client->getNickName() + "!"
+							+ client->getUser() + "@"
+							+ client->getHostname()
+							+ " PART " + channelName;
+
+		if (!reason.empty())
+			partMsg += " :" + reason;
+
+		partMsg += "\r\n";
+
+		channel->sendAllChan(partMsg);
+		channel->removeMember(client);
+		if (channel->chanIsEmpty())
+			server->removeChan(channelName);
 	}
 }
 
