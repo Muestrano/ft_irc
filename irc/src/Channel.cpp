@@ -85,38 +85,27 @@ void Channel::sendAllChanExcept(std::string message, Client* exclude)
 
 /**
  * @brief Check if a client is member of this channel.
- * 
+ *
  */
 bool Channel::isMember(Client* client)
 {
-	std::string nickName = client->getNickName();
-	return (members.find(nickName) != members.end());
+    std::string nickName = client->getNickName();
+    std::map<std::string, Client*>::iterator it = members.find(nickName);
+    return (it != members.end());
 }
 
-bool Channel::isOnChan(Client* client, Channel* channel)
-{
-	std::map<std::string, Client*>::iterator it;
-	it = channel->members.begin();
-	while (it != members.end()) //TEMP CHECK if there is the client on chan
-	{
-		if (it->first == client->getNickName())
-			return (true);
-	}
-	return (false);
-}
-
-void Channel::removeMember(Client* client) // we can make switch case with string "member" or "comment" to remove one of them
+void Channel::removeMember(Client* client)
 {
 	std::map<std::string, Client*>::iterator it;
 	it = members.find(client->getNickName());
-	if (it->first == client->getNickName())
+	if (it != members.end())
 	{
 		nbMember--;
 		members.erase(it);
 	}
 	std::map<std::string, Client*>::iterator itOp;
 	itOp = operators.find(client->getNickName());
-	if (itOp->first == client->getNickName())
+	if (itOp != operators.end())
 	{
 		nbOperator--;
 		operators.erase(itOp);
