@@ -24,13 +24,9 @@ class Channel
 		~Channel();
 
 		void addUser(const std::string, Client* client);
-		void sendAllChan(std::string message); //TODO
-
-
-
-
-	
-	public:
+		void sendAllChan(std::string message);
+		void sendAllChanExcept(std::string message, Client* exclude);
+		bool isMember(Client* client);
 };
 
 /*
