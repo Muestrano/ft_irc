@@ -405,23 +405,66 @@ void Command::who(Client* client, std::string buffer) //TODO
 	send(client->getFd(), msg.c_str() , msg.size(), 0);
 }
 
+/**
+ * @brief Handles the PRIVMSG command for sending messages to users or channels
+ * usage : PRIVMSG <target> :<message>
+ * - target can be a channel (#chan) or a user nickname
+ */
 void Command::privmsg(Client* client, std::string buffer)
 {
-	(void)*client;
 	std::stringstream ss(buffer);
-	std::string channelName;
+	std::string target;
 	std::string message;
-	ss >> channelName;
-	std::getline(ss, message);
-	message.erase(0, 2);
 
-	Channel* channel = server->findChannel(channelName);
-	std::string ircMsg = ":" + client->getNickName() + "!" 
-									+ client->getUser() + "@" 
-									+ client->getHostname() 
-									+ " PRIVMSG " + channelName	 
-									+ " :" + message + "\r\n";
-	channel->sendAllChan(ircMsg);
+	ss >> target;
+	std::getline(ss, message);
+
+	if (target.empty() || message.empty())
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "PRIVMSG");
+		return;
+	}
+
+	message.erase(0, message.find_first_not_of(" "));
+	if (!message.empty() && message[0] == ':')
+		message.erase(0, 1);
+	if (message.empty())
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "PRIVMSG");
+		return;
+	}
+
+	std::string ircMsg = ":" + client->getNickName() + "!"
+					   + client->getUser() + "@"
+					   + client->getHostname()
+					   + " PRIVMSG " + target
+					   + " :" + message + "\r\n";
+
+	if (target[0] == '#' || target[0] == '&' || target[0] == '!' || target[0] == '+') // PRIVMSG to #channel
+	{
+		Channel* channel = server->findChannel(target);
+		if (channel == NULL)
+		{
+			sendErrorCode(client, ERR_NOSUCHCHANNEL, target);
+			return;
+		}
+		if (!channel->isMember(client))
+		{
+			sendErrorCode(client, ERR_CANNOTSENDTOCHAN, target);
+			return;
+		}
+		channel->sendAllChanExcept(ircMsg, client);
+	}
+	else // PRIVMSG to user
+	{
+		Client* targetClient = server->findClientByNick(target);
+		if (targetClient == NULL)
+		{
+			sendErrorCode(client, ERR_NOSUCHNICK, target);
+			return;
+		}
+		send(targetClient->getFd(), ircMsg.c_str(), ircMsg.length(), 0);
+	}
 }
 
 // "<client> :Welcome to the <networkname> Network, <nick>[!<user>@<host>]"
