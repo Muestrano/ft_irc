@@ -41,6 +41,7 @@ class Server
 		void 		newConnection();
 		void 		startServer();
 		Channel* 	findChannel(const std::string name);
+		Client*		findClientByNick(const std::string& nickname);
 		void		addChannel(const std::string name, Channel* channel);
 		bool		isNickRegistered(std::string nick);
 

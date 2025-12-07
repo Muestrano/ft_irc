@@ -5,6 +5,9 @@
 
 enum ErrorCode 
 {
+	ERR_NOSUCHNICK = 401,
+	ERR_NOSUCHCHANNEL = 403,
+	ERR_CANNOTSENDTOCHAN = 404,
 	ERR_UNKNOWNCOMMAND = 421,
 	ERR_NONICKNAMEGIVEN = 431,
 	ERR_ERRONEUSNICKNAME = 432,
@@ -55,6 +58,7 @@ class Command
 		void join(Client* client, std::string buffer);
 		void mode(Client* client, std::string buffer);
 		void who(Client* client, std::string buffer);
+		void privmsg(Client* client, std::string buffer);
 		void sendWelcome(Client* client);
 		void sendMOTD(Client* client);
 		
@@ -65,7 +69,6 @@ class Command
 		// void	topic(Client* client, std::string buffer);
 		// void	invite(Client* client, std::string buffer);
 		// void	kick(Client* client, std::string buffer);
-		void	privmsg(Client* client, std::string buffer);
 		// void	exit(Client* client, std::string buffer);
 		// void	quit(Client* client, std::string buffer);
 
@@ -81,7 +84,7 @@ class Command
 		// /PRIVMSG <nickname> <message>\
 		// /PART <#channel>\
 		// /QUIT <message>\n";
-		*/
+	*/
 };
 
 #endif

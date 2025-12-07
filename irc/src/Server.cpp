@@ -201,12 +201,24 @@ void Server::startServer()
 
 Channel* Server::findChannel(const std::string name)
 {
- 	std::cout << "Chanel name: '" << name << "'" << std::endl; //TEMP
-	std::cout << "channels size: " << channels.size() << std::endl; //TEMP
+ 	std::cout << "Chanel name: '" << name << "'" << std::endl; // TEMP
+	std::cout << "channels size: " << channels.size() << std::endl; // TEMP
 	
 	std::map<std::string, Channel*>::iterator it = channels.find(name);
 	if (it != channels.end())
 		return it->second;
+	return (NULL);
+}
+
+Client* Server::findClientByNick(const std::string& nickname)
+{
+	std::map<int, Client*>::iterator it = this->clients.begin();
+	while (it != this->clients.end())
+	{
+		if (it->second->getNickName() == nickname)
+			return (it->second);
+		it++;
+	}
 	return (NULL);
 }
 

@@ -9,25 +9,6 @@ Channel::Channel(std::string name, Client* clientOp) : name(name), password(""),
 }
 
 /**
- * @brief msg to all user of one channel when someone joint it
- * @param MSG_CONFIRM flag confirm the msg il send
-*/	
-void Channel::sendAllChan(std::string message)
-{
-	std::cout << message << std::endl;
-	std::map<std::string, Client*>::iterator it;
-	it = members.begin();
-	while(it != members.end())
-	{
-		send(it->second->getFd(), message.c_str(), message.size(), 0); //MSG_CONFIRM TEMP (check this flag)
-		it++;
-	} 
-}
-
-
-// }
-
-/**
  * @brief check all Mode operator before add user in std::map members
 */
 void	Channel::addUser(const std::string key, Client* client)
@@ -60,4 +41,48 @@ void	Channel::addUser(const std::string key, Client* client)
 	std::string message = ":" + client->getNickName() + "!" + client->getUser() + "@" + client->getHostname() + " JOIN " + this->name + "\r\n";
 	sendAllChan(message);
 	std::cout << "new client: " << nickName << std::endl;
+}
+
+/**
+ * @brief msg to all user of one channel when someone joint it
+ * @param MSG_CONFIRM flag confirm the msg is send
+*/
+void Channel::sendAllChan(std::string message)
+{
+	std::cout << message << std::endl;
+	std::map<std::string, Client*>::iterator it;
+	it = members.begin();
+	while(it != members.end())
+	{
+		send(it->second->getFd(), message.c_str(), message.size(), 0); //MSG_CONFIRM TEMP (check this flag)
+		it++;
+	} 
+}
+
+/**
+ * @brief Send message to all channel members except one client (used for the sender, NULL for no exception none)
+ * // TODO Replace sendAllChan call by this one.
+ */
+void Channel::sendAllChanExcept(std::string message, Client* exclude)
+{
+	std::cout << message << std::endl;
+	std::map<std::string, Client*>::iterator it;
+	
+	it = members.begin();
+	while(it != members.end())
+	{
+		if (exclude == NULL || it->second->getFd() != exclude->getFd())
+			send(it->second->getFd(), message.c_str(), message.size(), 0);
+		it++;
+	}
+}
+
+/**
+ * @brief Check if a client is member of this channel.
+ * 
+ */
+bool Channel::isMember(Client* client)
+{
+	std::string nickName = client->getNickName();
+	return (members.find(nickName) != members.end());
 }
