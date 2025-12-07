@@ -12,6 +12,7 @@ enum ErrorCode
 	ERR_NONICKNAMEGIVEN = 431,
 	ERR_ERRONEUSNICKNAME = 432,
 	ERR_NICKNAMEINUSE = 433,
+	ERR_NOTONCHANNEL = 442,
 	ERR_NOTREGISTERED = 451,
 	ERR_NEEDMOREPARAMS = 461,
 	ERR_ALREADYREGISTERED = 462,
@@ -61,7 +62,7 @@ class Command
 		void privmsg(Client* client, std::string buffer);
 		void sendWelcome(Client* client);
 		void sendMOTD(Client* client);
-		
+		void part(Client* client, std::string buffer);
 		void test(Client* client, std::string buffer); // TODO Delete later.
 		
 		// void	pass_chan(Client* client, std::string buffer);

@@ -1,12 +1,15 @@
 #include "../include/Channel.hpp"
 #include "../include/include.hpp"
 
-Channel::Channel(std::string name, Client* clientOp) : name(name), password(""), topic(""), limitMember(0), nbMember(0), invitedOnly(false)
+Channel::Channel(std::string name, Client* clientOp) : name(name), password(""), topic(""), limitMember(0), nbMember(0), nbOperator(0), invitedOnly(false)
 {
 	members[clientOp->getNickName()] = clientOp;
 	nbMember = 1;
 	operators[clientOp->getNickName()] = clientOp;
 }
+Channel::~Channel()
+{}
+
 
 /**
  * @brief check all Mode operator before add user in std::map members
@@ -37,7 +40,10 @@ void	Channel::addUser(const std::string key, Client* client)
 		nbMember++;
 	}
 	if (nbMember == 1)
+	{
+		nbOperator++;
 		operators[nickName] = client;
+	}
 	std::string message = ":" + client->getNickName() + "!" + client->getUser() + "@" + client->getHostname() + " JOIN " + this->name + "\r\n";
 	sendAllChan(message);
 	std::cout << "new client: " << nickName << std::endl;
@@ -85,4 +91,41 @@ bool Channel::isMember(Client* client)
 {
 	std::string nickName = client->getNickName();
 	return (members.find(nickName) != members.end());
+}
+
+bool Channel::isOnChan(Client* client, Channel* channel)
+{
+	std::map<std::string, Client*>::iterator it;
+	it = channel->members.begin();
+	while (it != members.end()) //TEMP CHECK if there is the client on chan
+	{
+		if (it->first == client->getNickName())
+			return (true);
+	}
+	return (false);
+}
+
+void Channel::removeMember(Client* client) // we can make switch case with string "member" or "comment" to remove one of them
+{
+	std::map<std::string, Client*>::iterator it;
+	it = members.find(client->getNickName());
+	if (it->first == client->getNickName())
+	{
+		nbMember--;
+		members.erase(it);
+	}
+	std::map<std::string, Client*>::iterator itOp;
+	itOp = operators.find(client->getNickName());
+	if (itOp->first == client->getNickName())
+	{
+		nbOperator--;
+		operators.erase(itOp);
+	}
+}
+
+bool Channel::chanIsEmpty()
+{
+	if (nbMember == 0)
+		return (true);
+	return (false);
 }

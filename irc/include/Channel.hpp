@@ -14,6 +14,7 @@ class Channel
 		std::string 	topic;
 		unsigned int 	limitMember;
 		unsigned int 	nbMember;
+		unsigned int	nbOperator;
 		bool			invitedOnly;
 
 		std::map<std::string, Client*> members; //string => Nickname, client
@@ -27,6 +28,9 @@ class Channel
 		void sendAllChan(std::string message);
 		void sendAllChanExcept(std::string message, Client* exclude);
 		bool isMember(Client* client);
+		bool isOnChan(Client* client, Channel* channel);
+		void removeMember(Client* client);
+		bool chanIsEmpty();
 };
 
 /*

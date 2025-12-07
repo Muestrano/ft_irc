@@ -44,14 +44,14 @@ void Command::set_map(void)
 	CommandMap["NICK"] = &Command::nick;
 	CommandMap["USER"] = &Command::user;
 	CommandMap["JOIN"] = &Command::join;
-	
 	CommandMap["MODE"] = &Command::mode;
 	CommandMap["WHO"] = &Command::mode;
 	CommandMap["PRIVMSG"] = &Command::privmsg;
+	CommandMap["PART"] = &Command::part;
+
 	// CommandMap["TOPIC"] = &Command::topic;
 	// CommandMap["INVITE"] = &Command::invite;
 	// CommandMap["KICK"] = &Command::kick;
-	// CommandMap["PART"] = &Command::exit;
 	// CommandMap["QUIT"] = &Command::quit;
 }
 
@@ -492,6 +492,61 @@ void Command::sendMOTD(Client* client)
 	msgMOTD += client->getNickName() + " :Merry Xmas !\r\n";
 	msgMOTD += client->getNickName() + " :End of MOTD command\r\n";
 	send(client->getFd(), msgMOTD.c_str() , msgMOTD.size(), 0);
+}
+
+void Command::part(Client* client, std::string buffer)
+{
+	if (buffer == "")
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "") ;
+	std::vector<std::string> channelV;
+	std::vector<std::string> reasonV;
+	std::string channelStr;
+	std::string reasonStr;
+
+	std::stringstream ss(buffer);
+	ss >> channelStr;
+	if (!ss.eof())
+		ss >> reasonStr;
+	std::stringstream channelSS(channelStr);
+	std::string out;
+	while (std::getline(channelSS, out, ','))
+	{
+		if (out[0] == '#' || out[0] == '&' || out[0] == '!' || out[0] == '+')
+			channelV.push_back(out);
+	}
+	if (!reasonStr.empty())
+	{
+		std::stringstream reasonSS(reasonStr);
+		std::string reasonS;
+		while (std::getline(reasonSS, reasonS, ','))
+			reasonV.push_back(reasonS);
+	}
+
+	for (size_t i = 0; i < channelV.size(); i++)
+		std::cout << "channel: " << channelV[i] << std::endl;
+	for (size_t i = 0; i < reasonV.size(); i++)
+		std::cout << "reason: " << reasonV[i] << std::endl;
+	
+	for (size_t i = 0; i < channelV.size(); i++)
+	{
+		std::string channelName = channelV[i];
+		// std::string reason; //TODO put in reason broadcastmsg
+		// if (i < reasonV.size())
+		// 	reason = reasonV[i];
+		// else
+		// 	reason = "";
+		Channel* channel = server->findChannel(channelName);
+		if(!channel) // Channel don't exist
+			sendErrorCode(client, ERR_NOTONCHANNEL, ""); // 442
+		else if (channel->isOnChan(client, channel))
+		{
+			channel->removeMember(client);
+			if (channel->chanIsEmpty())
+				server->removeChan(channelName);
+		}
+		else // channel == NULL
+			sendErrorCode(client, ERR_NOSUCHCHANNEL, ""); //403
+	}
 }
 
 void	Command::test(Client* client, std::string buffer)

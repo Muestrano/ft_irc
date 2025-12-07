@@ -17,9 +17,8 @@ class Server
 		Command		cmd;
 
 		std::vector<struct pollfd> pollFd;
-		std::map<int, Client*> clients; // FD -> Client
-		std::map<std::string, Channel*> channels; //TODO
-
+		std::map<int, Client*> clients;  // FD -> Client
+		std::map<std::string, Channel*> channels; //channelName - channel
 		struct sockaddr_in serverAddr;
 	
 	public:
@@ -44,7 +43,7 @@ class Server
 		Client*		findClientByNick(const std::string& nickname);
 		void		addChannel(const std::string name, Channel* channel);
 		bool		isNickRegistered(std::string nick);
-
+		void		removeChan(std::string channelName);
 };
 
 

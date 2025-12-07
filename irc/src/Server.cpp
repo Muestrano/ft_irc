@@ -101,7 +101,6 @@ void Server::disconnectClient(int i)
 	
 	close(clientFd);
 	pollFd.erase(pollFd.begin() + i);
-
 }
 
 /**
@@ -199,6 +198,10 @@ void Server::startServer()
 	}
 }
 
+/**
+ * @brief Find Channel
+ * @return name of channel if exist, else return NULL
+*/
 Channel* Server::findChannel(const std::string name)
 {
  	std::cout << "Chanel name: '" << name << "'" << std::endl; // TEMP
@@ -238,6 +241,19 @@ bool Server::isNickRegistered(std::string nick)
 	}
 	return (false);
 }
+
+void Server::removeChan(std::string channelName)
+{
+	std::map<std::string, Channel*>::iterator it;
+	it = channels.find(channelName);
+	if (it != channels.end())
+	{
+		delete it->second;
+		channels.erase(it);
+		std::cout << "hhhhhhhhhhh" << std::endl;
+	}
+}
+
 
 /*
 poll give info if the operand accept, recv, send can execute
