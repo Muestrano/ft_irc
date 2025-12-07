@@ -47,10 +47,10 @@ void Command::set_map(void)
 	
 	CommandMap["MODE"] = &Command::mode;
 	CommandMap["WHO"] = &Command::mode;
+	CommandMap["PRIVMSG"] = &Command::privmsg;
 	// CommandMap["TOPIC"] = &Command::topic;
 	// CommandMap["INVITE"] = &Command::invite;
 	// CommandMap["KICK"] = &Command::kick;
-	CommandMap["PRIVMSG"] = &Command::privmsg;
 	// CommandMap["PART"] = &Command::exit;
 	// CommandMap["QUIT"] = &Command::quit;
 }
