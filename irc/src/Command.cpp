@@ -371,9 +371,45 @@ void	Command::join(Client* client, std::string buffer)
 			server->addChannel(channelName, channel);
 		}
 		channel->addUser(pass, client);
-	// 332, 353 et 366 rpl mandatory TODO
-	// 400- 599 error code
 
+		// 332 RPL_TOPIC
+		std::string topic = channel->getTopic();
+		if (!topic.empty())
+		{
+			std::string topicMsg = ":ft_irc 332 " + client->getNickName()
+								 + " " + channelName
+								 + " :" + topic + "\r\n";
+			send(client->getFd(), topicMsg.c_str(), topicMsg.length(), 0);
+		}
+		else
+		{
+			// 331 RPL_NOTOPIC
+			std::string noTopicMsg = ":ft_irc 331 " + client->getNickName()
+								   + " " + channelName
+								   + " :No topic is set\r\n";
+			send(client->getFd(), noTopicMsg.c_str(), noTopicMsg.length(), 0);
+		}
+
+		// 353 RPL_NAMREPLY
+		std::string namreply = ":ft_irc 353 " + client->getNickName()
+							 + " = " + channelName + " :";
+
+		std::map<std::string, Client*>& members = channel->getMembers();
+		for (std::map<std::string, Client*>::iterator it = members.begin();
+			 it != members.end(); ++it)
+		{
+			if (channel->isOperator(it->second))
+				namreply += "@";
+			namreply += it->first + " ";
+		}
+		namreply += "\r\n";
+		send(client->getFd(), namreply.c_str(), namreply.length(), 0);
+
+		// 366 RPL_ENDOFNAMES
+		std::string endofnames = ":ft_irc 366 " + client->getNickName()
+							   + " " + channelName
+							   + " :End of /NAMES list\r\n";
+		send(client->getFd(), endofnames.c_str(), endofnames.length(), 0);
 	}
 }
 
@@ -384,9 +420,10 @@ void Command::mode(Client* client, std::string buffer) //TODO
 		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
 		return;
 	}
+	// RPL_CHANNELMODEIS 324
 	std::string msg = ":" + client->getHostname() +  " 324 " 
 						+ client->getNickName() 
-						+ " " + buffer + " +\r\n"; // RPL_CHANNELMODEIS (324)
+						+ " " + buffer + " +\r\n"; 
 	send(client->getFd(), msg.c_str(), msg.size(), 0);
 }
 
@@ -397,12 +434,13 @@ void Command::who(Client* client, std::string buffer) //TODO
 		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
 		return;
 	}
+	//RPL_WHOREPLY 352
 	std::ostringstream oss;
 	oss << client->getFd() << " " << buffer 
 						<< " " << client->getUser() 
 						<< " " << client->getHostname() 
 						<< client->getNickName() << " :" 
-						<< "0 " << client->getRealName() << "\r\n"; //RPL_WHOREPLY (352)
+						<< "0 " << client->getRealName() << "\r\n"; 
 
 	std::string msg = oss.str();
 	send(client->getFd(), msg.c_str() , msg.size(), 0);
