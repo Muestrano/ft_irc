@@ -108,8 +108,7 @@ void Channel::removeMember(Client* client)
 	if (itOp != operators.end())
 	{
 		nbOperator--;
-		operators.erase(itOp);
-	}
+		operators.erase(itOp); // TODO Check if we keep the operator list when they're gone.
 }
 
 bool Channel::chanIsEmpty()
