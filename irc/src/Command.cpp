@@ -480,7 +480,7 @@ void Command::sendWelcome(Client* client)
 	welcomeMsg = ":ft_irc 001 " + client->getNickName() + " :Welcome to the irc42 Network, " + client->getNickName() + "[!" + client->getUser() + "@localhost]\r\n";
 	welcomeMsg += ":ft_irc 002 " + client->getNickName() + " :Your host is ft_irc, running version 42.42.\r\n";
 	welcomeMsg += ":ft_irc 003 " + client->getNickName() + " :This server was created the 11/13/25.\r\n";
-	welcomeMsg += ":ft_irc 004 " + client->getNickName() + " ft_irc 42.42. There is no available user modes. The available channel modes are : i (invite only), t (restricted topic), o (operator privilege), l (user limit). The available channel mode with a parameter is k (channel key).\r\n";
+	welcomeMsg += ":ft_irc 004 " + client->getNickName() + " ft_irc 42.42. The user mode available is o (operator). The available channel modes are : i (invite only), t (restricted topic), o (operator privilege), l (user limit). The available channel mode with a parameter is k (channel key).\r\n";
 	send(client->getFd(), welcomeMsg.c_str() , welcomeMsg.size(), 0);
 	sendMOTD(client);
 }
