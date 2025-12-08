@@ -7,9 +7,29 @@ Channel::Channel(std::string name, Client* clientOp) : name(name), password(""),
 	nbMember = 1;
 	operators[clientOp->getNickName()] = clientOp;
 }
-Channel::~Channel()
-{}
 
+Channel::~Channel()
+{
+}
+
+// Getters 
+
+std::map<std::string, Client*>& Channel::getMembers() 
+{ 
+	return members;
+}
+
+std::string Channel::getTopic() const 
+{
+	return topic;
+}
+
+std::string Channel::getName() const
+{
+	return name;
+}
+
+// Public method
 
 /**
  * @brief check all Mode operator before add user in std::map members
@@ -94,6 +114,13 @@ bool Channel::isMember(Client* client)
     return (it != members.end());
 }
 
+bool Channel::isOperator(Client* client)
+{
+	std::string nickName = client->getNickName();
+    std::map<std::string, Client*>::iterator it = operators.find(nickName);
+	return (it != operators.end());
+}
+
 void Channel::removeMember(Client* client)
 {
 	std::map<std::string, Client*>::iterator it;
@@ -109,6 +136,7 @@ void Channel::removeMember(Client* client)
 	{
 		nbOperator--;
 		operators.erase(itOp); // TODO Check if we keep the operator list when they're gone.
+	}
 }
 
 bool Channel::chanIsEmpty()
