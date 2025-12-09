@@ -48,10 +48,10 @@ void Command::set_map(void)
 	CommandMap["WHO"] = &Command::mode;
 	CommandMap["PRIVMSG"] = &Command::privmsg;
 	CommandMap["PART"] = &Command::part;
+	CommandMap["KICK"] = &Command::kick;
 
 	// CommandMap["TOPIC"] = &Command::topic;
 	// CommandMap["INVITE"] = &Command::invite;
-	// CommandMap["KICK"] = &Command::kick;
 	// CommandMap["QUIT"] = &Command::quit;
 }
 
@@ -138,7 +138,9 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 	std::string nickname = client->getNickName();
 	if (nickname.empty())
 		nickname = "*";
-	std::stringstream error;
+	std::stringstream 	error;
+	std::stringstream	ss(errorMsg);
+	std::string			token;
 	switch (errorCode)
 	{
 		case ERR_NOSUCHNICK: // "<client> <nick> :No such nick/channel"
@@ -183,11 +185,21 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 		case ERR_BADCHANNELKEY: // "<client> <channel> :Cannot join channel (+k)"
 			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+k)";
 			break;
+		case ERR_USERNOTINCHANNEL: // "<client> <nick> <channel> :They aren't on that channel"
+			ss >> token;
+			error << client->getNickName() << " " << token << " ";
+			ss >> token;
+			error << token << " :They aren't on that channel.";
+			break;
 		case ERR_NOTONCHANNEL: // "<client> <channel> :You're not on that channel"
-			error << client->getNickName() << " " << errorMsg << " :You're not on that channel";
+			error << client->getNickName() << " " << errorMsg << " :You're not on that channel.";
 			break;
 		case ERR_BADCHANMASK: // "<client> <channel> :Bad Channel Mask"
 			error << client->getNickName() << " " << errorMsg << " :Bad Channel Mask. Usage is /JOIN {#,!,&,+}{<channelname1>,<channelname2,...} {channelkey1,channelkey2,...}.";
+			break;
+		case ERR_CHANOPRIVSNEEDED: // "<client> <channel> :You're not channel operator"
+			error << client->getNickName() << " " << errorMsg << " :You're not channel operator.";
+			break;
 		default:
 			break;
 	}
@@ -343,7 +355,7 @@ void	Command::join(Client* client, std::string buffer)
 		if (out[0] == '#' || out[0] == '&' || out[0] == '!' || out[0] == '+')
 			channelV.push_back(out);
 		else
-			sendErrorCode(client, ERR_BADCHANMASK, "");
+			sendErrorCode(client, ERR_BADCHANMASK, out);
 	}
 	if (!keyStr.empty())
 	{
@@ -359,7 +371,7 @@ void	Command::join(Client* client, std::string buffer)
 		std::cout << "key: " << keyV[i] << std::endl;
 	if (keyV.size() > channelV.size())
 	{
-		sendErrorCode(client, ERR_BADCHANNELKEY, "");
+		sendErrorCode(client, ERR_BADCHANNELKEY, "EMPTY_CHAN_NAME");
 		return;
 	}
 
@@ -606,6 +618,62 @@ void Command::part(Client* client, std::string buffer)
 		if (channel->chanIsEmpty())
 			server->removeChan(channelName);
 	}
+}
+
+// Parameters: <channel> <user> [<comment>]
+/**
+ * @brief Handles the /KICK command
+ * @param client the pointer of the client
+ * @param buffer the parameters of the command
+ */
+void Command::kick(Client* client, std::string buffer)
+{
+	std::vector<std::string>	params;
+	std::stringstream			ss(buffer);
+	std::string					token;
+	while (ss >> token)
+	{
+		if (token[0] == ':')
+		{
+			std::string real = token.substr(1);
+			std::string tmp;
+			while (ss >> tmp)
+				real += " " + tmp;
+			params.push_back(real);
+			break;
+		}
+		params.push_back(token);
+	}
+	if (params.size() < 2 || params.size() > 3)
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "KICK");
+		return;
+	}
+	Channel* channel = this->server->findChannel(params[0]);
+	if (!channel)
+	{
+		sendErrorCode(client, ERR_NOSUCHCHANNEL, params[0]);
+		return;
+	}
+	if (!(channel->isMember(client)))
+	{
+		sendErrorCode(client, ERR_NOTONCHANNEL, params[0]);
+		return;
+	}
+	if (!(channel->isOperator(client)))
+	{
+		sendErrorCode(client, ERR_CHANOPRIVSNEEDED, params[0]);
+		return;
+	}
+	Client* user = this->server->findClientByNick(params[1]);
+	if (!(channel->isMember(user)))
+	{
+		std::stringstream error;
+		error << user << " " << params[0];
+		sendErrorCode(client, ERR_USERNOTINCHANNEL, error.str());
+		return;
+	}
+	
 }
 
 void	Command::test(Client* client, std::string buffer)
