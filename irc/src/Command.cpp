@@ -39,7 +39,6 @@ void Command::setServer(Server *srv)
 */
 void Command::set_map(void)
 {
-	CommandMap["TEST"] = &Command::test;
 	CommandMap["PASS"] = &Command::pass_serv;
 	CommandMap["NICK"] = &Command::nick;
 	CommandMap["USER"] = &Command::user;
@@ -48,6 +47,8 @@ void Command::set_map(void)
 	CommandMap["WHO"] = &Command::mode;
 	CommandMap["PRIVMSG"] = &Command::privmsg;
 	CommandMap["PART"] = &Command::part;
+	CommandMap["QUIT"] = &Command::quit;
+
 
 	// CommandMap["TOPIC"] = &Command::topic;
 	// CommandMap["INVITE"] = &Command::invite;
@@ -594,33 +595,45 @@ void Command::part(Client* client, std::string buffer)
 
 		partMsg += "\r\n";
 
-		channel->sendAllChan(partMsg);
+		channel->sendAllChanExcept(partMsg, NULL);
 		channel->removeMember(client);
 		if (channel->chanIsEmpty())
 			server->removeChan(channelName);
 	}
 }
 
-void	Command::test(Client* client, std::string buffer)
+void Command::quit(Client* client, std::string buffer)
 {
-	std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
-	send(client->getFd(), response.c_str(), response.length(), 0);
+	if (!server->isNickRegistered(client->getNickName()))
+		sendErrorCode(client, ERR_NOTREGISTERED, "");
+	
+	std::string reason = buffer;
+	if (!reason.empty() && reason[0] == ' ')
+		reason.erase(0, 1);
+	if (!reason.empty() && reason[0] == ':')
+		reason.erase(0, 1);
+	std::cout << "reason: " << reason << std::endl;
+	
+	
+	server->quitAllChan(client, reason)
+	// for (size_t i = 0; i < channelV.size(); i++)
+	{
+		std::string channelName = channelV[i];
+		Channel* channel = server->findChannel(channelName);
+
+		std::string quitMsg = ":" + client->getNickName() + "!"
+								+ client->getUser() + "@"
+								+ client->getHostname()
+								+ " Quit " + channelName;
+		if (!reason.empty())
+				quitMsg += " :" + reason;
+		std::cout << "reason: " << reason << std::endl;
+		quitMsg += "\r\n";
+		channel->sendAllChanExcept(quitMsg, NULL);
+		channel->removeMember(client);
+		if (channel->chanIsEmpty())
+			server->removeChan(channelName);
+		server->
+	}
+
 }
-
-/// MESSAGE PROCESSING ///
-// void Serv::processMessage(int user_fd, const char *message)
-// {
-// 	std::string msg(message);
-// 	std::string buffer;
-
-// 	this->clients[user_fd]->appendToBuffer(msg);
-// 	buffer = this->clients[user_fd]->getBuffer();
-// 	if (buffer.find_first_of("\r\n") == std::string::npos)
-// 		return;
-
-// 	std::vector<std::string> commands = splitCommands(buffer);
-// 	for (std::vector<std::string>::iterator it = commands.begin(); it != commands.end(); ++it)
-// 		this->interpret_message(user_fd, *it);
-// 	if (this->clients[user_fd])
-// 		this->clients[user_fd]->clearBuffer();
-// }

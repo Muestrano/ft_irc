@@ -127,16 +127,15 @@ void Channel::removeMember(Client* client)
 	it = members.find(client->getNickName());
 	if (it != members.end())
 	{
-		nbMember--;
-		members.erase(it);
+		this->nbMember--;
+		this->members.erase(it);
 	}
 	std::map<std::string, Client*>::iterator itOp;
 	itOp = operators.find(client->getNickName());
-	if (itOp != operators.end())
-	{
-		nbOperator--;
-		operators.erase(itOp); // TODO Check if we keep the operator list when they're gone.
-	}
+	// if (itOp != operators.end()) //TODO Check if we need nbOperator
+	// {
+	// 	nbOperator--;
+	// }
 }
 
 bool Channel::chanIsEmpty()

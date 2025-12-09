@@ -63,7 +63,7 @@ class Command
 		void sendWelcome(Client* client);
 		void sendMOTD(Client* client);
 		void part(Client* client, std::string buffer);
-		void test(Client* client, std::string buffer); // TODO Delete later.
+		void quit(Client* client, std::string buffer);
 		
 		// void	pass_chan(Client* client, std::string buffer);
 		// void	join(Client* client, std::string buffer);
@@ -71,7 +71,6 @@ class Command
 		// void	invite(Client* client, std::string buffer);
 		// void	kick(Client* client, std::string buffer);
 		// void	exit(Client* client, std::string buffer);
-		// void	quit(Client* client, std::string buffer);
 
 	/*
 		// /PASS <password>\

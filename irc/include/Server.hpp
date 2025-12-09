@@ -44,6 +44,8 @@ class Server
 		void		addChannel(const std::string name, Channel* channel);
 		bool		isNickRegistered(std::string nick);
 		void		removeChan(std::string channelName);
+		void		disconnectClient(std::string nick);
+		void		quitAllChan(Client* client, std::string reason);
 };
 
 

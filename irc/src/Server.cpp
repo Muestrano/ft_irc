@@ -250,9 +250,49 @@ void Server::removeChan(std::string channelName)
 	{
 		delete it->second;
 		channels.erase(it);
-		std::cout << "hhhhhhhhhhh" << std::endl;
 	}
 }
+
+void Server::disconnectClient(std::string nick)
+{
+	std::map<int, Client*>::iterator it;
+	it = clients.begin();
+	while (it != clients.end())
+	{
+		if (it->second->getNickName() == nick)
+		{
+			delete it->second;
+			clients.erase(it);
+		}
+	}
+	
+}
+void Server::quitAllChan(Client* client, std::string reason)
+{
+	std::map<std::string, Channel*>::iterator it;
+	it = channels.begin();
+	while (it != channels.end())
+	{
+		Channel* channel = it->second;
+		if (isNickRegistered(client->getNickName()))
+		{
+			channel->removeMember(client);
+			if (channel->chanIsEmpty())
+				this->removeChan(it->first);
+			std::string quitMsg = ":" + client->getNickName() + "!"
+									+ client->getUser() + "@"
+									+ client->getHostname()
+									+ " Quit " + it->first;
+			if (!reason.empty())
+					quitMsg += " :" + reason;
+			std::cout << "reason: " << reason << std::endl;
+			quitMsg += "\r\n";
+			channel->sendAllChanExcept(quitMsg, NULL);
+		}
+	}
+	this->disconnectClient(client->getNickName());
+}
+
 
 
 /*
