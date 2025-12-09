@@ -186,6 +186,8 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 		case ERR_NOTONCHANNEL: // "<client> <channel> :You're not on that channel"
 			error << client->getNickName() << " " << errorMsg << " :You're not on that channel";
 			break;
+		case ERR_BADCHANMASK: // "<client> <channel> :Bad Channel Mask"
+			error << client->getNickName() << " " << errorMsg << " :Bad Channel Mask. Usage is /JOIN {#,!,&,+}{<channelname1>,<channelname2,...} {channelkey1,channelkey2,...}.";
 		default:
 			break;
 	}
@@ -340,6 +342,8 @@ void	Command::join(Client* client, std::string buffer)
 	{
 		if (out[0] == '#' || out[0] == '&' || out[0] == '!' || out[0] == '+')
 			channelV.push_back(out);
+		else
+			sendErrorCode(client, ERR_BADCHANMASK, "");
 	}
 	if (!keyStr.empty())
 	{
@@ -353,8 +357,11 @@ void	Command::join(Client* client, std::string buffer)
 		std::cout << "channel: " << channelV[i] << std::endl;
 	for (size_t i = 0; i < keyV.size(); i++)
 		std::cout << "key: " << keyV[i] << std::endl;
-	if (keyV.size() > channelV.size()) //TODO
-		return; // sendError //TODO
+	if (keyV.size() > channelV.size())
+	{
+		sendErrorCode(client, ERR_BADCHANNELKEY, "");
+		return;
+	}
 
 	for (size_t i = 0; i < channelV.size(); i++)
 	{
