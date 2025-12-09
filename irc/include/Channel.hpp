@@ -38,7 +38,8 @@ class Channel
 		bool isOperator(Client* client);
 		void removeMember(Client* client);
 		bool chanIsEmpty();
-
+		void addInvited(const std::string, Client* client);
+		// void removeInvited(const std::string, Client* client); TODO + remove if client leaves
 };
 
 /*

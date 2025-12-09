@@ -59,7 +59,7 @@ void	Channel::addUser(const std::string key, Client* client)
 		members[nickName] = client;
 		nbMember++;
 	}
-	if (nbMember == 1)
+	if (nbMember == 1) // TODO si le dernier operator quitte le channel, plus personne ne devient operator (d'usage de faire ca, mais pas obligatoire)
 	{
 		nbOperator++;
 		operators[nickName] = client;
@@ -144,4 +144,12 @@ bool Channel::chanIsEmpty()
 	if (nbMember == 0)
 		return (true);
 	return (false);
+}
+
+void Channel::addInvited(const std::string, Client* client)
+{
+	// std::string nickName = client->getNickName();
+	// if (invited.find(nickName) == invited.end())
+	// 	invited[nickName] = client;
+	invited[nickName] = client;
 }

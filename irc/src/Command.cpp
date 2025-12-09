@@ -194,6 +194,12 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 		case ERR_NOTONCHANNEL: // "<client> <channel> :You're not on that channel"
 			error << client->getNickName() << " " << errorMsg << " :You're not on that channel.";
 			break;
+		case ERR_USERONCHANNEL: // "<client> <nick> <channel> :is already on channel"
+			ss >> token;
+			error << client->getNickName() << " " << token << " ";
+			ss >> token;
+			error << token << " :is already on channel.";
+			break;
 		case ERR_BADCHANMASK: // "<client> <channel> :Bad Channel Mask"
 			error << client->getNickName() << " " << errorMsg << " :Bad Channel Mask. Usage is /JOIN {#,!,&,+}{<channelname1>,<channelname2,...} {channelkey1,channelkey2,...}.";
 			break;
@@ -632,6 +638,7 @@ void Command::kick(Client* client, std::string buffer)
 	std::stringstream			ss(buffer);
 	std::string					token;
 	std::string					kick_msg;
+
 	while (ss >> token)
 	{
 		if (token[0] == ':')
@@ -669,9 +676,7 @@ void Command::kick(Client* client, std::string buffer)
 	Client* user = this->server->findClientByNick(params[1]);
 	if (!user)
 	{
-		std::stringstream error;
-		error << params[1] << " " << params[0];
-		sendErrorCode(client, ERR_USERNOTINCHANNEL, error.str());
+		sendErrorCode(client, ERR_NOSUCHNICK, params[1]);
 		return;
 	}
 	if (!(channel->isMember(user)))
@@ -691,6 +696,65 @@ void Command::kick(Client* client, std::string buffer)
 	channel->removeMember(user);
 	if (channel->chanIsEmpty())
 		server->removeChan(params[0]);
+	return;
+}
+
+//Command: INVITE
+//Parameters: <nickname> <channel>
+    // RPL_INVITING (341)
+/**
+ * @brief Handles the /INVITE command
+ * @param client the pointer of the client
+ * @param buffer the parameters of the command
+ */
+void	Command::invite(Client* client, std::string buffer)
+{
+	std::vector<std::string>	params;
+	std::stringstream			ss(buffer);
+	std::string					token;
+	std::string					invite_msg;
+
+	while (ss >> token)
+		params.push_back(token);
+	if (params.size() != 2)
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "INVITE");
+		return; 
+	}
+	Channel* channel = this->server->findChannel(params[1]);
+	if (!channel)
+	{
+		sendErrorCode(client, ERR_NOSUCHCHANNEL, params[1]);
+		return;
+	}
+	if (!(channel->isMember(client)))
+	{
+		sendErrorCode(client, ERR_NOTONCHANNEL, params[1]);
+		return;
+	}
+	if (!(channel->isOperator(client)))
+	{
+		sendErrorCode(client, ERR_CHANOPRIVSNEEDED, params[1]);
+		return;
+	}
+	Client* user = this->server->findClientByNick(params[0]);
+	if (!user)
+	{
+		sendErrorCode(client, ERR_NOSUCHNICK, params[0]);
+		return;
+	}
+	if (channel->isMember(user))
+	{
+		std::stringstream error;
+		error << params[0] << " " << params[1];
+		sendErrorCode(client, ERR_USERONCHANNEL, error.str());
+		return;
+	}
+	channel->addInvited(params[0], user);
+	invite_msg = ":" + client->getNickName() + " INVITE " + params[0] + " " + params[1] + "\r\n";
+	send(user->getFd(), invite_msg.c_str(), invite_msg.length(), 0);
+	invite_msg = ":ft_irc 341 " + client->getNickName() + " " + params[0] + " " + params[1] + "\r\n";
+	send(client->getFd(), invite_msg.c_str(), invite_msg.length(), 0);
 	return;
 }
 

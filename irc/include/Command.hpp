@@ -14,6 +14,7 @@ enum ErrorCode
 	ERR_NICKNAMEINUSE = 433,
 	ERR_USERNOTINCHANNEL = 441,
 	ERR_NOTONCHANNEL = 442,
+	ERR_USERONCHANNEL = 443,
 	ERR_NOTREGISTERED = 451,
 	ERR_NEEDMOREPARAMS = 461,
 	ERR_ALREADYREGISTERED = 462,
@@ -67,11 +68,11 @@ class Command
 		void sendMOTD(Client* client);
 		void part(Client* client, std::string buffer);
 		void kick(Client* client, std::string buffer);
+		void invite(Client* client, std::string buffer);
 		void test(Client* client, std::string buffer); // TODO Delete later.
 		
 		// void	pass_chan(Client* client, std::string buffer);
 		// void	topic(Client* client, std::string buffer);
-		// void	invite(Client* client, std::string buffer);
 		// void	exit(Client* client, std::string buffer);
 		// void	quit(Client* client, std::string buffer);
 
