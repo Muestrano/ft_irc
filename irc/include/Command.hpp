@@ -70,10 +70,8 @@ class Command
 		void test(Client* client, std::string buffer); // TODO Delete later.
 		
 		// void	pass_chan(Client* client, std::string buffer);
-		// void	join(Client* client, std::string buffer);
 		// void	topic(Client* client, std::string buffer);
 		// void	invite(Client* client, std::string buffer);
-		// void	kick(Client* client, std::string buffer);
 		// void	exit(Client* client, std::string buffer);
 		// void	quit(Client* client, std::string buffer);
 

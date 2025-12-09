@@ -631,6 +631,7 @@ void Command::kick(Client* client, std::string buffer)
 	std::vector<std::string>	params;
 	std::stringstream			ss(buffer);
 	std::string					token;
+	std::string					kick_msg;
 	while (ss >> token)
 	{
 		if (token[0] == ':')
@@ -666,14 +667,31 @@ void Command::kick(Client* client, std::string buffer)
 		return;
 	}
 	Client* user = this->server->findClientByNick(params[1]);
-	if (!(channel->isMember(user)))
+	if (!user)
 	{
 		std::stringstream error;
-		error << user << " " << params[0];
+		error << params[1] << " " << params[0];
 		sendErrorCode(client, ERR_USERNOTINCHANNEL, error.str());
 		return;
 	}
-	
+	if (!(channel->isMember(user)))
+	{
+		std::stringstream error;
+		error << params[1] << " " << params[0];
+		sendErrorCode(client, ERR_USERNOTINCHANNEL, error.str());
+		return;
+	}
+	kick_msg = ":" + client->getNickName() + " KICK " + params[0] + " " + params[1] + " :";
+	if (params.size() == 2)
+		kick_msg += "Goodbye " + params[1] + "!";
+	else
+		kick_msg += params[2];
+	kick_msg += "\r\n";
+	channel->sendAllChanExcept(kick_msg, NULL);
+	channel->removeMember(user);
+	if (channel->chanIsEmpty())
+		server->removeChan(params[0]);
+	return;
 }
 
 void	Command::test(Client* client, std::string buffer)
