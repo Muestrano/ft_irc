@@ -49,7 +49,7 @@ void	Channel::addUser(const std::string key, Client* client)
 		command.sendErrorCode(client, ERR_CHANNELISFULL, this->name); //TODO
 		return;
 	}
-	if (invitedOnly /*&& isInvited(client) TODO*/)
+	if (invitedOnly && !(this->isInvited(client)))
 	{
 		command.sendErrorCode(client, ERR_INVITEONLYCHAN, this->name); //TODO
 		return;
@@ -59,6 +59,8 @@ void	Channel::addUser(const std::string key, Client* client)
 		members[nickName] = client;
 		nbMember++;
 	}
+	if (this->isInvited(client))
+		this->removeInvited(client);
 	if (nbMember == 1) // TODO si le dernier operator quitte le channel, plus personne ne devient operator (d'usage de faire ca, mais pas obligatoire)
 	{
 		nbOperator++;
@@ -146,10 +148,30 @@ bool Channel::chanIsEmpty()
 	return (false);
 }
 
-void Channel::addInvited(const std::string, Client* client)
+void Channel::addInvited(Client* client)
 {
-	// std::string nickName = client->getNickName();
-	// if (invited.find(nickName) == invited.end())
-	// 	invited[nickName] = client;
-	invited[nickName] = client;
+	this->invited[client->getNickName()] = client;
+}
+
+void Channel::removeInvited(Client* client)
+{
+	std::map<std::string, Client*>::iterator it = invited.find(client->getNickName());
+    if (it != invited.end())
+        invited.erase(it);
+}
+
+/**
+ * @brief Returns if a client is in the invited list of the channel
+ * @param client The pointer of the client
+ */
+bool Channel::isInvited(Client* client)
+{
+	std::map<std::string, Client*>::iterator it = this->invited.begin();
+	while (it != this->invited.end())
+	{
+		if (it->second == client)
+			return (true);
+		it++;
+	}
+	return (false);
 }

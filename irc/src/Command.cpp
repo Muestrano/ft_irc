@@ -750,7 +750,7 @@ void	Command::invite(Client* client, std::string buffer)
 		sendErrorCode(client, ERR_USERONCHANNEL, error.str());
 		return;
 	}
-	channel->addInvited(params[0], user);
+	channel->addInvited(user);
 	invite_msg = ":" + client->getNickName() + " INVITE " + params[0] + " " + params[1] + "\r\n";
 	send(user->getFd(), invite_msg.c_str(), invite_msg.length(), 0);
 	invite_msg = ":ft_irc 341 " + client->getNickName() + " " + params[0] + " " + params[1] + "\r\n";
