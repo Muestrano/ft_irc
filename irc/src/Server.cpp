@@ -1,6 +1,8 @@
 #include "../include/Server.hpp"
 #include "../include/include.hpp"
 
+bool runningServ = true; // to handle SIGINT
+
 /**
  * @param AF_INET ipv4 protocol
  * @param SOCK_STREAM TCP socket
@@ -172,11 +174,13 @@ void Server::newConnection()
 */
 void Server::startServer()
 {
-
-	while (true)
+	setupSignal();
+	while (runningServ)
 	{
 		int waitPoll = poll(pollFd.data(), pollFd.size(), 5000);
-		// check all socket with POLLIN if there up with revents ==0
+		if (!runningServ) // Kill program
+			break;
+		//TODO check all socket with POLLIN if there up with revents ==0
 		if (waitPoll > 0)
 		{
 			for (int i = pollFd.size() - 1; i >= 0 ; i--)
@@ -193,9 +197,9 @@ void Server::startServer()
 					handleClientData(i);
 			
 			}
-			// check all events new connection or data give for one client // TODO
 		}
 	}
+	// freeAll();
 }
 
 /**
@@ -292,6 +296,20 @@ void Server::quitAllChan(Client* client, std::string reason)
 	}
 	this->disconnectClient(client->getNickName());
 }
+void sigint(int sig)
+{
+	if (sig == SIGINT)
+		runningServ = false;
+}
+
+void Server::setupSignal()
+{
+	struct sigaction act;
+	act.sa_flags = 0;
+	sigemptyset(&act.sa_mask);
+	act.sa_handler = &sigint;
+	sigaction(SIGINT, &act, NULL);
+}
 
 
 
@@ -333,3 +351,16 @@ socket : communication between two device in one network
 	
 
 */
+
+void	init_sig(int sig, void (*handler)(int, siginfo_t *, void *))
+{
+	struct sigaction	susr;
+
+	susr.sa_sigaction = handler;
+	susr.sa_flags = SA_SIGINFO;
+	sigemptyset(&susr.sa_mask);
+	if (sig == SIGUSR1)
+		sigaction(SIGUSR1, &susr, 0);
+	else if (sig == SIGUSR2)
+		sigaction(SIGUSR2, &susr, 0);
+}

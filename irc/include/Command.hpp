@@ -63,7 +63,7 @@ class Command
 		void sendWelcome(Client* client);
 		void sendMOTD(Client* client);
 		void part(Client* client, std::string buffer);
-		void quit(Client* client, std::string buffer);
+		// void quit(Client* client, std::string buffer);
 		
 		// void	pass_chan(Client* client, std::string buffer);
 		// void	join(Client* client, std::string buffer);

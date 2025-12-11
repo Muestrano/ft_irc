@@ -46,6 +46,8 @@ class Server
 		void		removeChan(std::string channelName);
 		void		disconnectClient(std::string nick);
 		void		quitAllChan(Client* client, std::string reason);
+		void		setupSignal();
+		// void		freeAll();
 };
 
 

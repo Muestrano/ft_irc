@@ -47,7 +47,7 @@ void Command::set_map(void)
 	CommandMap["WHO"] = &Command::mode;
 	CommandMap["PRIVMSG"] = &Command::privmsg;
 	CommandMap["PART"] = &Command::part;
-	CommandMap["QUIT"] = &Command::quit;
+	// CommandMap["QUIT"] = &Command::quit;
 
 
 	// CommandMap["TOPIC"] = &Command::topic;
@@ -602,38 +602,38 @@ void Command::part(Client* client, std::string buffer)
 	}
 }
 
-void Command::quit(Client* client, std::string buffer)
-{
-	if (!server->isNickRegistered(client->getNickName()))
-		sendErrorCode(client, ERR_NOTREGISTERED, "");
+// void Command::quit(Client* client, std::string buffer)
+// {
+// 	if (!server->isNickRegistered(client->getNickName()))
+// 		sendErrorCode(client, ERR_NOTREGISTERED, "");
 	
-	std::string reason = buffer;
-	if (!reason.empty() && reason[0] == ' ')
-		reason.erase(0, 1);
-	if (!reason.empty() && reason[0] == ':')
-		reason.erase(0, 1);
-	std::cout << "reason: " << reason << std::endl;
+// 	std::string reason = buffer;
+// 	if (!reason.empty() && reason[0] == ' ')
+// 		reason.erase(0, 1);
+// 	if (!reason.empty() && reason[0] == ':')
+// 		reason.erase(0, 1);
+// 	std::cout << "reason: " << reason << std::endl;
 	
 	
-	server->quitAllChan(client, reason)
-	// for (size_t i = 0; i < channelV.size(); i++)
-	{
-		std::string channelName = channelV[i];
-		Channel* channel = server->findChannel(channelName);
+// 	server->quitAllChan(client, reason)
+// 	// for (size_t i = 0; i < channelV.size(); i++)
+// 	{
+// 		std::string channelName = channelV[i];
+// 		Channel* channel = server->findChannel(channelName);
 
-		std::string quitMsg = ":" + client->getNickName() + "!"
-								+ client->getUser() + "@"
-								+ client->getHostname()
-								+ " Quit " + channelName;
-		if (!reason.empty())
-				quitMsg += " :" + reason;
-		std::cout << "reason: " << reason << std::endl;
-		quitMsg += "\r\n";
-		channel->sendAllChanExcept(quitMsg, NULL);
-		channel->removeMember(client);
-		if (channel->chanIsEmpty())
-			server->removeChan(channelName);
-		server->
-	}
+// 		std::string quitMsg = ":" + client->getNickName() + "!"
+// 								+ client->getUser() + "@"
+// 								+ client->getHostname()
+// 								+ " Quit " + channelName;
+// 		if (!reason.empty())
+// 				quitMsg += " :" + reason;
+// 		std::cout << "reason: " << reason << std::endl;
+// 		quitMsg += "\r\n";
+// 		channel->sendAllChanExcept(quitMsg, NULL);
+// 		channel->removeMember(client);
+// 		if (channel->chanIsEmpty())
+// 			server->removeChan(channelName);
+// 		server->
+// 	}
 
-}
+// }
