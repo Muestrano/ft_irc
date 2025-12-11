@@ -199,7 +199,7 @@ void Server::startServer()
 			}
 		}
 	}
-	// freeAll();
+	freeAll();
 }
 
 /**
@@ -296,21 +296,68 @@ void Server::quitAllChan(Client* client, std::string reason)
 	}
 	this->disconnectClient(client->getNickName());
 }
+/**
+ * @brief Modified flag runningServ if we have signal CTR + c (SIGINT)
+*/
 void sigint(int sig)
 {
 	if (sig == SIGINT)
 		runningServ = false;
 }
-
+/**
+ * @brief sigaction configuration (handling signal)
+ * @param sigemptyset initialize sa_mask to handle each signal by each signal and not in the same time
+ * @param sa_handler take a function to handle signal consequence
+ * @param sigaction Link SIGINT signal to sa_handler to do sigint function
+ * 
+*/
 void Server::setupSignal()
 {
 	struct sigaction act;
-	act.sa_flags = 0;
+	act.sa_flags = 0; // No option
 	sigemptyset(&act.sa_mask);
 	act.sa_handler = &sigint;
 	sigaction(SIGINT, &act, NULL);
 }
+/**
+ * @brief delete Clients Channels and close socket/poll
+*/
+void Server::freeAll()
+{
+	std::map<int, Client*>::iterator itClient;
+	std::map<std::string, Channel*>::iterator itChan;
+	itClient = clients.begin();
+	itChan = channels.begin();
+	while (itChan != channels.end())
+	{
+		if (itChan->second)
+		{	delete itChan->second;
+			itChan->second = NULL;
+		}
+		itChan++;
+	}
+	channels.clear();
 
+
+	while (itClient != clients.end())
+	{
+		if (itClient->second)
+		{	
+			close(itClient->first);
+			delete itClient->second;
+			itClient->second = NULL;
+		}
+		itClient++;
+	}
+	clients.clear();
+
+	if (socketFd >= 0)
+	{
+		close(socketFd);
+		socketFd = -1; // Secure socket close
+	}
+	pollFd.clear();
+}
 
 
 /*
@@ -351,16 +398,3 @@ socket : communication between two device in one network
 	
 
 */
-
-void	init_sig(int sig, void (*handler)(int, siginfo_t *, void *))
-{
-	struct sigaction	susr;
-
-	susr.sa_sigaction = handler;
-	susr.sa_flags = SA_SIGINFO;
-	sigemptyset(&susr.sa_mask);
-	if (sig == SIGUSR1)
-		sigaction(SIGUSR1, &susr, 0);
-	else if (sig == SIGUSR2)
-		sigaction(SIGUSR2, &susr, 0);
-}

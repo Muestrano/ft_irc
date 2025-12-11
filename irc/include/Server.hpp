@@ -6,7 +6,6 @@
 
 class Client;
 
-
 class Server
 {
 	private:
@@ -47,7 +46,7 @@ class Server
 		void		disconnectClient(std::string nick);
 		void		quitAllChan(Client* client, std::string reason);
 		void		setupSignal();
-		// void		freeAll();
+		void		freeAll();
 };
 
 
