@@ -88,22 +88,22 @@ void Server::initServer()
 	this->pollFd.push_back(listenerPollFd);
 }
 
-/**
- * @brief disconnect client and erase the client socket
-*/
-void Server::disconnectClient(int i)
-{
-	int clientFd = pollFd[i].fd;
-	std::cout << "client disconnect: " << clientFd << std::endl;
-	if (clients.find(clientFd) != clients.end()) 
-	{
-		delete clients[clientFd];    // free client
-		clients.erase(clientFd);     // clean map
-	}
+// /**
+//  * @brief disconnect client and erase the client socket //TEMP
+// */
+// void Server::disconnectClient(int i)
+// {
+// 	int clientFd = pollFd[i].fd;
+// 	std::cout << "client disconnect: " << clientFd << std::endl;
+// 	if (clients.find(clientFd) != clients.end()) 
+// 	{
+// 		delete clients[clientFd];    // free client
+// 		clients.erase(clientFd);     // clean map
+// 	}
 	
-	close(clientFd);
-	pollFd.erase(pollFd.begin() + i);
-}
+// 	close(clientFd);
+// 	pollFd.erase(pollFd.begin() + i);
+// }
 
 /**
  * @brief handle receive message and parse the command
@@ -122,11 +122,15 @@ void Server::handleClientData(int i)
 		buffer[bytesRead] = '\0';
 		client->setBuffer(buffer);
 		cmd.extractCompleteCommand(client);
-		// client->clearbuff() // TODO need to see if it's necessary
+		if (client->getWillDisconnect())
+		{
+			disconnectClient(pollFd[i].fd); // Fd of the current client
+			return;
+		}
 	}
 	else if (bytesRead == 0)
 	{
-		disconnectClient(i);
+		disconnectClient(pollFd[i].fd);
 	}
 	else //error
 	{ 
@@ -134,7 +138,7 @@ void Server::handleClientData(int i)
 			return;
 		else 
 		{
-			disconnectClient(i);
+			disconnectClient(pollFd[i].fd);
 		}
 	}
 }
@@ -253,48 +257,59 @@ void Server::removeChan(std::string channelName)
 	if (it != channels.end())
 	{
 		delete it->second;
+		it->second = NULL;
 		channels.erase(it);
 	}
 }
 
-void Server::disconnectClient(std::string nick)
+void Server::disconnectClient(int clientFd)
 {
-	std::map<int, Client*>::iterator it;
-	it = clients.begin();
-	while (it != clients.end())
+	std::map<int, Client*>::iterator it = clients.find(clientFd);
+	if (it == clients.end())
+		return;
+	
+	Client* client = it->second;
+	// std::string nick = client->getNickName();
+
+	delete client;
+	clients.erase(it);
+	close(clientFd);
+	for (size_t i = 0; i < pollFd.size(); ++i)
 	{
-		if (it->second->getNickName() == nick)
+		if (pollFd[i].fd == clientFd)
 		{
-			delete it->second;
-			clients.erase(it);
+			pollFd.erase(pollFd.begin() + i);
+			break;
 		}
 	}
-	
 }
 void Server::quitAllChan(Client* client, std::string reason)
 {
 	std::map<std::string, Channel*>::iterator it;
 	it = channels.begin();
+
 	while (it != channels.end())
 	{
 		Channel* channel = it->second;
-		if (isNickRegistered(client->getNickName()))
+		std::map<std::string, Channel*>::iterator current = it;
+		it++;
+		if (channel->isMember(client))
 		{
+			std::string quitMsg = ":" + client->getNickName() + "!"
+                                + client->getUser() + "@"
+                                + client->getHostname()
+                                + " QUIT :" + reason + "\r\n";
+			channel->sendAllChanExcept(quitMsg, NULL);
 			channel->removeMember(client);
 			if (channel->chanIsEmpty())
-				this->removeChan(it->first);
-			std::string quitMsg = ":" + client->getNickName() + "!"
-									+ client->getUser() + "@"
-									+ client->getHostname()
-									+ " Quit " + it->first;
-			if (!reason.empty())
-					quitMsg += " :" + reason;
-			std::cout << "reason: " << reason << std::endl;
-			quitMsg += "\r\n";
-			channel->sendAllChanExcept(quitMsg, NULL);
+			{
+				// std::string channelName = current->first;
+				delete channel;
+				channels.erase(current);
+				// this->removeChan(it->first); //TEMP
+			}
 		}
 	}
-	this->disconnectClient(client->getNickName());
 }
 /**
  * @brief Modified flag runningServ if we have signal CTR + c (SIGINT)
