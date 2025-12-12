@@ -612,7 +612,11 @@ void Command::quit(Client* client, std::string buffer)
 	if (!reason.empty() && reason[0] == ':')
 		reason.erase(0, 1);
 	std::cout << "reason: " << reason << std::endl;
-	
+	std::string quitMsg = ":" + client->getNickName() + "!"
+                        + client->getUser() + "@"
+                        + client->getHostname()
+                        + " QUIT :" + reason + "\r\n";
+    send(client->getFd(), quitMsg.c_str(), quitMsg.length(), 0);
 	
 	server->quitAllChan(client, reason);
 	client->setWillDisconnect(true);

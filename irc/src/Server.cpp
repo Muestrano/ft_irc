@@ -261,7 +261,9 @@ void Server::removeChan(std::string channelName)
 		channels.erase(it);
 	}
 }
-
+/**
+ * @brief delete client and pollFd
+*/
 void Server::disconnectClient(int clientFd)
 {
 	std::map<int, Client*>::iterator it = clients.find(clientFd);
@@ -269,8 +271,6 @@ void Server::disconnectClient(int clientFd)
 		return;
 	
 	Client* client = it->second;
-	// std::string nick = client->getNickName();
-
 	delete client;
 	clients.erase(it);
 	close(clientFd);
@@ -283,8 +283,12 @@ void Server::disconnectClient(int clientFd)
 		}
 	}
 }
+/**
+ * @brief Delete all channel of the current client
+*/
 void Server::quitAllChan(Client* client, std::string reason)
 {
+	(void)reason; //TEMP
 	std::map<std::string, Channel*>::iterator it;
 	it = channels.begin();
 
@@ -299,14 +303,12 @@ void Server::quitAllChan(Client* client, std::string reason)
                                 + client->getUser() + "@"
                                 + client->getHostname()
                                 + " QUIT :" + reason + "\r\n";
-			channel->sendAllChanExcept(quitMsg, NULL);
+			channel->sendAllChanExcept(quitMsg, client);
 			channel->removeMember(client);
 			if (channel->chanIsEmpty())
 			{
-				// std::string channelName = current->first;
 				delete channel;
 				channels.erase(current);
-				// this->removeChan(it->first); //TEMP
 			}
 		}
 	}
