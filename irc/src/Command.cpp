@@ -624,7 +624,6 @@ void Command::part(Client* client, std::string buffer)
 	}
 }
 
-void Command::quit(Client* client, std::string buffer)
 // Parameters: <channel> <user> [<comment>]
 /**
  * @brief Handles the /KICK command
@@ -699,7 +698,7 @@ void Command::kick(Client* client, std::string buffer)
 	return;
 }
 
-void	Command::test(Client* client, std::string buffer)
+void	Command::quit(Client* client, std::string buffer)
 {
 	if (!server->isNickRegistered(client->getNickName()))
 		sendErrorCode(client, ERR_NOTREGISTERED, "");
