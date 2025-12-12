@@ -1,6 +1,8 @@
 #include "../include/Server.hpp"
 #include "../include/include.hpp"
 
+bool runningServ = true; // to handle SIGINT
+
 /**
  * @param AF_INET ipv4 protocol
  * @param SOCK_STREAM TCP socket
@@ -86,22 +88,22 @@ void Server::initServer()
 	this->pollFd.push_back(listenerPollFd);
 }
 
-/**
- * @brief disconnect client and erase the client socket
-*/
-void Server::disconnectClient(int i)
-{
-	int clientFd = pollFd[i].fd;
-	std::cout << "client disconnect: " << clientFd << std::endl;
-	if (clients.find(clientFd) != clients.end()) 
-	{
-		delete clients[clientFd];    // free client
-		clients.erase(clientFd);     // clean map
-	}
+// /**
+//  * @brief disconnect client and erase the client socket //TEMP
+// */
+// void Server::disconnectClient(int i)
+// {
+// 	int clientFd = pollFd[i].fd;
+// 	std::cout << "client disconnect: " << clientFd << std::endl;
+// 	if (clients.find(clientFd) != clients.end()) 
+// 	{
+// 		delete clients[clientFd];    // free client
+// 		clients.erase(clientFd);     // clean map
+// 	}
 	
-	close(clientFd);
-	pollFd.erase(pollFd.begin() + i);
-}
+// 	close(clientFd);
+// 	pollFd.erase(pollFd.begin() + i);
+// }
 
 /**
  * @brief handle receive message and parse the command
@@ -120,11 +122,15 @@ void Server::handleClientData(int i)
 		buffer[bytesRead] = '\0';
 		client->setBuffer(buffer);
 		cmd.extractCompleteCommand(client);
-		// client->clearbuff() // TODO need to see if it's necessary
+		if (client->getWillDisconnect())
+		{
+			disconnectClient(pollFd[i].fd); // Fd of the current client
+			return;
+		}
 	}
 	else if (bytesRead == 0)
 	{
-		disconnectClient(i);
+		disconnectClient(pollFd[i].fd);
 	}
 	else //error
 	{ 
@@ -132,7 +138,7 @@ void Server::handleClientData(int i)
 			return;
 		else 
 		{
-			disconnectClient(i);
+			disconnectClient(pollFd[i].fd);
 		}
 	}
 }
@@ -172,11 +178,13 @@ void Server::newConnection()
 */
 void Server::startServer()
 {
-
-	while (true)
+	setupSignal();
+	while (runningServ)
 	{
 		int waitPoll = poll(pollFd.data(), pollFd.size(), 5000);
-		// check all socket with POLLIN if there up with revents ==0
+		if (!runningServ) // Kill program
+			break;
+		//TODO check all socket with POLLIN if there up with revents ==0
 		if (waitPoll > 0)
 		{
 			for (int i = pollFd.size() - 1; i >= 0 ; i--)
@@ -193,9 +201,9 @@ void Server::startServer()
 					handleClientData(i);
 			
 			}
-			// check all events new connection or data give for one client // TODO
 		}
 	}
+	freeAll();
 }
 
 /**
@@ -249,9 +257,123 @@ void Server::removeChan(std::string channelName)
 	if (it != channels.end())
 	{
 		delete it->second;
+		it->second = NULL;
 		channels.erase(it);
-		std::cout << "hhhhhhhhhhh" << std::endl;
 	}
+}
+/**
+ * @brief delete client and pollFd
+*/
+void Server::disconnectClient(int clientFd)
+{
+	std::map<int, Client*>::iterator it = clients.find(clientFd);
+	if (it == clients.end())
+		return;
+	
+	Client* client = it->second;
+	delete client;
+	clients.erase(it);
+	close(clientFd);
+	for (size_t i = 0; i < pollFd.size(); ++i)
+	{
+		if (pollFd[i].fd == clientFd)
+		{
+			pollFd.erase(pollFd.begin() + i);
+			break;
+		}
+	}
+}
+/**
+ * @brief Delete all channel of the current client
+*/
+void Server::quitAllChan(Client* client, std::string reason)
+{
+	(void)reason; //TEMP
+	std::map<std::string, Channel*>::iterator it;
+	it = channels.begin();
+
+	while (it != channels.end())
+	{
+		Channel* channel = it->second;
+		std::map<std::string, Channel*>::iterator current = it;
+		it++;
+		if (channel->isMember(client))
+		{
+			std::string quitMsg = ":" + client->getNickName() + "!"
+                                + client->getUser() + "@"
+                                + client->getHostname()
+                                + " QUIT :" + reason + "\r\n";
+			channel->sendAllChanExcept(quitMsg, client);
+			channel->removeMember(client);
+			if (channel->chanIsEmpty())
+			{
+				delete channel;
+				channels.erase(current);
+			}
+		}
+	}
+}
+/**
+ * @brief Modified flag runningServ if we have signal CTR + c (SIGINT)
+*/
+void sigint(int sig)
+{
+	if (sig == SIGINT)
+		runningServ = false;
+}
+/**
+ * @brief sigaction configuration (handling signal)
+ * @param sigemptyset initialize sa_mask to handle each signal by each signal and not in the same time
+ * @param sa_handler take a function to handle signal consequence
+ * @param sigaction Link SIGINT signal to sa_handler to do sigint function
+ * 
+*/
+void Server::setupSignal()
+{
+	struct sigaction act;
+	act.sa_flags = 0; // No option
+	sigemptyset(&act.sa_mask);
+	act.sa_handler = &sigint;
+	sigaction(SIGINT, &act, NULL);
+}
+/**
+ * @brief delete Clients Channels and close socket/poll
+*/
+void Server::freeAll()
+{
+	std::map<int, Client*>::iterator itClient;
+	std::map<std::string, Channel*>::iterator itChan;
+	itClient = clients.begin();
+	itChan = channels.begin();
+	while (itChan != channels.end())
+	{
+		if (itChan->second)
+		{	delete itChan->second;
+			itChan->second = NULL;
+		}
+		itChan++;
+	}
+	channels.clear();
+
+
+	while (itClient != clients.end())
+	{
+		if (itClient->second)
+		{	
+			close(itClient->first);
+			delete itClient->second;
+			itClient->second = NULL;
+		}
+		itClient++;
+	}
+	clients.clear();
+
+	if (socketFd >= 0)
+	{
+		close(socketFd);
+		socketFd = -1; // Secure socket close
+	}
+	pollFd.clear();
 }
 
 

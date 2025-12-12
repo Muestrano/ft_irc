@@ -32,7 +32,6 @@ class Channel
 		// Public method
 	
 		void addUser(const std::string, Client* client);
-		void sendAllChan(std::string message);
 		void sendAllChanExcept(std::string message, Client* exclude);
 		bool isMember(Client* client);
 		bool isOperator(Client* client);

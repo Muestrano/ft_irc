@@ -6,11 +6,11 @@
 	For handle non blocking we can put data into buffer
 */
 
-Client::Client() : nickName("guest42"), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isNick(false), isUser(false), isRegistered(false)
+Client::Client() : nickName("guest42"), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isNick(false), isUser(false), isRegistered(false), willDisconnect(false)
 {
 }
 
-Client::Client(int fd) : nickName("guest42"), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isNick(false), isUser(false), isRegistered(false), clientFd(fd)
+Client::Client(int fd) : nickName("guest42"), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isNick(false), isUser(false), isRegistered(false), clientFd(fd), willDisconnect(false)
 {
 }
 
@@ -79,6 +79,11 @@ std::string Client::getStringFd() const
     return(oss.str());
 }
 
+bool Client::getWillDisconnect() const
+{
+	return (willDisconnect);
+}
+
 // Setters
 
 void Client::setRealName(const std::string &real)
@@ -123,4 +128,12 @@ void Client::setIsNick(bool nick_registered)
 void Client::setIsUser(bool user_registered)
 {
 	this->isUser = user_registered;
+}
+
+void Client::setWillDisconnect(bool state)
+{
+	if (state == true)
+		willDisconnect = true;
+	else if (state == false)
+		willDisconnect = false;
 }
