@@ -53,6 +53,11 @@ void Command::set_map(void)
 	// CommandMap["TOPIC"] = &Command::topic;
 	// CommandMap["INVITE"] = &Command::invite;
 	// CommandMap["KICK"] = &Command::kick;
+	CommandMap["KICK"] = &Command::kick;
+
+	// CommandMap["TOPIC"] = &Command::topic;
+	// CommandMap["INVITE"] = &Command::invite;
+	// CommandMap["QUIT"] = &Command::quit;
 }
 
 /**
@@ -137,7 +142,9 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 	std::string nickname = client->getNickName();
 	if (nickname.empty())
 		nickname = "*";
-	std::stringstream error;
+	std::stringstream 	error;
+	std::stringstream	ss(errorMsg);
+	std::string			token;
 	switch (errorCode)
 	{
 		case ERR_NOSUCHNICK: // "<client> <nick> :No such nick/channel"
@@ -182,8 +189,20 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 		case ERR_BADCHANNELKEY: // "<client> <channel> :Cannot join channel (+k)"
 			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+k)";
 			break;
+		case ERR_USERNOTINCHANNEL: // "<client> <nick> <channel> :They aren't on that channel"
+			ss >> token;
+			error << client->getNickName() << " " << token << " ";
+			ss >> token;
+			error << token << " :They aren't on that channel.";
+			break;
 		case ERR_NOTONCHANNEL: // "<client> <channel> :You're not on that channel"
-			error << client->getNickName() << " " << errorMsg << " :You're not on that channel";
+			error << client->getNickName() << " " << errorMsg << " :You're not on that channel.";
+			break;
+		case ERR_BADCHANMASK: // "<client> <channel> :Bad Channel Mask"
+			error << client->getNickName() << " " << errorMsg << " :Bad Channel Mask. Usage is /JOIN {#,!,&,+}{<channelname1>,<channelname2,...} {channelkey1,channelkey2,...}.";
+			break;
+		case ERR_CHANOPRIVSNEEDED: // "<client> <channel> :You're not channel operator"
+			error << client->getNickName() << " " << errorMsg << " :You're not channel operator.";
 			break;
 		default:
 			break;
@@ -339,6 +358,8 @@ void	Command::join(Client* client, std::string buffer)
 	{
 		if (out[0] == '#' || out[0] == '&' || out[0] == '!' || out[0] == '+')
 			channelV.push_back(out);
+		else
+			sendErrorCode(client, ERR_BADCHANMASK, out);
 	}
 	if (!keyStr.empty())
 	{
@@ -352,8 +373,11 @@ void	Command::join(Client* client, std::string buffer)
 		std::cout << "channel: " << channelV[i] << std::endl;
 	for (size_t i = 0; i < keyV.size(); i++)
 		std::cout << "key: " << keyV[i] << std::endl;
-	if (keyV.size() > channelV.size()) //TODO
-		return; // sendError //TODO
+	if (keyV.size() > channelV.size())
+	{
+		sendErrorCode(client, ERR_BADCHANNELKEY, "EMPTY_CHAN_NAME");
+		return;
+	}
 
 	for (size_t i = 0; i < channelV.size(); i++)
 	{
@@ -601,6 +625,81 @@ void Command::part(Client* client, std::string buffer)
 }
 
 void Command::quit(Client* client, std::string buffer)
+// Parameters: <channel> <user> [<comment>]
+/**
+ * @brief Handles the /KICK command
+ * @param client the pointer of the client
+ * @param buffer the parameters of the command
+ */
+void Command::kick(Client* client, std::string buffer)
+{
+	std::vector<std::string>	params;
+	std::stringstream			ss(buffer);
+	std::string					token;
+	std::string					kick_msg;
+	while (ss >> token)
+	{
+		if (token[0] == ':')
+		{
+			std::string real = token.substr(1);
+			std::string tmp;
+			while (ss >> tmp)
+				real += " " + tmp;
+			params.push_back(real);
+			break;
+		}
+		params.push_back(token);
+	}
+	if (params.size() < 2 || params.size() > 3)
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "KICK");
+		return;
+	}
+	Channel* channel = this->server->findChannel(params[0]);
+	if (!channel)
+	{
+		sendErrorCode(client, ERR_NOSUCHCHANNEL, params[0]);
+		return;
+	}
+	if (!(channel->isMember(client)))
+	{
+		sendErrorCode(client, ERR_NOTONCHANNEL, params[0]);
+		return;
+	}
+	if (!(channel->isOperator(client)))
+	{
+		sendErrorCode(client, ERR_CHANOPRIVSNEEDED, params[0]);
+		return;
+	}
+	Client* user = this->server->findClientByNick(params[1]);
+	if (!user)
+	{
+		std::stringstream error;
+		error << params[1] << " " << params[0];
+		sendErrorCode(client, ERR_USERNOTINCHANNEL, error.str());
+		return;
+	}
+	if (!(channel->isMember(user)))
+	{
+		std::stringstream error;
+		error << params[1] << " " << params[0];
+		sendErrorCode(client, ERR_USERNOTINCHANNEL, error.str());
+		return;
+	}
+	kick_msg = ":" + client->getNickName() + " KICK " + params[0] + " " + params[1] + " :";
+	if (params.size() == 2)
+		kick_msg += "Goodbye " + params[1] + "!";
+	else
+		kick_msg += params[2];
+	kick_msg += "\r\n";
+	channel->sendAllChanExcept(kick_msg, NULL);
+	channel->removeMember(user);
+	if (channel->chanIsEmpty())
+		server->removeChan(params[0]);
+	return;
+}
+
+void	Command::test(Client* client, std::string buffer)
 {
 	if (!server->isNickRegistered(client->getNickName()))
 		sendErrorCode(client, ERR_NOTREGISTERED, "");
