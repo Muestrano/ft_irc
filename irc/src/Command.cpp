@@ -116,7 +116,6 @@ void Command::prepareCommand(Client* client, std::string line)
 void Command::extractCompleteCommand(Client* client)
 {
 	std::string& buffer = client->getBuffer();
-
 	size_t pos;
 	while ((pos = buffer.find("\r\n")) != std::string::npos)
 	{
@@ -124,7 +123,7 @@ void Command::extractCompleteCommand(Client* client)
 		buffer.erase(0, pos + 2); // Supp \r\n for the next  command
 		prepareCommand(client, line);
 	}
-	buffer.erase(0, pos + 2);
+	// buffer.erase(0, pos + 2);
 }
 
 /**
@@ -614,6 +613,5 @@ void Command::quit(Client* client, std::string buffer)
 	
 	server->quitAllChan(client, reason);
 	client->setWillDisconnect(true);
-	// server->disconnectClient(client->getFd()); TEMP
 	client->getBuffer().clear();
 }
