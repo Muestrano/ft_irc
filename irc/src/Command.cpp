@@ -179,6 +179,9 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 		case ERR_CHANNELISFULL: //"<client> <channel> :Cannot join channel (+l)"
 			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+l)";
 			break;
+		case ERR_UNKNOWNMODE: // "<client> <char> :is unknown mode char to me"
+			error << client->getNickName() << " " << errorMsg << " :is unknown mode char to me";
+			break;
 		case ERR_INVITEONLYCHAN: // "<client> <channel> :Cannot join channel (+i)"
 			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+i)";
 			break;
@@ -432,52 +435,6 @@ void	Command::join(Client* client, std::string buffer)
 	}
 }
 
-void Command::mode(Client* client, std::string buffer) //TODO
-{
-	if (buffer.empty())
-	{
-		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
-		return;
-	}
-	// RPL_CHANNELMODEIS 324
-	std::string msg = ":" + client->getHostname() +  " 324 " 
-						+ client->getNickName() 
-						+ " " + buffer + " +\r\n"; 
-	send(client->getFd(), msg.c_str(), msg.size(), 0);
-}
-
-void Command::mode(Client* client, std::string buffer)
-{
-
-	if (!buffer.empty())
-	{
-		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
-		return;
-	}
-	
-	std::stringstream ss(buffer);
-	std::string channelName;
-	std::string modeString;
-	std::vector<std::string> modeParams;
-	
-	ss >> channelName >> modeString;
-
-	// Récupérer params restants (pour +k, +o, +l)
-	std::string param;
-	while (ss >> param)
-		modeParams.push_back(param);
-	
-	// 2. Vérifications de base
-
-	// - Canal existe ?
-	// - Client est membre ?
-	// - Client est opérateur ?
-	
-	// 3. Parser modeString (+/-i+/-t+/-k...)
-	// 4. Appliquer chaque mode
-	// 5. Broadcast changements au canal
-}
-
 void Command::who(Client* client, std::string buffer) //TODO
 {
 	if (buffer.empty())
@@ -726,6 +683,256 @@ void Command::kick(Client* client, std::string buffer)
 	return;
 }
 
+/**
+ * @brief Display current channel modes (RPL_CHANNELMODEIS 324)
+ */
+void Command::displayCurrentModes(Client* client, Channel* channel, const std::string& channelName)
+{
+	std::string currentModes = "+";
+
+	if (channel->getInviteOnly())
+		currentModes += "i";
+	if (channel->getTopicRestricted())
+		currentModes += "t";
+	if (!channel->getPassword().empty())
+		currentModes += "k";
+
+	std::string msg = ":ft_irc 324 " + client->getNickName()
+					+ " " + channelName + " " + currentModes + "\r\n";
+	send(client->getFd(), msg.c_str(), msg.size(), 0);
+}
+
+/**
+ * @brief Validate that client has permissions to change modes
+ */
+bool Command::validateModePermissions(Client* client, Channel* channel, const std::string& channelName)
+{
+	if (!channel->isMember(client))
+	{
+		sendErrorCode(client, ERR_NOTONCHANNEL, channelName);
+		return false;
+	}
+
+	if (!channel->isOperator(client))
+	{
+		sendErrorCode(client, ERR_CHANOPRIVSNEEDED, channelName);
+		return false;
+	}
+
+	return true;
+}
+
+/**
+ * @brief Broadcast mode changes to all channel members
+ */
+void Command::broadcastModeChanges(Client* client, Channel* channel, const std::string& channelName,
+								   const std::string& appliedModes, const std::string& modeArgs)
+{
+	if (appliedModes.empty())
+		return;
+
+	std::string modeMsg = ":" + client->getNickName() + "!"
+						+ client->getUser() + "@"
+						+ client->getHostname()
+						+ " MODE " + channelName
+						+ " " + appliedModes
+						+ modeArgs + "\r\n";
+
+	channel->sendAllChan(modeMsg);
+}
+
+/**
+ * @brief the MODE command for channel mode changes
+ * 
+ *		  syntax: MODE <#channel> <+/-><mode letter> [params]
+
+ * 		  Available modes: i (invite-only), t (topic restricted), k (set/remove password),
+ *        o (op/deop members), l (set/remove users limit to channels).
+ * 
+ */
+void Command::mode(Client* client, std::string buffer)
+{
+	std::stringstream ss(buffer);
+	std::string channelName;
+	std::string modeString;
+	std::vector<std::string> modeParams;
+
+	ss >> channelName;
+
+	if (channelName.empty())
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
+		return;
+	}
+
+	Channel* channel = server->findChannel(channelName);
+
+	if (!channel)
+	{
+		sendErrorCode(client, ERR_NOSUCHCHANNEL, channelName);
+		return;
+	}
+	if (ss.eof())
+	{
+		displayCurrentModes(client, channel, channelName);
+		return;
+	}
+
+	ss >> modeString;
+	std::string param;
+
+	while (ss >> param)
+		modeParams.push_back(param);
+	if (!validateModePermissions(client, channel, channelName))
+		return;
+
+	bool adding = true;
+	size_t paramIndex = 0;
+	std::string appliedModes = "";
+	std::string modeArgs = "";
+
+	for (size_t i = 0; i < modeString.length(); i++)
+	{
+		char mode = modeString[i];
+
+		if (mode == '+')
+		{
+			adding = true;
+			continue;
+		}
+		else if (mode == '-')
+		{
+			adding = false;
+			continue;
+		}
+
+		switch (mode)
+		{
+			case 'i': // Invite-only
+				channel->setInviteOnly(adding);
+				if (adding)
+					appliedModes += "+i";
+				else
+					appliedModes += "-i";
+				break;
+
+			case 't': // Topic restricted
+				channel->setTopicRestricted(adding);
+				if (adding)
+					appliedModes += "+t";
+				else
+					appliedModes += "-t";
+				break;
+
+			case 'k': // Channel key (password)
+			{
+				if (adding)
+				{
+					if (paramIndex >= modeParams.size())
+					{
+						sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE +k");
+						return;
+					}
+
+					channel->setPassword(modeParams[paramIndex]);
+					appliedModes += "+k";
+					modeArgs += " ";
+					modeArgs += modeParams[paramIndex];
+					paramIndex++;
+				}
+				else
+				{
+					channel->setPassword("");
+					appliedModes += "-k";
+				}
+				break;
+			}
+
+			case 'o': // Channel operator privilege
+			{
+				if (paramIndex >= modeParams.size())
+				{
+					sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE +/-o");
+					return;
+				}
+
+				std::string targetNick = modeParams[paramIndex];
+				Client* targetClient = server->findClientByNick(targetNick);
+
+				if (!targetClient)
+				{
+					sendErrorCode(client, ERR_NOSUCHNICK, targetNick);
+					paramIndex++;
+					continue;
+				}
+
+				if (!channel->isMember(targetClient))
+				{
+					std::stringstream error;
+					error << targetNick << " " << channelName;
+					sendErrorCode(client, ERR_USERNOTINCHANNEL, error.str());
+					paramIndex++;
+					continue;
+				}
+
+				if (adding)
+					channel->addOperator(targetClient);
+				else
+					channel->removeOperator(targetClient);
+
+				if (adding)
+					appliedModes += "+o";
+				else
+					appliedModes += "-o";
+				modeArgs += " ";
+				modeArgs += targetNick;
+				paramIndex++;
+				break;
+			}
+
+			case 'l': // User limit to channel
+			{
+				if (adding)
+				{
+					if (paramIndex >= modeParams.size())
+					{
+						sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE +l");
+						return;
+					}
+
+					std::stringstream convert(modeParams[paramIndex]);
+					unsigned int limit;
+					convert >> limit;
+
+					if (convert.fail())
+					{
+						paramIndex++;
+						continue;
+					}
+
+					channel->setLimitMember(limit);
+					appliedModes += "+l";
+					modeArgs += " ";
+					modeArgs += modeParams[paramIndex];
+					paramIndex++;
+				}
+				else
+				{
+					channel->setLimitMember(0);
+					appliedModes += "-l";
+				}
+				break;
+			}
+
+			default:
+				std::string unknownMode(1, mode);
+				sendErrorCode(client, ERR_UNKNOWNMODE, unknownMode);
+				continue;
+		}
+	}
+
+	broadcastModeChanges(client, channel, channelName, appliedModes, modeArgs);
+}
 
 void	Command::test(Client* client, std::string buffer)
 {

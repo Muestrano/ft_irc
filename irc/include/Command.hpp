@@ -68,10 +68,12 @@ class Command
 		void part(Client* client, std::string buffer);
 		void kick(Client* client, std::string buffer);
 		void mode(Client* client, std::string buffer);
+		void displayCurrentModes(Client* client, Channel* channel, const std::string& channelName);
+		bool validateModePermissions(Client* client, Channel* channel, const std::string& channelName);
+		void broadcastModeChanges(Client* client, Channel* channel, const std::string& channelName, const std::string& appliedModes, const std::string& modeArgs);
 		
 		void test(Client* client, std::string buffer); // TODO Delete later.
-		
-		
+
 		// void	pass_chan(Client* client, std::string buffer);
 		// void	topic(Client* client, std::string buffer);
 		// void	invite(Client* client, std::string buffer);
