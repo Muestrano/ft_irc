@@ -1,7 +1,7 @@
 #include "../include/Channel.hpp"
 #include "../include/include.hpp"
 
-Channel::Channel(std::string name, Client* clientOp) : name(name), password(""), topic(""), limitMember(0), nbMember(0), nbOperator(0), invitedOnly(false), topicRestricted(false)
+Channel::Channel(std::string name, Client* clientOp) : name(name), password(""), topic(""), limitMember(0), nbMember(0), invitedOnly(false), topicRestricted(false)
 {
 	members[clientOp->getNickName()] = clientOp;
 	nbMember = 1;
@@ -28,8 +28,6 @@ std::string Channel::getPassword() const { return password; }
 
 // Setters
 
-// Setters
-
 void Channel::setTopicRestricted(bool value) { this->topicRestricted = value; }
 
 void Channel::setInviteOnly(bool value) {this->invitedOnly = value; }
@@ -42,10 +40,7 @@ void Channel::addOperator(Client* client)
 {
 	std::string nickName = client->getNickName();
 	if (operators.find(nickName) == operators.end())
-	{
 		operators[nickName] = client;
-		nbOperator++;
-	}
 }
 
 void Channel::removeOperator(Client* client)
@@ -53,10 +48,7 @@ void Channel::removeOperator(Client* client)
 	std::string nickName = client->getNickName();
 	std::map<std::string, Client*>::iterator it = operators.find(nickName);
 	if (it != operators.end())
-	{
 		operators.erase(it);
-		nbOperator--;
-	}
 }
 
 // Public methods
@@ -68,7 +60,6 @@ void	Channel::addUser(const std::string key, Client* client)
 {
 	Command command;
 	std::string nickName = client->getNickName();
-	// need to Verif modes //TODO
 	if (!password.empty() && key != password )
 	{
 		command.sendErrorCode(client, ERR_BADCHANNELKEY, this->name); //TODO
@@ -90,10 +81,7 @@ void	Channel::addUser(const std::string key, Client* client)
 		nbMember++;
 	}
 	if (nbMember == 1)
-	{
-		nbOperator++;
 		operators[nickName] = client;
-	}
 	std::string message = ":" + client->getNickName() + "!" + client->getUser() + "@" + client->getHostname() + " JOIN " + this->name + "\r\n";
 	sendAllChanExcept(message, NULL);
 	std::cout << "new client: " << nickName << std::endl;
@@ -101,7 +89,6 @@ void	Channel::addUser(const std::string key, Client* client)
 
 /**
  * @brief Send message to all channel members except one client (used for the sender, NULL for no exception none)
- * // TODO Replace sendAllChan call by this one.
  */
 void Channel::sendAllChanExcept(std::string message, Client* exclude)
 {
@@ -117,10 +104,6 @@ void Channel::sendAllChanExcept(std::string message, Client* exclude)
 	}
 }
 
-/**
- * @brief Check if a client is member of this channel.
- *
- */
 bool Channel::isMember(Client* client)
 {
     std::string nickName = client->getNickName();
@@ -146,10 +129,6 @@ void Channel::removeMember(Client* client)
 	}
 	std::map<std::string, Client*>::iterator itOp;
 	itOp = operators.find(client->getNickName());
-	// if (itOp != operators.end()) //TODO Check if we need nbOperator
-	// {
-	// 	nbOperator--;
-	// }
 }
 
 bool Channel::chanIsEmpty()

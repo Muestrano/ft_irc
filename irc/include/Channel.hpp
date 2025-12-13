@@ -14,7 +14,6 @@ class Channel
 		std::string 	topic;
 		unsigned int 	limitMember;
 		unsigned int 	nbMember;
-		unsigned int	nbOperator;
 		bool			invitedOnly;
 		bool			topicRestricted;
 

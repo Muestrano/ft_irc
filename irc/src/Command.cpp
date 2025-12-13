@@ -52,7 +52,6 @@ void Command::set_map(void)
 	
 	// CommandMap["INVITE"] = &Command::invite;
 	// CommandMap["TOPIC"] = &Command::topic;
-	// CommandMap["KICK"] = &Command::kick;
 }
 
 /**
@@ -123,7 +122,6 @@ void Command::extractCompleteCommand(Client* client)
 		buffer.erase(0, pos + 2); // Supp \r\n for the next  command
 		prepareCommand(client, line);
 	}
-	// buffer.erase(0, pos + 2);
 }
 
 /**
@@ -337,7 +335,6 @@ void Command::user(Client* client, std::string buffer)
  * @brief Create new channel if he exist
  * @param channelV channel name
  * @param keyV password
- * 
 */
 void	Command::join(Client* client, std::string buffer)
 {	
@@ -434,7 +431,7 @@ void	Command::join(Client* client, std::string buffer)
 	}
 }
 
-void Command::who(Client* client, std::string buffer) //TODO
+void Command::who(Client* client, std::string buffer)
 {
 	if (buffer.empty())
 	{
@@ -744,7 +741,7 @@ void Command::broadcastModeChanges(Client* client, Channel* channel, const std::
  * @brief the MODE command for channel mode changes
  * 
  *		  syntax: MODE <#channel> <+/-><mode letter> [params]
-
+ *
  * 		  Available modes: i (invite-only), t (topic restricted), k (set/remove password),
  *        o (op/deop members), l (set/remove users limit to channels).
  * 
@@ -933,6 +930,9 @@ void Command::mode(Client* client, std::string buffer)
 	broadcastModeChanges(client, channel, channelName, appliedModes, modeArgs);
 }
 
+/**
+ * @brief Quit all chan and disconnect Client
+*/
 void	Command::quit(Client* client, std::string buffer)
 {
 	if (!server->isNickRegistered(client->getNickName()))

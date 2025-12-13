@@ -1,11 +1,6 @@
 #include "../include/Client.hpp"
 #include "../include/include.hpp"
 
-/*
-	handle client connection / received data (non blocking)
-	For handle non blocking we can put data into buffer
-*/
-
 Client::Client() : nickName("guest42"), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isNick(false), isUser(false), isRegistered(false), willDisconnect(false)
 {
 }
@@ -16,8 +11,6 @@ Client::Client(int fd) : nickName("guest42"), userName(""), hostName("127.0.0.1"
 
 Client::~Client()
 {
-	// TODO : Define if the delete is usefull 
-	//delete Client;
 }
 
 // Getters
