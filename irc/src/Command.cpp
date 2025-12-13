@@ -446,6 +446,38 @@ void Command::mode(Client* client, std::string buffer) //TODO
 	send(client->getFd(), msg.c_str(), msg.size(), 0);
 }
 
+void Command::mode(Client* client, std::string buffer)
+{
+
+	if (!buffer.empty())
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
+		return;
+	}
+	
+	std::stringstream ss(buffer);
+	std::string channelName;
+	std::string modeString;
+	std::vector<std::string> modeParams;
+	
+	ss >> channelName >> modeString;
+
+	// Récupérer params restants (pour +k, +o, +l)
+	std::string param;
+	while (ss >> param)
+		modeParams.push_back(param);
+	
+	// 2. Vérifications de base
+
+	// - Canal existe ?
+	// - Client est membre ?
+	// - Client est opérateur ?
+	
+	// 3. Parser modeString (+/-i+/-t+/-k...)
+	// 4. Appliquer chaque mode
+	// 5. Broadcast changements au canal
+}
+
 void Command::who(Client* client, std::string buffer) //TODO
 {
 	if (buffer.empty())
@@ -693,6 +725,7 @@ void Command::kick(Client* client, std::string buffer)
 		server->removeChan(params[0]);
 	return;
 }
+
 
 void	Command::test(Client* client, std::string buffer)
 {
