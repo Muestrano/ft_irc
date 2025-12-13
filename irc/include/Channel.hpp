@@ -16,11 +16,14 @@ class Channel
 		unsigned int 	nbMember;
 		unsigned int	nbOperator;
 		bool			invitedOnly;
+		bool			topicRestricted;
 
 		std::map<std::string, Client*> members; //string => Nickname, client
 		std::map<std::string, Client*> operators;
 		std::map<std::string, Client*> invited; // invite but not inside the canal
+
 	public:
+		// Coplien form
 		Channel(std::string name, Client* clientOp);
 		~Channel();
 
@@ -28,9 +31,19 @@ class Channel
 		std::map<std::string, Client*>& getMembers();
 		std::string getTopic() const;
 		std::string getName() const;
-		
-		// Public method
-	
+		bool getTopicRestricted() const;
+		bool getInviteOnly() const;
+		std::string getPassword() const;
+
+		// Setters
+		void setTopicRestricted(bool value);
+		void setInviteOnly(bool value);
+		void setPassword(const std::string& pass);
+		void setLimitMember(unsigned int limit);
+		void addOperator(Client* client);
+		void removeOperator(Client* client);
+
+		// Public methods
 		void addUser(const std::string, Client* client);
 		void sendAllChanExcept(std::string message, Client* exclude);
 		bool isMember(Client* client);

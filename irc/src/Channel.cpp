@@ -1,7 +1,7 @@
 #include "../include/Channel.hpp"
 #include "../include/include.hpp"
 
-Channel::Channel(std::string name, Client* clientOp) : name(name), password(""), topic(""), limitMember(0), nbMember(0), nbOperator(0), invitedOnly(false)
+Channel::Channel(std::string name, Client* clientOp) : name(name), password(""), topic(""), limitMember(0), nbMember(0), nbOperator(0), invitedOnly(false), topicRestricted(false)
 {
 	members[clientOp->getNickName()] = clientOp;
 	nbMember = 1;
@@ -14,22 +14,52 @@ Channel::~Channel()
 
 // Getters 
 
-std::map<std::string, Client*>& Channel::getMembers() 
-{ 
-	return members;
-}
+std::map<std::string, Client*>& Channel::getMembers() { return members; }
 
-std::string Channel::getTopic() const 
+std::string Channel::getTopic() const { return topic; }
+
+std::string Channel::getName() const { return name; }
+
+bool Channel::getTopicRestricted() const { return topicRestricted; }
+
+bool Channel::getInviteOnly() const { return invitedOnly; }
+
+std::string Channel::getPassword() const { return password; }
+
+// Setters
+
+// Setters
+
+void Channel::setTopicRestricted(bool value) { this->topicRestricted = value; }
+
+void Channel::setInviteOnly(bool value) {this->invitedOnly = value; }
+
+void Channel::setPassword(const std::string& pass) {this->password = pass;}
+
+void Channel::setLimitMember(unsigned int limit) { this->limitMember = limit; }
+
+void Channel::addOperator(Client* client)
 {
-	return topic;
+	std::string nickName = client->getNickName();
+	if (operators.find(nickName) == operators.end())
+	{
+		operators[nickName] = client;
+		nbOperator++;
+	}
 }
 
-std::string Channel::getName() const
+void Channel::removeOperator(Client* client)
 {
-	return name;
+	std::string nickName = client->getNickName();
+	std::map<std::string, Client*>::iterator it = operators.find(nickName);
+	if (it != operators.end())
+	{
+		operators.erase(it);
+		nbOperator--;
+	}
 }
 
-// Public method
+// Public methods
 
 /**
  * @brief check all Mode operator before add user in std::map members

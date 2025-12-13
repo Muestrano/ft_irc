@@ -19,6 +19,7 @@ enum ErrorCode
 	ERR_ALREADYREGISTERED = 462,
 	ERR_PASSWDMISMATCH = 464,
 	ERR_CHANNELISFULL = 471,
+	ERR_UNKNOWNMODE = 472,
 	ERR_INVITEONLYCHAN = 473,
 	ERR_BADCHANNELKEY = 475,
 	ERR_BADCHANMASK = 476,
@@ -60,7 +61,6 @@ class Command
 		void nick(Client* client, std::string buffer);
 		void user(Client* client, std::string buffer);
 		void join(Client* client, std::string buffer);
-		void mode(Client* client, std::string buffer);
 		void who(Client* client, std::string buffer);
 		void privmsg(Client* client, std::string buffer);
 		void sendWelcome(Client* client);
@@ -68,8 +68,13 @@ class Command
 		void part(Client* client, std::string buffer);
 		void quit(Client* client, std::string buffer);
 		void kick(Client* client, std::string buffer);
-		void test(Client* client, std::string buffer); // TODO Delete later.
+		void mode(Client* client, std::string buffer);
+		void displayCurrentModes(Client* client, Channel* channel, const std::string& channelName);
+		bool validateModePermissions(Client* client, Channel* channel, const std::string& channelName);
+		void broadcastModeChanges(Client* client, Channel* channel, const std::string& channelName, const std::string& appliedModes, const std::string& modeArgs);
 		
+		void test(Client* client, std::string buffer); // TODO Delete later.
+
 		// void	pass_chan(Client* client, std::string buffer);
 		// void	topic(Client* client, std::string buffer);
 		// void	invite(Client* client, std::string buffer);
