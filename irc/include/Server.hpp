@@ -6,7 +6,6 @@
 
 class Client;
 
-
 class Server
 {
 	private:
@@ -35,7 +34,6 @@ class Server
 		// Public method
 
 		void 		initServer();
-		void 		disconnectClient(int i);
 		void 		handleClientData(int i);
 		void 		newConnection();
 		void 		startServer();
@@ -44,6 +42,10 @@ class Server
 		void		addChannel(const std::string name, Channel* channel);
 		bool		isNickRegistered(std::string nick);
 		void		removeChan(std::string channelName);
+		void		disconnectClient(int fd);
+		void		quitAllChan(Client* client, std::string reason);
+		void		setupSignal();
+		void		freeAll();
 };
 
 

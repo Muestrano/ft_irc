@@ -66,6 +66,7 @@ class Command
 		void sendWelcome(Client* client);
 		void sendMOTD(Client* client);
 		void part(Client* client, std::string buffer);
+		void quit(Client* client, std::string buffer);
 		void kick(Client* client, std::string buffer);
 		void mode(Client* client, std::string buffer);
 		void displayCurrentModes(Client* client, Channel* channel, const std::string& channelName);
@@ -78,7 +79,6 @@ class Command
 		// void	topic(Client* client, std::string buffer);
 		// void	invite(Client* client, std::string buffer);
 		// void	exit(Client* client, std::string buffer);
-		// void	quit(Client* client, std::string buffer);
 
 	/*
 		// /PASS <password>\

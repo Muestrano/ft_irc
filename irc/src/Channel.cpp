@@ -95,24 +95,8 @@ void	Channel::addUser(const std::string key, Client* client)
 		operators[nickName] = client;
 	}
 	std::string message = ":" + client->getNickName() + "!" + client->getUser() + "@" + client->getHostname() + " JOIN " + this->name + "\r\n";
-	sendAllChan(message);
+	sendAllChanExcept(message, NULL);
 	std::cout << "new client: " << nickName << std::endl;
-}
-
-/**
- * @brief msg to all user of one channel when someone joint it
- * @param MSG_CONFIRM flag confirm the msg is send
-*/
-void Channel::sendAllChan(std::string message)
-{
-	std::cout << message << std::endl;
-	std::map<std::string, Client*>::iterator it;
-	it = members.begin();
-	while(it != members.end())
-	{
-		send(it->second->getFd(), message.c_str(), message.size(), 0); //MSG_CONFIRM TEMP (check this flag)
-		it++;
-	} 
 }
 
 /**
@@ -157,16 +141,15 @@ void Channel::removeMember(Client* client)
 	it = members.find(client->getNickName());
 	if (it != members.end())
 	{
-		nbMember--;
-		members.erase(it);
+		this->nbMember--;
+		this->members.erase(it);
 	}
 	std::map<std::string, Client*>::iterator itOp;
 	itOp = operators.find(client->getNickName());
-	if (itOp != operators.end())
-	{
-		nbOperator--;
-		operators.erase(itOp); // TODO Check if we keep the operator list when they're gone.
-	}
+	// if (itOp != operators.end()) //TODO Check if we need nbOperator
+	// {
+	// 	nbOperator--;
+	// }
 }
 
 bool Channel::chanIsEmpty()

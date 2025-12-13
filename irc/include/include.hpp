@@ -18,6 +18,7 @@
 #include <map>
 #include <algorithm>
 #include <err.h>
+#include <signal.h>
 
 
 #include "Channel.hpp"

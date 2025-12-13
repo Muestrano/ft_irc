@@ -39,7 +39,6 @@ void Command::setServer(Server *srv)
 */
 void Command::set_map(void)
 {
-	CommandMap["TEST"] = &Command::test;
 	CommandMap["PASS"] = &Command::pass_serv;
 	CommandMap["NICK"] = &Command::nick;
 	CommandMap["USER"] = &Command::user;
@@ -48,11 +47,12 @@ void Command::set_map(void)
 	CommandMap["WHO"] = &Command::mode;
 	CommandMap["PRIVMSG"] = &Command::privmsg;
 	CommandMap["PART"] = &Command::part;
+	CommandMap["QUIT"] = &Command::quit;
 	CommandMap["KICK"] = &Command::kick;
-
-	// CommandMap["TOPIC"] = &Command::topic;
+	
 	// CommandMap["INVITE"] = &Command::invite;
-	// CommandMap["QUIT"] = &Command::quit;
+	// CommandMap["TOPIC"] = &Command::topic;
+	// CommandMap["KICK"] = &Command::kick;
 }
 
 /**
@@ -116,7 +116,6 @@ void Command::prepareCommand(Client* client, std::string line)
 void Command::extractCompleteCommand(Client* client)
 {
 	std::string& buffer = client->getBuffer();
-
 	size_t pos;
 	while ((pos = buffer.find("\r\n")) != std::string::npos)
 	{
@@ -124,7 +123,7 @@ void Command::extractCompleteCommand(Client* client)
 		buffer.erase(0, pos + 2); // Supp \r\n for the next  command
 		prepareCommand(client, line);
 	}
-	buffer.erase(0, pos + 2);
+	// buffer.erase(0, pos + 2);
 }
 
 /**
@@ -602,7 +601,7 @@ void Command::part(Client* client, std::string buffer)
 
 		partMsg += "\r\n";
 
-		channel->sendAllChan(partMsg);
+		channel->sendAllChanExcept(partMsg, NULL);
 		channel->removeMember(client);
 		if (channel->chanIsEmpty())
 			server->removeChan(channelName);
@@ -738,7 +737,7 @@ void Command::broadcastModeChanges(Client* client, Channel* channel, const std::
 						+ " " + appliedModes
 						+ modeArgs + "\r\n";
 
-	channel->sendAllChan(modeMsg);
+	channel->sendAllChanExcept(modeMsg, NULL);
 }
 
 /**
@@ -934,26 +933,18 @@ void Command::mode(Client* client, std::string buffer)
 	broadcastModeChanges(client, channel, channelName, appliedModes, modeArgs);
 }
 
-void	Command::test(Client* client, std::string buffer)
+void	Command::quit(Client* client, std::string buffer)
 {
-	std::string response = "TEST reçu! Paramètres: '" + buffer + "'\r\n";
-	send(client->getFd(), response.c_str(), response.length(), 0);
+	if (!server->isNickRegistered(client->getNickName()))
+		sendErrorCode(client, ERR_NOTREGISTERED, "");
+	
+	std::string reason = buffer;
+	if (!reason.empty() && reason[0] == ' ')
+		reason.erase(0, 1);
+	if (!reason.empty() && reason[0] == ':')
+		reason.erase(0, 1);
+	
+	server->quitAllChan(client, reason);
+	client->setWillDisconnect(true);
+	client->getBuffer().clear();
 }
-
-/// MESSAGE PROCESSING ///
-// void Serv::processMessage(int user_fd, const char *message)
-// {
-// 	std::string msg(message);
-// 	std::string buffer;
-
-// 	this->clients[user_fd]->appendToBuffer(msg);
-// 	buffer = this->clients[user_fd]->getBuffer();
-// 	if (buffer.find_first_of("\r\n") == std::string::npos)
-// 		return;
-
-// 	std::vector<std::string> commands = splitCommands(buffer);
-// 	for (std::vector<std::string>::iterator it = commands.begin(); it != commands.end(); ++it)
-// 		this->interpret_message(user_fd, *it);
-// 	if (this->clients[user_fd])
-// 		this->clients[user_fd]->clearBuffer();
-// }
