@@ -27,10 +27,7 @@ Command& Command::operator=(const Command& c)
 
 // Setters
 
-void Command::setServer(Server *srv)
-{
-	this->server = srv;
-}
+void Command::setServer(Server *srv) { this->server = srv; }
 
 // Methods to handle commands.
 
@@ -49,9 +46,8 @@ void Command::set_map(void)
 	CommandMap["PART"] = &Command::part;
 	CommandMap["QUIT"] = &Command::quit;
 	CommandMap["KICK"] = &Command::kick;
-	
-	// CommandMap["INVITE"] = &Command::invite;
-	// CommandMap["TOPIC"] = &Command::topic;
+	CommandMap["TOPIC"] = &Command::topic;
+	CommandMap["INVITE"] = &Command::invite;
 }
 
 /**
@@ -161,6 +157,21 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 		case ERR_NICKNAMEINUSE: // "<client> <nick> :Nickname is already in use"
 			error << client->getNickName() << " " << errorMsg << " :Nickname is already in use. Please try again with another one.";
 			break;
+		case ERR_USERNOTINCHANNEL: // "<client> <nick> <channel> :They aren't on that channel"
+			ss >> token;
+			error << client->getNickName() << " " << token << " ";
+			ss >> token;
+			error << token << " :They aren't on that channel.";
+			break;
+		case ERR_NOTONCHANNEL: // "<client> <channel> :You're not on that channel"
+			error << client->getNickName() << " " << errorMsg << " :You're not on that channel.";
+			break;
+		case ERR_USERONCHANNEL: // "<client> <nick> <channel> :is already on channel"
+			ss >> token;
+			error << client->getNickName() << " " << token << " ";
+			ss >> token;
+			error << token << " :is already on channel.";
+			break;
 		case ERR_NOTREGISTERED: // "<client> :You have not registered"
 			error << client->getNickName() << " :You have not registered";
 			break;
@@ -184,15 +195,6 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 			break;
 		case ERR_BADCHANNELKEY: // "<client> <channel> :Cannot join channel (+k)"
 			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+k)";
-			break;
-		case ERR_USERNOTINCHANNEL: // "<client> <nick> <channel> :They aren't on that channel"
-			ss >> token;
-			error << client->getNickName() << " " << token << " ";
-			ss >> token;
-			error << token << " :They aren't on that channel.";
-			break;
-		case ERR_NOTONCHANNEL: // "<client> <channel> :You're not on that channel"
-			error << client->getNickName() << " " << errorMsg << " :You're not on that channel.";
 			break;
 		case ERR_BADCHANMASK: // "<client> <channel> :Bad Channel Mask"
 			error << client->getNickName() << " " << errorMsg << " :Bad Channel Mask. Usage is /JOIN {#,!,&,+}{<channelname1>,<channelname2,...} {channelkey1,channelkey2,...}.";
@@ -947,4 +949,142 @@ void	Command::quit(Client* client, std::string buffer)
 	server->quitAllChan(client, reason);
 	client->setWillDisconnect(true);
 	client->getBuffer().clear();
+}
+
+/**
+ * @brief Handles the /INVITE command
+ * @param client the pointer of the client
+ * @param buffer the parameters of the command
+ * syntax : INVITE <nickname> <#channel>
+ */
+void	Command::invite(Client* client, std::string buffer)
+{
+	std::vector<std::string>	params;
+	std::stringstream			ss(buffer);
+	std::string					token;
+	std::string					invite_msg;
+
+	while (ss >> token)
+		params.push_back(token);
+	if (params.size() != 2)
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "INVITE");
+		return; 
+	}
+	Channel* channel = this->server->findChannel(params[1]);
+	if (!channel)
+	{
+		sendErrorCode(client, ERR_NOSUCHCHANNEL, params[1]);
+		return;
+	}
+	if (!(channel->isMember(client)))
+	{
+		sendErrorCode(client, ERR_NOTONCHANNEL, params[1]);
+		return;
+	}
+	if (!(channel->isOperator(client)))
+	{
+		sendErrorCode(client, ERR_CHANOPRIVSNEEDED, params[1]);
+		return;
+	}
+	Client* user = this->server->findClientByNick(params[0]);
+	if (!user)
+	{
+		sendErrorCode(client, ERR_NOSUCHNICK, params[0]);
+		return;
+	}
+	if (channel->isMember(user))
+	{
+		std::stringstream error;
+		error << params[0] << " " << params[1];
+		sendErrorCode(client, ERR_USERONCHANNEL, error.str());
+		return;
+	}
+	// RPL_INVITING (341)
+	channel->addInvited(user);
+	invite_msg = ":" + client->getNickName() + " INVITE " + params[0] + " " + params[1] + "\r\n";
+	send(user->getFd(), invite_msg.c_str(), invite_msg.length(), 0);
+	invite_msg = ":ft_irc 341 " + client->getNickName() + " " + params[0] + " " + params[1] + "\r\n";
+	send(client->getFd(), invite_msg.c_str(), invite_msg.length(), 0);
+	return;
+}
+
+/**
+ * @brief Handles the TOPIC command
+ * Syntax: TOPIC #channel [new topic]
+ */
+void Command::topic(Client* client, std::string buffer)
+{
+	std::stringstream ss(buffer);
+	std::string channelName;
+	std::string newTopic;
+	ss >> channelName;
+
+	if (channelName.empty())
+	{
+		sendErrorCode(client, ERR_NEEDMOREPARAMS, "TOPIC");
+		return;
+	}
+
+	Channel* channel = server->findChannel(channelName);
+	if (!channel)
+	{
+		sendErrorCode(client, ERR_NOSUCHCHANNEL, channelName);
+		return;
+	}
+
+	if (!channel->isMember(client))
+	{
+		sendErrorCode(client, ERR_NOTONCHANNEL, channelName);
+		return;
+	}
+
+	if (!ss.eof())
+	{
+		std::getline(ss, newTopic);
+
+		if (!newTopic.empty() && newTopic[0] == ' ')
+			newTopic.erase(0, 1);
+		if (!newTopic.empty() && newTopic[0] == ':')
+			newTopic.erase(0, 1);
+	}
+
+	if (newTopic.empty())
+	{
+		std::string currentTopic = channel->getTopic();
+
+		if (currentTopic.empty())
+		{
+			// RPL_NOTOPIC 331
+			std::string msg = ":ft_irc 331 " + client->getNickName()
+			                + " " + channelName + " :No topic is set\r\n";
+			send(client->getFd(), msg.c_str(), msg.size(), 0);
+		}
+		else
+		{
+			// RPL_TOPIC 332
+			std::string msg = ":ft_irc 332 " + client->getNickName()
+			                + " " + channelName + " :" + currentTopic + "\r\n";
+			send(client->getFd(), msg.c_str(), msg.size(), 0);
+		}
+		return;
+	}
+
+	if (channel->getTopicRestricted())
+	{
+		if (!channel->isOperator(client))
+		{
+			sendErrorCode(client, ERR_CHANOPRIVSNEEDED, channelName);
+			return;
+		}
+	}
+	channel->setTopic(newTopic);
+
+	std::string topicMsg = ":" + client->getNickName() + "!"
+	                     + client->getUser() + "@"
+	                     + client->getHostname()
+	                     + " TOPIC " + channelName
+	                     + " :" + newTopic + "\r\n";
+
+	channel->sendAllChanExcept(topicMsg, NULL);
 }
