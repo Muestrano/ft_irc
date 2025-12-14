@@ -14,6 +14,7 @@ enum ErrorCode
 	ERR_NICKNAMEINUSE = 433,
 	ERR_USERNOTINCHANNEL = 441,
 	ERR_NOTONCHANNEL = 442,
+	ERR_USERONCHANNEL = 443,
 	ERR_NOTREGISTERED = 451,
 	ERR_NEEDMOREPARAMS = 461,
 	ERR_ALREADYREGISTERED = 462,
@@ -50,9 +51,9 @@ class Command
 		// Setters
 
 		void setServer(Server *server);
-
+		
 		// Public methods
-
+		
 		void set_map(void);
 		void prepareCommand(Client* client, std::string line);
 		void extractCompleteCommand(Client* client);
@@ -66,33 +67,14 @@ class Command
 		void sendWelcome(Client* client);
 		void sendMOTD(Client* client);
 		void part(Client* client, std::string buffer);
-		void quit(Client* client, std::string buffer);
 		void kick(Client* client, std::string buffer);
-		void mode(Client* client, std::string buffer);
 		void displayCurrentModes(Client* client, Channel* channel, const std::string& channelName);
 		bool validateModePermissions(Client* client, Channel* channel, const std::string& channelName);
 		void broadcastModeChanges(Client* client, Channel* channel, const std::string& channelName, const std::string& appliedModes, const std::string& modeArgs);
-		
-		void test(Client* client, std::string buffer); // TODO Delete later.
-
-		// void	pass_chan(Client* client, std::string buffer);
-		// void	topic(Client* client, std::string buffer);
-		// void	invite(Client* client, std::string buffer);
-		// void	exit(Client* client, std::string buffer);
-
-	/*
-		// /PASS <password>\
-		// /NICK <nickname>\
-		// /USER <username> <hostname> <servername> <realname>\
-		// /JOIN <#channel> '<pass>'\
-		// /MODE <#channel> <mode> [OPERATOR]\
-		// /TOPIC <#channel> <topic> [OPERATOR]\
-		// /INVITE <nickname> <#channel>\
-		// /KICK <#channel> <nickname> [OPERATOR]\
-		// /PRIVMSG <nickname> <message>\
-		// /PART <#channel>\
-		// /QUIT <message>\n";
-	*/
+		void mode(Client* client, std::string buffer);
+		void quit(Client* client, std::string buffer);
+		void invite(Client* client, std::string buffer);
+		void topic(Client* client, std::string buffer);
 };
 
 #endif

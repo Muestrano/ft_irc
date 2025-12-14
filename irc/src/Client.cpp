@@ -15,55 +15,25 @@ Client::~Client()
 
 // Getters
 
-std::string Client::getNickName() const
-{
-	return (this->nickName);
-}
+std::string Client::getNickName() const { return (this->nickName); }
 
-std::string Client::getUser() const
-{
-	return (this->userName);
-}
+std::string Client::getUser() const { return (this->userName); }
 
-std::string Client::getHostname() const
-{
-	return (this->hostName);
-}
+std::string Client::getHostname() const { return (this->hostName); }
 
-std::string& Client::getBuffer()
-{
-	return (this->buffer);
-}
-std::string Client::getRealName() const
-{
-	return (this->realName);
-}
+std::string& Client::getBuffer() { return (this->buffer); }
 
+std::string Client::getRealName() const { return (this->realName); }
 
-int Client::getFd() const
-{
-	return (this->clientFd);
-}
+int Client::getFd() const { return (this->clientFd); }
 
-bool Client::getIsRegistered() const
-{
-	return (this->isRegistered);
-}
+bool Client::getIsRegistered() const { return (this->isRegistered); }
 
-bool Client::getIsAuthenticated() const
-{
-	return (this->isAuthenticated);
-}
+bool Client::getIsAuthenticated() const { return (this->isAuthenticated); }
 
-bool Client::getIsNick() const
-{
-	return (this->isNick);
-}
+bool Client::getIsNick() const { return (this->isNick); }
 
-bool Client::getIsUser() const
-{
-	return (this->isUser);
-}
+bool Client::getIsUser() const { return (this->isUser); }
 
 std::string Client::getStringFd() const
 {
@@ -72,56 +42,27 @@ std::string Client::getStringFd() const
     return(oss.str());
 }
 
-bool Client::getWillDisconnect() const
-{
-	return (willDisconnect);
-}
+bool Client::getWillDisconnect() const { return (willDisconnect); }
 
 // Setters
 
-void Client::setRealName(const std::string &real)
-{
-	this->realName = real;
-}
+void Client::setRealName(const std::string &real) { this->realName = real; }
 
-void Client::setHostname(const std::string& hostname)
-{
-	this->hostName = hostname;
-}
+void Client::setHostname(const std::string& hostname) { this->hostName = hostname; }
 
-void Client::setNickName(const std::string &nick)
-{
-	this->nickName = nick;
-}
+void Client::setNickName(const std::string &nick) { this->nickName = nick; }
 
-void Client::setUserName(const std::string &user)
-{
-	this->userName = user;
-}
+void Client::setUserName(const std::string &user) { this->userName = user; }
 
-void Client::setBuffer(const std::string& appendBuffer)
-{
-	this->buffer += appendBuffer;
-}
+void Client::setBuffer(const std::string& appendBuffer) { this->buffer += appendBuffer; }
 
-void Client::setIsRegistered(const bool registered)
-{
-	this->isRegistered = registered;
-}
+void Client::setIsRegistered(const bool registered) { this->isRegistered = registered; }
 
-void Client::setIsAuthenticated(bool authenticated)
-{
-	this->isAuthenticated = authenticated;
-}
+void Client::setIsAuthenticated(bool authenticated) { this->isAuthenticated = authenticated; }
 
-void Client::setIsNick(bool nick_registered)
-{
-	this->isNick = nick_registered;
-}
-void Client::setIsUser(bool user_registered)
-{
-	this->isUser = user_registered;
-}
+void Client::setIsNick(bool nick_registered) { this->isNick = nick_registered; }
+
+void Client::setIsUser(bool user_registered) { this->isUser = user_registered; }
 
 void Client::setWillDisconnect(bool state)
 {

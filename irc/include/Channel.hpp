@@ -35,6 +35,7 @@ class Channel
 		std::string getPassword() const;
 
 		// Setters
+		void setTopic(const std::string& newTopic);
 		void setTopicRestricted(bool value);
 		void setInviteOnly(bool value);
 		void setPassword(const std::string& pass);
@@ -49,6 +50,9 @@ class Channel
 		bool isOperator(Client* client);
 		void removeMember(Client* client);
 		bool chanIsEmpty();
+		void addInvited(Client* client);
+		void removeInvited(Client* client);
+		bool isInvited(Client* client);
 
 };
 

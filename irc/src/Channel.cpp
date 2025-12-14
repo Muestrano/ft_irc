@@ -8,9 +8,7 @@ Channel::Channel(std::string name, Client* clientOp) : name(name), password(""),
 	operators[clientOp->getNickName()] = clientOp;
 }
 
-Channel::~Channel()
-{
-}
+Channel::~Channel() {}
 
 // Getters 
 
@@ -27,6 +25,8 @@ bool Channel::getInviteOnly() const { return invitedOnly; }
 std::string Channel::getPassword() const { return password; }
 
 // Setters
+
+void Channel::setTopic(const std::string& newTopic) { this->topic = newTopic; }
 
 void Channel::setTopicRestricted(bool value) { this->topicRestricted = value; }
 
@@ -62,17 +62,17 @@ void	Channel::addUser(const std::string key, Client* client)
 	std::string nickName = client->getNickName();
 	if (!password.empty() && key != password )
 	{
-		command.sendErrorCode(client, ERR_BADCHANNELKEY, this->name); //TODO
+		command.sendErrorCode(client, ERR_BADCHANNELKEY, this->name);
 		return;
 	}
 	if (limitMember > 0 && nbMember >= limitMember)
 	{
-		command.sendErrorCode(client, ERR_CHANNELISFULL, this->name); //TODO
+		command.sendErrorCode(client, ERR_CHANNELISFULL, this->name);
 		return;
 	}
-	if (invitedOnly /*&& isInvited(client) TODO*/)
+	if (invitedOnly && !isInvited(client))
 	{
-		command.sendErrorCode(client, ERR_INVITEONLYCHAN, this->name); //TODO
+		command.sendErrorCode(client, ERR_INVITEONLYCHAN, this->name);
 		return;
 	}
 	if (members.find(nickName) == members.end())
@@ -135,5 +135,33 @@ bool Channel::chanIsEmpty()
 {
 	if (nbMember == 0)
 		return (true);
+	return (false);
+}
+
+void Channel::addInvited(Client* client)
+{
+	this->invited[client->getNickName()] = client;
+}
+
+void Channel::removeInvited(Client* client)
+{
+	std::map<std::string, Client*>::iterator it = invited.find(client->getNickName());
+    if (it != invited.end())
+        invited.erase(it);
+}
+
+/**
+ * @brief Returns if a client is in the invited list of the channel
+ * @param client The pointer of the client
+ */
+bool Channel::isInvited(Client* client)
+{
+	std::map<std::string, Client*>::iterator it = this->invited.begin();
+	while (it != this->invited.end())
+	{
+		if (it->second == client)
+			return (true);
+		it++;
+	}
 	return (false);
 }
