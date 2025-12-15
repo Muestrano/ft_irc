@@ -774,6 +774,11 @@ void Command::mode(Client* client, std::string buffer)
 		sendErrorCode(client, ERR_NEEDMOREPARAMS, "MODE");
 		return;
 	}
+	if (channelName[0] != '#' && channelName[0] != '&' && channelName[0] != '!' && channelName[0] != '+')
+	{
+		sendErrorCode(client, ERR_NOSUCHCHANNEL, channelName);
+		return;
+	}
 
 	Channel* channel = server->findChannel(channelName);
 
@@ -789,6 +794,13 @@ void Command::mode(Client* client, std::string buffer)
 	}
 
 	ss >> modeString;
+	
+	if (modeString.empty() || (modeString[0] != '+' && modeString[0] != '-'))
+	{
+		sendErrorCode(client, ERR_UNKNOWNMODE, modeString);
+		return;
+	}
+
 	std::string param;
 
 	while (ss >> param)

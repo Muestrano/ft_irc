@@ -127,8 +127,12 @@ void Channel::removeMember(Client* client)
 		this->nbMember--;
 		this->members.erase(it);
 	}
+
+	// Remove from operator map if member is one, leaving a zombie chan if it was the last.
 	std::map<std::string, Client*>::iterator itOp;
 	itOp = operators.find(client->getNickName());
+	if (itOp != operators.end())
+		operators.erase(itOp);
 }
 
 bool Channel::chanIsEmpty()
