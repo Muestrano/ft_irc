@@ -232,6 +232,8 @@ void Server::disconnectClient(int clientFd)
 		return;
 	
 	Client* client = it->second;
+	
+	quitAllChan(client, "Client disconnected");
 	delete client;
 	clients.erase(it);
 	close(clientFd);
