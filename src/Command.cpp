@@ -511,7 +511,7 @@ void Command::privmsg(Client* client, std::string buffer)
 				sendErrorCode(client, ERR_CANNOTSENDTOCHAN, target);
 				continue;
 			}
-			channel->sendAllChanExcept(ircMsg, NULL);
+			channel->sendAllChanExcept(ircMsg, client);
 		}
 		else // PRIVMSG to current user
 		{
