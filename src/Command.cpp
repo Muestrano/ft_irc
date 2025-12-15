@@ -1069,14 +1069,14 @@ void Command::topic(Client* client, std::string buffer)
 		{
 			// RPL_NOTOPIC 331
 			std::string msg = ":ft_irc 331 " + client->getNickName()
-			                + " " + channelName + " :No topic is set\r\n";
+							+ " " + channelName + " :No topic is set\r\n";
 			send(client->getFd(), msg.c_str(), msg.size(), 0);
 		}
 		else
 		{
 			// RPL_TOPIC 332
 			std::string msg = ":ft_irc 332 " + client->getNickName()
-			                + " " + channelName + " :" + currentTopic + "\r\n";
+							+ " " + channelName + " :" + currentTopic + "\r\n";
 			send(client->getFd(), msg.c_str(), msg.size(), 0);
 		}
 		return;
@@ -1093,10 +1093,10 @@ void Command::topic(Client* client, std::string buffer)
 	channel->setTopic(newTopic);
 
 	std::string topicMsg = ":" + client->getNickName() + "!"
-	                     + client->getUser() + "@"
-	                     + client->getHostname()
-	                     + " TOPIC " + channelName
-	                     + " :" + newTopic + "\r\n";
+						 + client->getUser() + "@"
+						 + client->getHostname()
+						 + " TOPIC " + channelName
+						 + " :" + newTopic + "\r\n";
 
 	channel->sendAllChanExcept(topicMsg, NULL);
 }

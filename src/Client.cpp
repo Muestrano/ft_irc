@@ -38,8 +38,8 @@ bool Client::getIsUser() const { return (this->isUser); }
 std::string Client::getStringFd() const
 {
 	std::ostringstream oss;
-    oss << this->getFd();
-    return(oss.str());
+	oss << this->getFd();
+	return(oss.str());
 }
 
 bool Client::getWillDisconnect() const { return (willDisconnect); }

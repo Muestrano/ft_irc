@@ -66,9 +66,9 @@ void Server::initServer()
 	int reuse = 1;
 	if (setsockopt(this->socketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) 
 	{
-	    std::cerr << "Error setsockopt(SO_REUSEADDR): " << std::endl;
-	    close(this->socketFd);
-	    exit(EXIT_FAILURE);
+		std::cerr << "Error setsockopt(SO_REUSEADDR): " << std::endl;
+		close(this->socketFd);
+		exit(EXIT_FAILURE);
 	}
 	this->serverAddr.sin_family = AF_INET;
 	this->serverAddr.sin_port = htons(this->port);
@@ -275,9 +275,9 @@ void Server::quitAllChan(Client* client, std::string reason)
 		if (channel->isMember(client))
 		{
 			std::string quitMsg = ":" + client->getNickName() + "!"
-                                + client->getUser() + "@"
-                                + client->getHostname()
-                                + " QUIT :" + reason + "\r\n";
+								+ client->getUser() + "@"
+								+ client->getHostname()
+								+ " QUIT :" + reason + "\r\n";
 			channel->sendAllChanExcept(quitMsg, client);
 			channel->removeMember(client);
 			if (channel->chanIsEmpty())
