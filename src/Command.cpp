@@ -456,13 +456,13 @@ void Command::who(Client* client, std::string buffer)
 void Command::privmsg(Client* client, std::string buffer)
 {
 	std::stringstream ss(buffer);
-	std::string target;
+	std::string targetsStr;
 	std::string message;
 
-	ss >> target;
+	ss >> targetsStr;
 	std::getline(ss, message);
 
-	if (target.empty() || message.empty())
+	if (targetsStr.empty() || message.empty())
 	{
 		sendErrorCode(client, ERR_NEEDMOREPARAMS, "PRIVMSG");
 		return;
@@ -477,36 +477,51 @@ void Command::privmsg(Client* client, std::string buffer)
 		return;
 	}
 
-	std::string ircMsg = ":" + client->getNickName() + "!"
-					   + client->getUser() + "@"
-					   + client->getHostname()
-					   + " PRIVMSG " + target
-					   + " :" + message + "\r\n";
-
-	if (target[0] == '#' || target[0] == '&' || target[0] == '!' || target[0] == '+') // PRIVMSG to #channel
+	// Multiple PRIVMSG target handling (<target1>,<target2>)
+	std::vector<std::string> targets;
+	std::stringstream targetsSS(targetsStr);
+	std::string singleTarget;
+	while (std::getline(targetsSS, singleTarget, ','))
 	{
-		Channel* channel = server->findChannel(target);
-		if (channel == NULL)
-		{
-			sendErrorCode(client, ERR_NOSUCHCHANNEL, target);
-			return;
-		}
-		if (!channel->isMember(client))
-		{
-			sendErrorCode(client, ERR_CANNOTSENDTOCHAN, target);
-			return;
-		}
-		channel->sendAllChanExcept(ircMsg, client);
+		if (!singleTarget.empty())
+			targets.push_back(singleTarget);
 	}
-	else // PRIVMSG to user
+
+	for (size_t i = 0; i < targets.size(); i++)
 	{
-		Client* targetClient = server->findClientByNick(target);
-		if (targetClient == NULL)
+		std::string target = targets[i];
+	
+		std::string ircMsg = ":" + client->getNickName() + "!"
+						   + client->getUser() + "@"
+						   + client->getHostname()
+						   + " PRIVMSG " + target
+						   + " :" + message + "\r\n";
+
+		if (target[0] == '#' || target[0] == '&' || target[0] == '!' || target[0] == '+') // PRIVMSG to current #channel
 		{
-			sendErrorCode(client, ERR_NOSUCHNICK, target);
-			return;
+			Channel* channel = server->findChannel(target);
+			if (channel == NULL)
+			{
+				sendErrorCode(client, ERR_NOSUCHCHANNEL, target);
+				continue;
+			}
+			if (!channel->isMember(client))
+			{
+				sendErrorCode(client, ERR_CANNOTSENDTOCHAN, target);
+				continue;
+			}
+			channel->sendAllChanExcept(ircMsg, NULL);
 		}
-		send(targetClient->getFd(), ircMsg.c_str(), ircMsg.length(), 0);
+		else // PRIVMSG to current user
+		{
+			Client* targetClient = server->findClientByNick(target);
+			if (targetClient == NULL)
+			{
+				sendErrorCode(client, ERR_NOSUCHNICK, target);
+				continue;
+			}
+			send(targetClient->getFd(), ircMsg.c_str(), ircMsg.length(), 0);
+		}
 	}
 }
 
