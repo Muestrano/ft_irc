@@ -8,13 +8,9 @@ Command::Command() : server(NULL)
 	set_map();
 }
 
-Command::Command(const Command& c) : CommandMap(c.CommandMap) 
-{
-}
+Command::Command(const Command& c) : CommandMap(c.CommandMap) {}
 
-Command::~Command()
-{
-}
+Command::~Command() {}
 
 Command& Command::operator=(const Command& c)
 {
