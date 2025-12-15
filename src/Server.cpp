@@ -29,6 +29,12 @@ std::string Server::getPassword() const
 
 /**
  * @brief Create a server fd and initialize poll/sockaddr struct
+ * @param setsockopt set socket option
+ * 
+ * \li - SOL_SOCKET: Socket level, the scope is only the current socket
+ * 
+ * \li - SO_REUSEADDR: Give the permission to use the same adresse again and again for one port. 
+ * 
  * @param fcntl open fd and configure it:
  * 
  * \li - F_SETFL: Set File Status Flags, overwrites actual flags
@@ -57,6 +63,13 @@ void Server::initServer()
 		std::cerr << "Error: problem when creating socket" << std::endl;
 
 	fcntl(this->socketFd, F_SETFL, O_NONBLOCK);
+	int reuse = 1;
+	if (setsockopt(this->socketFd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) < 0) 
+	{
+	    std::cerr << "Error setsockopt(SO_REUSEADDR): " << std::endl;
+	    close(this->socketFd);
+	    exit(EXIT_FAILURE);
+	}
 	this->serverAddr.sin_family = AF_INET;
 	this->serverAddr.sin_port = htons(this->port);
 	this->serverAddr.sin_addr.s_addr = INADDR_ANY;
