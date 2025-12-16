@@ -1,11 +1,11 @@
 #include "../include/Client.hpp"
 #include "../include/include.hpp"
 
-Client::Client() : nickName("guest42"), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isNick(false), isUser(false), isRegistered(false), willDisconnect(false)
+Client::Client() : nickName("guest42"), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isNick(false), isUser(false), isRegistered(false), willDisconnect(false), isWelcomed(false)
 {
 }
 
-Client::Client(int fd) : nickName("guest42"), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isNick(false), isUser(false), isRegistered(false), clientFd(fd), willDisconnect(false)
+Client::Client(int fd) : nickName("guest42"), userName(""), hostName("127.0.0.1"), isAuthenticated(false), isNick(false), isUser(false), isRegistered(false), clientFd(fd), willDisconnect(false), isWelcomed(false)
 {
 }
 
@@ -44,6 +44,8 @@ std::string Client::getStringFd() const
 
 bool Client::getWillDisconnect() const { return (willDisconnect); }
 
+bool Client::getIsWelcomed() const { return (this->isWelcomed); }
+
 // Setters
 
 void Client::setRealName(const std::string &real) { this->realName = real; }
@@ -71,3 +73,5 @@ void Client::setWillDisconnect(bool state)
 	else if (state == false)
 		willDisconnect = false;
 }
+
+void Client::setIsWelcomed(bool welcome) { this->isWelcomed = welcome; }
