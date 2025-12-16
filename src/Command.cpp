@@ -107,7 +107,7 @@ void Command::prepareCommand(Client* client, std::string line)
 void Command::extractCompleteCommand(Client* client)
 {
 	std::string& buffer = client->getBuffer();
-	std::cout << "buffer: " << buffer << std::endl;
+	//std::cout << "buffer: " << buffer << std::endl; //For defense purpose
 	size_t pos;
 	while ((pos = buffer.find("\r\n")) != std::string::npos)
 	{
