@@ -266,10 +266,12 @@ void Command::nick(Client* client, std::string buffer)
 		sendErrorCode(client, ERR_ERRONEUSNICKNAME, "");
 		return ;
 	}
-	std::string message = client->getNickName() + " changed his nickname to " + buffer + ".\r\n";
+	std::string message = ":" + client->getNickName() + "!" + client->getUser() + "@localhost NICK :" + buffer + "\r\n";
+	this->server->updateChanMember(buffer, client);
 	client->setNickName(buffer);
 	client->setIsNick(true);
 	send(client->getFd(), message.c_str(), message.length(), 0);
+	this->server->sendLinkedClients(message, client);
 	if (client->getIsUser())
 	{
 		client->setIsRegistered(true);

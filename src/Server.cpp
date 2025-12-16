@@ -350,3 +350,89 @@ void Server::freeAll()
 	}
 	pollFd.clear();
 }
+
+/**
+ * @brief Send a message to all the clients who share a channel with a client
+ * @param buffer The message to send
+ * @param client The pointer of the client
+ */
+// void Server::sendLinkedClients(std::string buffer, Client* client)
+// {
+// 	std::map<std::string, Client*> linkedClients;
+// 	std::map<std::string, Client*>::iterator itLinked;
+// 	std::map<std::string, Channel*>::iterator itChannels;
+
+// 	itChannels = this->channels.begin();
+// 	while (itChannels != this->channels.end())
+// 	{
+// 		Channel* channel = itChannels->second;
+// 		std::map<std::string, Channel*>::iterator current = itChannels;
+// 		itChannels++;
+// 		if (channel->isMember(client))
+// 		{
+			
+// 		}
+// 	}
+// }
+
+void Server::sendLinkedClients(std::string message, Client* client)
+{
+	std::map<std::string, Client*> linkedClients;
+	std::map<std::string, Client*>::iterator itLinked;
+	std::map<std::string, Channel*>::iterator itChannels;
+
+	itChannels = this->channels.begin();
+	while (itChannels != this->channels.end())
+	{
+		Channel* channel = itChannels->second;
+		if (channel->isMember(client))
+		{
+			std::map<std::string, Client*>& channelClients = channel->getMembers();
+			std::map<std::string, Client*>::iterator itClients;
+			itClients = channelClients.begin();
+			while (itClients != channelClients.end())
+			{
+				Client* currentClient = itClients->second;
+				if (currentClient != client)
+					linkedClients[currentClient->getNickName()] = currentClient;
+				++itClients;
+			}
+		}
+		++itChannels;
+	}
+	itLinked = linkedClients.begin();
+	while (itLinked != linkedClients.end())
+	{
+		send(itLinked->second->getFd(), message.c_str(), message.length(), 0);
+		++itLinked;
+	}
+}
+
+void Server::updateChanMember(std::string newNick, Client* client)
+{
+	std::map<std::string, Channel*>::iterator itChannels;
+
+	itChannels = this->channels.begin();
+	while (itChannels != this->channels.end())
+	{
+		Channel* channel = itChannels->second;
+		if (channel->isMember(client))
+		{
+			std::map<std::string, Client*>& channelClients = channel->getMembers();
+			std::map<std::string, Client*>::iterator itClients;
+			itClients = channelClients.begin();
+			while (itClients != channelClients.end())
+			{
+				Client* currentClient = itClients->second;
+				if (currentClient == client)
+				{
+					channelClients.erase(itClients);
+					channelClients[newNick] = client;
+					break;
+				}
+				++itClients;
+			}
+		}
+		++itChannels;
+	}
+}
