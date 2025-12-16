@@ -191,7 +191,7 @@ void Command::sendErrorCode(Client* client, ErrorCode errorCode, std::string err
 			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+i)";
 			break;
 		case ERR_BADCHANNELKEY: // "<client> <channel> :Cannot join channel (+k)"
-			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+k)";
+			error << client->getNickName() << " " << errorMsg << " :Cannot join channel (+k), bad channel key";
 			break;
 		case ERR_BADCHANMASK: // "<client> <channel> :Bad Channel Mask"
 			error << client->getNickName() << " " << errorMsg << " :Bad Channel Mask. Usage is /JOIN {#,!,&,+}{<channelname1>,<channelname2,...} {channelkey1,channelkey2,...}.";
@@ -371,16 +371,6 @@ void	Command::join(Client* client, std::string buffer)
 		std::string keyS;
 		while (std::getline(keySS, keyS, ','))
 			keyV.push_back(keyS);
-	}
-	
-	for (size_t i = 0; i < channelV.size(); i++)
-		std::cout << "channel: " << channelV[i] << std::endl;
-	for (size_t i = 0; i < keyV.size(); i++)
-		std::cout << "key: " << keyV[i] << std::endl;
-	if (keyV.size() > channelV.size())
-	{
-		sendErrorCode(client, ERR_BADCHANNELKEY, "EMPTY_CHAN_NAME");
-		return;
 	}
 
 	for (size_t i = 0; i < channelV.size(); i++)
@@ -816,8 +806,10 @@ void Command::mode(Client* client, std::string buffer)
 	while (ss >> param)
 		modeParams.push_back(param);
 	if (!validateModePermissions(client, channel, channelName))
+	{
+		sendErrorCode(client, ERR_CHANOPRIVSNEEDED, "");
 		return;
-
+	}
 	bool adding = true;
 	size_t paramIndex = 0;
 	std::string appliedModes = "";
